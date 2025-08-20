@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>助成金レスキュー - AI助成金相談サービス</title>
+    <meta name="description" content="Claude AIを活用した高精度な助成金相談サービス。業務改善助成金の専門知識で、あなたの会社に最適な助成金をご提案します。">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            padding: 2rem 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
+        }
+        
+        .card h2 {
+            color: #495057;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 100%;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .chat-area {
+            margin-top: 1.5rem;
+        }
+        
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            margin-bottom: 1rem;
+        }
+        
+        .message {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        
+        .user-message {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .ai-message {
+            background: #f3e5f5;
+            border-left: 4px solid #9c27b0;
+            white-space: pre-wrap;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .features {
+            grid-column: span 2;
+            margin-top: 2rem;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            text-align: center;
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div>
+                    <h1>🚀 助成金レスキュー</h1>
+                    <p class="subtitle">Claude AIによる高精度助成金相談サービス</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="main-content">
+            <div class="card">
+                <h2>📋 会社情報入力</h2>
+                <form id="companyForm">
+                    <div class="form-group">
+                        <label for="companyName">会社名</label>
+                        <input type="text" id="companyName" name="companyName" placeholder="株式会社〇〇">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="industry">業種</label>
+                        <select id="industry" name="industry">
+                            <option value="">選択してください</option>
+                            <option value="製造業">製造業</option>
+                            <option value="小売業">小売業</option>
+                            <option value="飲食業">飲食業</option>
+                            <option value="サービス業">サービス業</option>
+                            <option value="IT・通信業">IT・通信業</option>
+                            <option value="建設業">建設業</option>
+                            <option value="運輸業">運輸業</option>
+                            <option value="その他">その他</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="employeeCount">従業員数</label>
+                        <input type="number" id="employeeCount" name="employeeCount" placeholder="例: 50">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="currentMinWage">現在の最低賃金 (円/時)</label>
+                        <input type="number" id="currentMinWage" name="currentMinWage" placeholder="例: 900">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="plannedInvestment">設備投資予定</label>
+                        <textarea id="plannedInvestment" name="plannedInvestment" rows="3" placeholder="例: POSシステムの導入、従業員研修の実施など"></textarea>
+                    </div>
+                    
+                    <button type="button" onclick="checkGrants()">💡 利用可能な助成金をチェック</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>💬 AI助成金相談</h2>
+                <div class="chat-area">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message ai-message">
+                            こんにちは！助成金レスキューのAIアシスタントです。
+                            業務改善助成金について、どのようなことをお聞きになりたいですか？
+
+                            例:
+                            • 「うちの会社は業務改善助成金を受けられますか？」
+                            • 「申請手続きの流れを教えてください」
+                            • 「必要な書類は何ですか？」
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <textarea id="userQuestion" placeholder="助成金について質問をどうぞ..." rows="3"></textarea>
+                    </div>
+                    
+                    <button type="button" onclick="sendQuestion()">📤 質問を送信</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="card">
+                <h2>🌟 サービスの特徴</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🤖</div>
+                        <h3>Claude AI搭載</h3>
+                        <p>最新のAI技術により、高精度な助成金相談を実現</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>即座に回答</h3>
+                        <p>24時間365日、いつでも素早く専門的なアドバイスを提供</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎯</div>
+                        <h3>個別最適化</h3>
+                        <p>あなたの会社の状況に合わせたカスタマイズされた提案</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function sendQuestion() {
+            const question = document.getElementById('userQuestion').value.trim();
+            if (!question) {
+                alert('質問を入力してください');
+                return;
+            }
+
+            const chatMessages = document.getElementById('chatMessages');
+            
+            // ユーザーの質問を表示
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user-message';
+            userMessage.textContent = question;
+            chatMessages.appendChild(userMessage);
+            
+            // ローディング表示
+            const loadingMessage = document.createElement('div');
+            loadingMessage.className = 'message loading';
+            loadingMessage.textContent = 'AI が回答を生成中...';
+            chatMessages.appendChild(loadingMessage);
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // 質問をクリア
+            document.getElementById('userQuestion').value = '';
+            
+            try {
+                const companyInfo = getCompanyInfo();
+                
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        company_info: companyInfo,
+                        question: question
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // ローディングメッセージを削除
+                chatMessages.removeChild(loadingMessage);
+                
+                if (data.status === 'success') {
+                    const aiMessage = document.createElement('div');
+                    aiMessage.className = 'message ai-message';
+                    aiMessage.textContent = data.response;
+                    chatMessages.appendChild(aiMessage);
+                } else {
+                    const errorMessage = document.createElement('div');
+                    errorMessage.className = 'message ai-message';
+                    errorMessage.textContent = 'エラー: ' + (data.error || '不明なエラーが発生しました');
+                    chatMessages.appendChild(errorMessage);
+                }
+                
+            } catch (error) {
+                // ローディングメッセージを削除
+                chatMessages.removeChild(loadingMessage);
+                
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'message ai-message';
+                errorMessage.textContent = 'ネットワークエラーが発生しました。しばらく時間をおいて再度お試しください。';
+                chatMessages.appendChild(errorMessage);
+            }
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function checkGrants() {
+            const companyInfo = getCompanyInfo();
+            
+            if (!companyInfo.company_name && !companyInfo.industry) {
+                alert('最低限、会社名または業種を入力してください');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/grant-check', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        company_info: companyInfo
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    const chatMessages = document.getElementById('chatMessages');
+                    const resultMessage = document.createElement('div');
+                    resultMessage.className = 'message ai-message';
+                    resultMessage.innerHTML = '<strong>🔍 助成金適用可能性チェック結果:</strong><br><br>' + 
+                                            data.grants.map(grant => 
+                                                `<strong>${grant.name}:</strong><br>${grant.description}`
+                                            ).join('<br><br>');
+                    chatMessages.appendChild(resultMessage);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                } else {
+                    alert('エラー: ' + (data.error || '不明なエラーが発生しました'));
+                }
+                
+            } catch (error) {
+                alert('ネットワークエラーが発生しました。しばらく時間をおいて再度お試しください。');
+            }
+        }
+
+        function getCompanyInfo() {
+            return {
+                company_name: document.getElementById('companyName').value,
+                industry: document.getElementById('industry').value,
+                employee_count: document.getElementById('employeeCount').value,
+                current_min_wage: document.getElementById('currentMinWage').value,
+                planned_investment: document.getElementById('plannedInvestment').value
+            };
+        }
+
+        // Enterキーで送信
+        document.getElementById('userQuestion').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendQuestion();
+            }
+        });
+    </script>
+</body>
+</html>
