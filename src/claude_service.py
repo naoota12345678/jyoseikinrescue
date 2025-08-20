@@ -30,21 +30,35 @@ class ClaudeService:
         self.business_improvement_prompt = self._load_business_improvement_prompt()
     
     def _load_business_improvement_prompt(self) -> str:
-        """業務改善助成金の詳細プロンプトをロード"""
+        """業務改善助成金の詳細プロンプトをロード（全4ファイル統合版）"""
         try:
-            # ファイルパスを相対的に設定
             import os
             base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            file_path = os.path.join(base_dir, 'gyoumukaizen07.txt')
             
-            with open(file_path, 'r', encoding='utf-8') as f:
-                grant_details = f.read()
+            # 4つのファイルを全て読み込み
+            files = [
+                'gyoumukaizen07.txt',  # 交付要綱
+                'gyoumukaizenmanyual.txt',  # 申請マニュアル
+                '業務改善助成金Ｑ＆Ａ.txt',  # Q&A
+                '業務改善助成金 交付申請書等の書き方と留意事項 について.txt'  # 申請書の書き方
+            ]
+            
+            all_content = ""
+            for file_name in files:
+                file_path = os.path.join(base_dir, file_name)
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                        all_content += f"\n\n【{file_name}】\n{content}\n"
+                except FileNotFoundError:
+                    logger.warning(f"File not found: {file_path}")
+                    continue
             
             return f"""
-あなたは業務改善助成金の専門家です。以下の交付要綱を完全に理解した上で、企業からの相談に正確に回答してください。
+あなたは業務改善助成金の専門家です。以下の公式文書を完全に理解した上で、企業からの相談に正確に回答してください。
 
-【業務改善助成金交付要綱】
-{grant_details}
+【業務改善助成金 完全版資料】
+{all_content}
 
 以下の形式で構造化された診断を行ってください：
 
