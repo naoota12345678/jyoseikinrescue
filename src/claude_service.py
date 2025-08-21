@@ -20,7 +20,7 @@ class ClaudeService:
             logger.error(f"Failed to initialize Anthropic client: {str(e)}")
             raise
         
-        self.model = "claude-3-sonnet-20240229"
+        self.model = "claude-3-haiku-20240307"
         
         # 助成金専門のシステムプロンプト（汎用版）
         self.general_prompt = """
@@ -181,7 +181,7 @@ class ClaudeService:
                 model=self.model,
                 max_tokens=2000,
                 temperature=0.2,
-                system=self.system_prompt,
+                system=self.general_prompt,
                 messages=[
                     {
                         "role": "user",
