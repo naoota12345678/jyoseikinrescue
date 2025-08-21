@@ -4,7 +4,10 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(gcloud run services describe:*)"
+      "Bash(gcloud run services describe:*)",
+      "Bash(gcloud config get-value project)",
+      "Bash(gcloud config set:*)",
+      "Bash(gcloud run services logs read:*)"
     ],
     "deny": [],
     "ask": []

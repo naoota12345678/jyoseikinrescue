@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request, jsonify, session
 import os
+import sys
 from dotenv import load_dotenv
+# srcディレクトリをPythonパスに追加
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from claude_service import ClaudeService
 import logging
 
