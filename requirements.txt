@@ -4,3 +4,12 @@ python-dotenv==1.0.0
 gunicorn==21.2.0
 httpx==0.24.1
 Werkzeug==3.0.1
+# Firebase & Auth
+firebase-admin==6.4.0
+google-cloud-firestore==2.13.1
+# Stripe
+stripe==7.8.0
+# JWT for token handling
+PyJWT==2.8.0
+# Password hashing
+bcrypt==4.1.2

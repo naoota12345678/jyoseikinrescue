@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>助成金レスキュー - AI助成金相談サービス</title>
+    <meta name="description" content="Claude AIを活用した高精度な助成金相談サービス。業務改善助成金をはじめ様々な助成金について、あなたの会社に最適な提案をします。">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Stripe SDK -->
+    <script src="https://js.stripe.com/v3/"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            padding: 2rem 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
+        }
+        
+        .card h2 {
+            color: #495057;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 100%;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .chat-area {
+            margin-top: 1.5rem;
+        }
+        
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            margin-bottom: 1rem;
+        }
+        
+        .message {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        
+        .user-message {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .ai-message {
+            background: #f3e5f5;
+            border-left: 4px solid #9c27b0;
+            white-space: pre-wrap;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .features {
+            grid-column: span 2;
+            margin-top: 2rem;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            text-align: center;
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* 認証関連スタイル */
+        .auth-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #e8f5e8;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .usage-stats {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .upgrade-button {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            margin-top: 1rem;
+        }
+        
+        .login-form {
+            max-width: 400px;
+            margin: 2rem auto;
+        }
+        
+        .login-button {
+            background: linear-gradient(135deg, #4285f4 0%, #1a73e8 100%);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div>
+                    <h1>🚀 業務改善助成金レスキュー</h1>
+                    <p class="subtitle">10月賃上げ前の今がチャンス！最大120万円獲得サポート</p>
+                </div>
+                <div id="authSection" class="hidden">
+                    <div class="user-info" id="userInfo">
+                        <span id="userEmail"></span>
+                        <button onclick="logout()" style="padding: 0.5rem 1rem; background: #dc3545;">ログアウト</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- 認証状態表示 -->
+        <div id="loginSection" class="auth-section">
+            <h2>🔐 ログインが必要です</h2>
+            <div class="login-form">
+                <p>業務改善助成金AI相談サービスをご利用いただくには、ログインが必要です。</p>
+                <button onclick="loginWithGoogle()" class="login-button">
+                    👤 Googleでログイン
+                </button>
+                <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
+                    初回登録時は5回の無料お試しがご利用いただけます。
+                </p>
+            </div>
+        </div>
+        
+        <div id="usageSection" class="auth-section hidden">
+            <div class="usage-stats" id="usageStats">
+                <h3>📊 使用状況</h3>
+                <p>Plan: <span id="planType"></span></p>
+                <p>残り質問数: <span id="remainingQuestions"></span> / <span id="totalQuestions"></span></p>
+                <div id="upgradeSection" class="hidden">
+                    <button onclick="upgradeToBasisPlan()" class="upgrade-button">
+                        ⬆️ 基本プランにアップグレード (月額3,000円)
+                    </button>
+                    <button onclick="buyAdditionalPack()" class="upgrade-button">
+                        📦 50質問追加パック購入 (2,000円)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content" id="mainContent" style="display: none;">
+            <div class="card">
+                <h2>📋 会社情報入力</h2>
+                <form id="companyForm">
+                    <div class="form-group">
+                        <label for="companyName">会社名</label>
+                        <input type="text" id="companyName" name="companyName" placeholder="株式会社〇〇">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="industry">業種</label>
+                        <select id="industry" name="industry">
+                            <option value="">選択してください</option>
+                            <option value="製造業">製造業</option>
+                            <option value="小売業">小売業</option>
+                            <option value="飲食業">飲食業</option>
+                            <option value="サービス業">サービス業</option>
+                            <option value="IT・通信業">IT・通信業</option>
+                            <option value="建設業">建設業</option>
+                            <option value="運輸業">運輸業</option>
+                            <option value="その他">その他</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="employeeCount">従業員数</label>
+                        <input type="number" id="employeeCount" name="employeeCount" placeholder="例: 50">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="currentMinWage">現在の最低賃金 (円/時)</label>
+                        <input type="number" id="currentMinWage" name="currentMinWage" placeholder="例: 900">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="plannedInvestment">設備投資予定</label>
+                        <select id="plannedInvestment" name="plannedInvestment">
+                            <option value="">選択してください</option>
+                            <option value="あり">あり</option>
+                            <option value="なし">なし</option>
+                        </select>
+                    </div>
+                    
+                    <button type="button" onclick="checkGrants()">💡 利用可能な助成金をチェック</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>💬 業務改善助成金 AI相談</h2>
+                <div class="chat-area">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message ai-message">
+                            こんにちは！業務改善助成金専門のAIアシスタントです。
+                            業務改善助成金について、どのようなことをお聞きになりたいですか？
+
+                            例:
+                            • 「うちの会社は業務改善助成金を使えますか？」
+                            • 「業務改善助成金の申請手続きを教えてください」
+                            • 「設備投資でいくら助成されますか？」
+                            • 「最低賃金を何円上げれば対象になりますか？」
+                            
+                            ※このサービスは業務改善助成金に特化しています。
+                            　他の助成金・補助金については専門外となります。
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <textarea id="userQuestion" placeholder="業務改善助成金について質問をどうぞ..." rows="3"></textarea>
+                    </div>
+                    
+                    <button type="button" onclick="sendQuestion()" id="sendButton">📤 質問を送信</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="card" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%); color: white; margin-bottom: 2rem;">
+                <h2>🔥 8月限定！特急申請チャンス</h2>
+                <div style="font-size: 1.1rem; line-height: 1.8; margin-top: 1rem;">
+                    <p><strong>✅ 10月賃上げ予定の企業様限定</strong></p>
+                    <p><strong>✅ 2ヶ月前倒し申請で確実獲得</strong></p>
+                    <p><strong>✅ 従来手数料12万円 → AIサポート3万円</strong></p>
+                    <p><strong>✅ 最大120万円の助成金を自分で申請</strong></p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>🌟 サービスの特徴</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🤖</div>
+                        <h3>業務改善助成金専門AI</h3>
+                        <p>公式文書を完全学習した高精度な専門AI</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>即座に回答</h3>
+                        <p>24時間365日、いつでも素早く専門的なアドバイスを提供</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💰</div>
+                        <h3>圧倒的コスパ</h3>
+                        <p>従来手数料の1/4で同等以上のサポートを実現</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ===== Firebase 認証設定 =====
+        
+        // Firebase設定（実際のプロジェクト設定に置き換えてください）
+        const firebaseConfig = {
+            apiKey: "your-api-key",
+            authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project-id",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "your-app-id"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        
+        let currentUser = null;
+        let usageStats = null;
+        
+        // 認証状態の監視
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadUserData();
+                showMainContent();
+            } else {
+                currentUser = null;
+                showLoginForm();
+            }
+        });
+        
+        // Googleログイン
+        async function loginWithGoogle() {
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                const result = await auth.signInWithPopup(provider);
+                
+                // 新規ユーザーの場合、サーバーでユーザー登録
+                if (result.additionalUserInfo.isNewUser) {
+                    await registerNewUser(result.user);
+                }
+            } catch (error) {
+                console.error('ログインエラー:', error);
+                alert('ログインに失敗しました。');
+            }
+        }
+        
+        // ログアウト
+        async function logout() {
+            try {
+                await auth.signOut();
+            } catch (error) {
+                console.error('ログアウトエラー:', error);
+            }
+        }
+        
+        // 新規ユーザー登録
+        async function registerNewUser(user) {
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        uid: user.uid,
+                        email: user.email,
+                        display_name: user.displayName || ''
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('ユーザー登録に失敗しました');
+                }
+            } catch (error) {
+                console.error('ユーザー登録エラー:', error);
+                alert('ユーザー登録に失敗しました。');
+            }
+        }
+        
+        // ユーザーデータ読み込み
+        async function loadUserData() {
+            try {
+                const idToken = await currentUser.getIdToken();
+                
+                const response = await fetch('/api/auth/user', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${idToken}`,
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    usageStats = data.usage_stats;
+                    updateUsageDisplay();
+                }
+            } catch (error) {
+                console.error('ユーザーデータ読み込みエラー:', error);
+            }
+        }
+        
+        // 使用状況表示更新
+        function updateUsageDisplay() {
+            if (!usageStats) return;
+            
+            document.getElementById('planType').textContent = usageStats.plan_type || 'trial';
+            document.getElementById('remainingQuestions').textContent = usageStats.remaining || 0;
+            document.getElementById('totalQuestions').textContent = usageStats.questions_limit || 0;
+            
+            // アップグレードボタンを表示するか判定
+            const upgradeSection = document.getElementById('upgradeSection');
+            if (usageStats.remaining <= 5) {
+                upgradeSection.classList.remove('hidden');
+            } else {
+                upgradeSection.classList.add('hidden');
+            }
+            
+            // 送信ボタンの状態更新
+            const sendButton = document.getElementById('sendButton');
+            if (usageStats.remaining <= 0) {
+                sendButton.disabled = true;
+                sendButton.textContent = '質問回数の上限に達しています';
+            } else {
+                sendButton.disabled = false;
+                sendButton.textContent = '📤 質問を送信';
+            }
+        }
+        
+        // UI表示切り替え
+        function showLoginForm() {
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('usageSection').classList.add('hidden');
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('authSection').classList.add('hidden');
+        }
+        
+        function showMainContent() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('usageSection').classList.remove('hidden');
+            document.getElementById('mainContent').style.display = 'grid';
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('userEmail').textContent = currentUser.email;
+        }
+        
+        // ===== 決済関連関数 =====
+        
+        // 基本プランにアップグレード
+        async function upgradeToBasisPlan() {
+            try {
+                const idToken = await currentUser.getIdToken();
+                
+                const response = await fetch('/api/payment/basic-plan', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${idToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        success_url: window.location.origin + '/success',
+                        cancel_url: window.location.origin + '/cancel'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    window.location.href = data.checkout_url;
+                } else {
+                    alert('エラー: ' + data.error);
+                }
+            } catch (error) {
+                console.error('決済エラー:', error);
+                alert('決済処理に失敗しました。');
+            }
+        }
+        
+        // 追加パック購入
+        async function buyAdditionalPack() {
+            try {
+                const idToken = await currentUser.getIdToken();
+                
+                const response = await fetch('/api/payment/additional-pack', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${idToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        success_url: window.location.origin + '/success',
+                        cancel_url: window.location.origin + '/cancel'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    window.location.href = data.checkout_url;
+                } else {
+                    alert('エラー: ' + data.error);
+                }
+            } catch (error) {
+                console.error('決済エラー:', error);
+                alert('決済処理に失敗しました。');
+            }
+        }
+
+        async function sendQuestion() {
+            const question = document.getElementById('userQuestion').value.trim();
+            if (!question) {
+                alert('質問を入力してください');
+                return;
+            }
+            
+            if (!currentUser) {
+                alert('ログインが必要です');
+                return;
+            }
+
+            const chatMessages = document.getElementById('chatMessages');
+            
+            // ユーザーの質問を表示
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user-message';
+            userMessage.textContent = question;
+            chatMessages.appendChild(userMessage);
+            
+            // ローディング表示
+            const loadingMessage = document.createElement('div');
+            loadingMessage.className = 'message loading';
+            loadingMessage.textContent = 'AI が回答を生成中...';
+            chatMessages.appendChild(loadingMessage);
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // 質問をクリア
+            document.getElementById('userQuestion').value = '';
+            
+            try {
+                const companyInfo = getCompanyInfo();
+                const idToken = await currentUser.getIdToken();
+                
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${idToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        company_info: companyInfo,
+                        question: question
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // ローディングメッセージを削除
+                chatMessages.removeChild(loadingMessage);
+                
+                if (data.status === 'success') {
+                    const aiMessage = document.createElement('div');
+                    aiMessage.className = 'message ai-message';
+                    aiMessage.textContent = data.response;
+                    chatMessages.appendChild(aiMessage);
+                    
+                    // 使用状況を更新
+                    if (data.usage_stats) {
+                        usageStats = data.usage_stats;
+                        updateUsageDisplay();
+                    }
+                } else {
+                    const errorMessage = document.createElement('div');
+                    errorMessage.className = 'message ai-message';
+                    
+                    if (data.code === 'LIMIT_EXCEEDED') {
+                        errorMessage.innerHTML = '質問回数の上限に達しています。<br>継続してご利用いただくには、プランのアップグレードまたは追加パックの購入が必要です。';
+                        // 使用状況を更新
+                        if (data.usage_stats) {
+                            usageStats = data.usage_stats;
+                            updateUsageDisplay();
+                        }
+                    } else {
+                        errorMessage.textContent = 'エラー: ' + (data.error || '不明なエラーが発生しました');
+                    }
+                    
+                    chatMessages.appendChild(errorMessage);
+                }
+                
+            } catch (error) {
+                // ローディングメッセージを削除
+                chatMessages.removeChild(loadingMessage);
+                
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'message ai-message';
+                errorMessage.textContent = 'ネットワークエラーが発生しました。しばらく時間をおいて再度お試しください。';
+                chatMessages.appendChild(errorMessage);
+            }
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function checkGrants() {
+            const companyInfo = getCompanyInfo();
+            
+            if (!companyInfo.company_name && !companyInfo.industry) {
+                alert('最低限、会社名または業種を入力してください');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/grant-check', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        company_info: companyInfo
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    const chatMessages = document.getElementById('chatMessages');
+                    const resultMessage = document.createElement('div');
+                    resultMessage.className = 'message ai-message';
+                    resultMessage.innerHTML = '<strong>🔍 助成金適用可能性チェック結果:</strong><br><br>' + 
+                                            data.grants.map(grant => 
+                                                `<strong>${grant.name}:</strong><br>${grant.description}`
+                                            ).join('<br><br>');
+                    chatMessages.appendChild(resultMessage);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                } else {
+                    alert('エラー: ' + (data.error || '不明なエラーが発生しました'));
+                }
+                
+            } catch (error) {
+                alert('ネットワークエラーが発生しました。しばらく時間をおいて再度お試しください。');
+            }
+        }
+
+        function getCompanyInfo() {
+            return {
+                company_name: document.getElementById('companyName').value,
+                industry: document.getElementById('industry').value,
+                employee_count: document.getElementById('employeeCount').value,
+                current_min_wage: document.getElementById('currentMinWage').value,
+                planned_investment: document.getElementById('plannedInvestment').value
+            };
+        }
+
+        // Enterキーで送信
+        document.getElementById('userQuestion').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendQuestion();
+            }
+        });
+    </script>
+</body>
+</html>
