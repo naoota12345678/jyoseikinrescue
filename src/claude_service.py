@@ -40,53 +40,72 @@ class ClaudeService:
         self.business_improvement_prompt = self._load_business_improvement_prompt()
     
     def _load_business_improvement_prompt(self) -> str:
-        """業務改善助成金の要約版プロンプトを返す"""
-        return """
-あなたは業務改善助成金の専門家です。以下の公式情報に基づいて、企業からの相談に正確に回答してください。
+        """業務改善助成金の詳細プロンプトをロード（全4ファイル統合版）"""
+        try:
+            import os
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            
+            # 4つのファイルを全て読み込み
+            files = [
+                'gyoumukaizen07.txt',  # 交付要綱
+                'gyoumukaizenmanyual.txt',  # 申請マニュアル
+                '業務改善助成金Ｑ＆Ａ.txt',  # Q&A
+                '業務改善助成金 交付申請書等の書き方と留意事項 について.txt'  # 申請書の書き方
+            ]
+            
+            all_content = ""
+            for file_name in files:
+                file_path = os.path.join(base_dir, file_name)
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                        all_content += f"\n\n【{file_name}】\n{content}\n"
+                        logger.info(f"Successfully loaded file: {file_name} ({len(content)} chars)")
+                except FileNotFoundError:
+                    logger.error(f"File not found: {file_path}")
+                    continue
+                except Exception as e:
+                    logger.error(f"Error reading file {file_path}: {str(e)}")
+                    continue
+            
+            if all_content:
+                return f"""
+あなたは業務改善助成金の専門家です。以下の公式文書を完全に理解した上で、企業からの相談に正確に回答してください。
 
-【業務改善助成金制度概要】
-目的：中小企業等の生産性向上と賃金引上げ支援
-対象：中小企業事業者、小規模事業者
-条件：設備投資により生産性向上を図り、事業場内最低賃金を引き上げる
-
-【助成額・助成率】
-引上額30円：上限50万円（助成率3/4）
-引上額45円：上限70万円（助成率3/4）
-引上額60円：上限100万円（助成率3/4）
-引上額90円：上限120万円（助成率3/4）
-
-【対象設備例】
-POSシステム、自動釣銭機、キャッシュレス決済端末、券売機、
-顧客管理システム、予約システム、会計ソフト、業務ソフト、
-PC・タブレット端末、機械装置、測定工具、器具備品等
-
-【中小企業の定義】
-・小売業：資本金5千万円以下または従業員50人以下
-・サービス業：資本金5千万円以下または従業員100人以下  
-・卸売業：資本金1億円以下または従業員100人以下
-・製造業：資本金3億円以下または従業員300人以下
-
-【申請要件】
-1. 賃金引上げ計画の策定・実行
-2. 対象設備の導入による生産性向上
-3. 解雇・賃金引下げ等の禁止
-4. 申請前に設備導入・賃金引上げを実施
-
-【除外要件】
-・過去3年間に不正受給歴
-・労働関係法令違反
-・賃金引下げ、解雇等の実施
-・風俗営業関連事業
+【業務改善助成金 完全版資料】
+{all_content}
 
 以下の形式で構造化された診断を行ってください：
 
 ✅ **基本条件チェック**
-📋 **企業状況の診断**  
-💰 **助成額の算定**
-⚠️ **注意事項・リスク**
+1. 中小企業事業者の要件
+2. 事業場内最低賃金の引上げ要件  
+3. 生産性向上設備投資の要件
 
-具体的で実践的なアドバイスを提供してください。
+📋 **企業状況の診断**
+・業種区分による資本金・従業員数要件
+・現在の最低賃金状況
+・設備投資計画の妥当性
+
+💰 **助成額の算定**
+・申請可能なコース区分
+・引上げ労働者数に応じた助成額
+・助成率の適用
+
+⚠️ **注意事項・リスク**
+・交付対象除外要件の確認
+・申請スケジュールの注意点
+・必要書類と手続きの流れ
+
+必ず交付要綱に基づいて正確な情報を提供し、企業の状況に応じた具体的なアドバイスを行ってください。
 """
+            else:
+                # ファイルが読み込めない場合のフォールバック
+                return self.general_prompt
+                
+        except Exception as e:
+            logger.error(f"Error loading business improvement prompt: {str(e)}")
+            return self.general_prompt
     
     def _select_system_prompt(self, question: str) -> str:
         """質問内容に応じて適切なシステムプロンプトを選択"""
