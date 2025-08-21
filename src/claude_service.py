@@ -7,9 +7,19 @@ logger = logging.getLogger(__name__)
 
 class ClaudeService:
     def __init__(self):
-        self.client = anthropic.Anthropic(
-            api_key=os.getenv('CLAUDE_API_KEY')
-        )
+        api_key = os.getenv('CLAUDE_API_KEY')
+        if not api_key:
+            logger.error("CLAUDE_API_KEY is not set in environment variables")
+            raise ValueError("CLAUDE_API_KEY is required")
+        
+        try:
+            self.client = anthropic.Anthropic(
+                api_key=api_key
+            )
+        except Exception as e:
+            logger.error(f"Failed to initialize Anthropic client: {str(e)}")
+            raise
+        
         self.model = "claude-3-5-sonnet-20241022"
         
         # 助成金専門のシステムプロンプト（汎用版）

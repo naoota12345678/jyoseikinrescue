@@ -15,6 +15,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ ./src/
 COPY templates/ ./templates/
 COPY static/ ./static/
+# 助成金関連のドキュメントをコピー
+COPY *.txt ./
 
 # 非root用のユーザーを作成
 RUN useradd --create-home --shell /bin/bash app
