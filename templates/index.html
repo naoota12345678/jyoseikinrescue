@@ -249,7 +249,11 @@
                     
                     <div class="form-group">
                         <label for="plannedInvestment">設備投資予定</label>
-                        <textarea id="plannedInvestment" name="plannedInvestment" rows="3" placeholder="例: POSシステムの導入、従業員研修の実施など"></textarea>
+                        <select id="plannedInvestment" name="plannedInvestment">
+                            <option value="">選択してください</option>
+                            <option value="あり">あり</option>
+                            <option value="なし">なし</option>
+                        </select>
                     </div>
                     
                     <button type="button" onclick="checkGrants()">💡 利用可能な助成金をチェック</button>
