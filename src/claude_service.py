@@ -20,7 +20,7 @@ class ClaudeService:
             logger.error(f"Failed to initialize Anthropic client: {str(e)}")
             raise
         
-        self.model = "claude-3-haiku-20240307"
+        self.model = "claude-3-5-sonnet-20241022"
         
         # 助成金専門のシステムプロンプト（汎用版）
         self.general_prompt = """
@@ -60,8 +60,12 @@ class ClaudeService:
                     with open(file_path, 'r', encoding='utf-8') as f:
                         content = f.read()
                         all_content += f"\n\n【{file_name}】\n{content}\n"
+                        logger.info(f"Successfully loaded file: {file_name} ({len(content)} chars)")
                 except FileNotFoundError:
-                    logger.warning(f"File not found: {file_path}")
+                    logger.error(f"File not found: {file_path}")
+                    continue
+                except Exception as e:
+                    logger.error(f"Error reading file {file_path}: {str(e)}")
                     continue
             
             return f"""
@@ -118,11 +122,29 @@ class ClaudeService:
         企業情報と質問を基に、助成金相談の回答を生成
         """
         try:
-            # 質問内容に応じてプロンプトを選択
-            system_prompt = self._select_system_prompt(question)
-            
             # 企業情報を整理
             company_context = self._format_company_info(company_info)
+            
+            # 業務改善助成金関連の質問かチェック
+            if self._is_business_improvement_question(question):
+                # 関連情報のみを抽出してコンパクトなプロンプトを作成
+                relevant_info = self._extract_relevant_info(question, company_info)
+                system_prompt = f"""
+あなたは業務改善助成金の専門家です。以下の情報を基に、企業の相談に正確に回答してください。
+
+【関連する制度情報】
+{relevant_info}
+
+【回答の形式】
+✅ 基本条件チェック
+📋 企業状況の診断  
+💰 助成額の算定
+⚠️ 注意事項・リスク
+
+具体的で実践的なアドバイスを提供してください。
+"""
+            else:
+                system_prompt = self.general_prompt
             
             # プロンプトを構築
             user_prompt = f"""
@@ -235,3 +257,55 @@ class ClaudeService:
             formatted.append(f"事業目標: {company_info['business_goals']}")
         
         return "\n".join(formatted) if formatted else "企業情報が提供されていません"
+    
+    def _is_business_improvement_question(self, question: str) -> bool:
+        """業務改善助成金関連の質問かどうか判定"""
+        keywords = [
+            "業務改善", "最低賃金", "設備投資", "生産性向上",
+            "pos", "レジ", "機械装置", "賃金引上げ", "助成額", "申請"
+        ]
+        question_lower = question.lower()
+        return any(keyword in question_lower for keyword in keywords)
+    
+    def _extract_relevant_info(self, question: str, company_info: Dict) -> str:
+        """質問と企業情報に関連する情報のみを抽出"""
+        # 簡略化された重要な制度情報
+        basic_info = """
+【業務改善助成金の基本概要】
+目的：中小企業・小規模事業者の生産性向上を図り、事業場内最低賃金の引上げを支援
+対象：中小企業・小規模事業者
+条件：設備投資を行い、事業場内最低賃金を一定額以上引き上げること
+
+【助成対象と助成額】
+・30円以上引上げ：助成率3/4（上限50万円）
+・45円以上引上げ：助成率3/4（上限70万円）  
+・60円以上引上げ：助成率3/4（上限100万円）
+・90円以上引上げ：助成率3/4（上限120万円）
+
+【対象設備の例】
+POSシステム、自動釣銭機、キャッシュレス決済端末、顧客管理システム、
+業務用ソフトウェア、機械装置、工具、器具備品等
+
+【主な要件】
+1. 中小企業事業者であること
+2. 賃金引上げ計画を策定し、実行すること
+3. 対象設備を導入し、生産性向上を図ること
+4. 解雇や賃金引下げ等を行っていないこと
+"""
+        
+        # 企業の業種や規模に応じた追加情報
+        additional_info = ""
+        
+        industry = company_info.get('industry', '')
+        if '小売' in industry or '飲食' in industry:
+            additional_info += """
+【小売・飲食業向け】
+特に効果的な設備：POSシステム、自動釣銭機、券売機、予約管理システム
+"""
+        elif 'サービス' in industry:
+            additional_info += """
+【サービス業向け】  
+特に効果的な設備：顧客管理システム、予約システム、業務効率化ソフト
+"""
+        
+        return basic_info + additional_info
