@@ -8,7 +8,11 @@
       "Bash(gcloud config get-value project)",
       "Bash(gcloud config set:*)",
       "Bash(gcloud run services logs read:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(for file in *.txt)",
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(wc:*)",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []
