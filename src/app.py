@@ -63,7 +63,11 @@ def get_subscription_service():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # 認証機能が有効な場合は認証版ページを表示
+    if AUTH_ENABLED:
+        return render_template('auth_index.html')
+    else:
+        return render_template('index.html')
 
 @app.route('/api/chat', methods=['POST'])
 @require_auth
