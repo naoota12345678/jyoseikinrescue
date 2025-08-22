@@ -7,10 +7,10 @@ logger = logging.getLogger(__name__)
 
 class ClaudeService:
     def __init__(self):
-        api_key = os.getenv('CLAUDE_API_KEY')
+        api_key = os.getenv('ANTHROPIC_API_KEY')
         if not api_key:
-            logger.error("CLAUDE_API_KEY is not set in environment variables")
-            raise ValueError("CLAUDE_API_KEY is required")
+            logger.error("ANTHROPIC_API_KEY is not set in environment variables")
+            raise ValueError("ANTHROPIC_API_KEY is required")
         
         try:
             self.client = anthropic.Anthropic(
