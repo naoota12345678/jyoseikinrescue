@@ -275,12 +275,26 @@
     <main class="container">
         <!-- 認証状態表示 -->
         <div id="loginSection" class="auth-section">
-            <h2>🔐 ログインが必要です</h2>
+            <h2>🔐 ログイン / 新規登録</h2>
             <div class="login-form">
-                <p>業務改善助成金AI相談サービスをご利用いただくには、ログインが必要です。</p>
-                <button onclick="loginWithGoogle()" class="login-button">
-                    👤 Googleでログイン
+                <p>業務改善助成金AI相談サービスをご利用ください。</p>
+                
+                <div class="form-group">
+                    <input type="email" id="emailInput" placeholder="メールアドレス" />
+                </div>
+                
+                <div class="form-group">
+                    <input type="password" id="passwordInput" placeholder="パスワード（6文字以上）" />
+                </div>
+                
+                <button onclick="loginWithEmail()" class="login-button">
+                    ログイン
                 </button>
+                
+                <button onclick="registerWithEmail()" class="login-button" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); margin-top: 0.5rem;">
+                    新規登録（無料5回お試し付き）
+                </button>
+                
                 <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
                     初回登録時は5回の無料お試しがご利用いただけます。
                 </p>
@@ -444,19 +458,63 @@
             }
         });
         
-        // Googleログイン
-        async function loginWithGoogle() {
+        // メールアドレスでログイン
+        async function loginWithEmail() {
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passwordInput').value;
+            
+            if (!email || !password) {
+                alert('メールアドレスとパスワードを入力してください');
+                return;
+            }
+            
             try {
-                const provider = new firebase.auth.GoogleAuthProvider();
-                const result = await auth.signInWithPopup(provider);
-                
-                // 新規ユーザーの場合、サーバーでユーザー登録
-                if (result.additionalUserInfo.isNewUser) {
-                    await registerNewUser(result.user);
-                }
+                const result = await auth.signInWithEmailAndPassword(email, password);
+                console.log('ログイン成功:', result.user.email);
             } catch (error) {
                 console.error('ログインエラー:', error);
-                alert('ログインに失敗しました。');
+                if (error.code === 'auth/user-not-found') {
+                    alert('ユーザーが見つかりません。新規登録してください。');
+                } else if (error.code === 'auth/wrong-password') {
+                    alert('パスワードが間違っています。');
+                } else {
+                    alert('ログインに失敗しました: ' + error.message);
+                }
+            }
+        }
+        
+        // メールアドレスで新規登録
+        async function registerWithEmail() {
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passwordInput').value;
+            
+            if (!email || !password) {
+                alert('メールアドレスとパスワードを入力してください');
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert('パスワードは6文字以上で入力してください');
+                return;
+            }
+            
+            try {
+                const result = await auth.createUserWithEmailAndPassword(email, password);
+                console.log('新規登録成功:', result.user.email);
+                
+                // サーバーでユーザー登録
+                await registerNewUser(result.user);
+                
+                alert('登録完了！無料お試し5回分が付与されました。');
+            } catch (error) {
+                console.error('登録エラー:', error);
+                if (error.code === 'auth/email-already-in-use') {
+                    alert('このメールアドレスは既に使用されています。ログインしてください。');
+                } else if (error.code === 'auth/weak-password') {
+                    alert('パスワードが弱すぎます。6文字以上で設定してください。');
+                } else {
+                    alert('登録に失敗しました: ' + error.message);
+                }
             }
         }
         
