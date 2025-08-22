@@ -12,7 +12,9 @@
       "Bash(for file in *.txt)",
       "Bash(do echo \"=== $file ===\")",
       "Bash(wc:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(gh run list:*)",
+      "Bash(gcloud run services:*)"
     ],
     "deny": [],
     "ask": []

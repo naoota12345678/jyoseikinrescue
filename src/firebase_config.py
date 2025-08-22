@@ -97,4 +97,17 @@ class FirebaseService:
             raise
 
 # シングルトンインスタンス
-firebase_service = FirebaseService()
+try:
+    firebase_service = FirebaseService()
+except Exception as e:
+    logger.error(f"Firebase initialization failed: {str(e)}")
+    # Firebaseの初期化に失敗した場合、ダミーのサービスを提供
+    class DummyFirebaseService:
+        def get_db(self):
+            return None
+        def verify_token(self, token):
+            return None
+        def create_custom_token(self, uid):
+            return ""
+    firebase_service = DummyFirebaseService()
+    logger.warning("Using dummy Firebase service due to initialization failure")

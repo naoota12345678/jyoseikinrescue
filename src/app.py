@@ -5,18 +5,30 @@ from dotenv import load_dotenv
 # srcディレクトリをPythonパスに追加
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import logging
-from auth_middleware import require_auth, check_usage_limit, get_current_user, get_usage_stats, AuthService
-from stripe_service import StripeService
-from models.subscription import SubscriptionService
-from firebase_config import firebase_service
 
 load_dotenv()
 
-app = Flask(__name__, template_folder='../templates', static_folder='../static')
-app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-here')
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+try:
+    from auth_middleware import require_auth, check_usage_limit, get_current_user, get_usage_stats, AuthService
+    from stripe_service import StripeService
+    from models.subscription import SubscriptionService
+    from firebase_config import firebase_service
+    AUTH_ENABLED = True
+    logger.info("Authentication modules loaded successfully")
+except Exception as e:
+    logger.warning(f"Authentication modules not available: {str(e)}")
+    AUTH_ENABLED = False
+    # ダミーのデコレータを提供
+    def require_auth(f):
+        return f
+    def check_usage_limit(f):
+        return f
+
+app = Flask(__name__, template_folder='../templates', static_folder='../static')
+app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-here')
 
 # サービスの遅延初期化
 claude_service = None
