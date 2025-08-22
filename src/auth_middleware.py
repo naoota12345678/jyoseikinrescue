@@ -39,12 +39,14 @@ def require_auth(f):
             
             if not user:
                 # 新規ユーザーの場合は自動作成
+                logger.info(f"Creating new user for uid: {uid}")
                 user_id = user_service.create_user({
                     'uid': uid,
                     'email': decoded_token.get('email'),
                     'display_name': decoded_token.get('name', '')
                 })
                 user = user_service.get_user_by_id(user_id)
+                logger.info(f"New user created with id: {user_id}")
             
             # グローバル変数に設定
             g.current_user = user
@@ -77,8 +79,10 @@ def check_usage_limit(f):
             
             # 使用状況を確認
             usage_stats = subscription_service.get_usage_stats(user_id)
+            logger.info(f"User {user_id} usage stats: {usage_stats}")
             
             if usage_stats.get('error'):
+                logger.error(f"Subscription error for user {user_id}: {usage_stats.get('error')}")
                 return jsonify({
                     'error': 'サブスクリプション情報の取得に失敗しました',
                     'code': 'SUBSCRIPTION_ERROR'
@@ -86,6 +90,7 @@ def check_usage_limit(f):
             
             # 質問回数の制限チェック
             remaining = usage_stats.get('remaining', 0)
+            logger.info(f"User {user_id} has {remaining} questions remaining")
             
             if remaining <= 0:
                 return jsonify({
