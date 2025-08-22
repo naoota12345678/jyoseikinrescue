@@ -33,11 +33,22 @@ class FirebaseService:
                     cred = credentials.Certificate(cred_path)
                 else:
                     # 環境変数からサービスアカウント情報を取得
+                    private_key = os.getenv('FIREBASE_PRIVATE_KEY', '')
+                    
+                    # デバッグ: private_keyの内容を確認
+                    logger.info(f"FIREBASE_PROJECT_ID exists: {bool(os.getenv('FIREBASE_PROJECT_ID'))}")
+                    logger.info(f"FIREBASE_PRIVATE_KEY length: {len(private_key)}")
+                    logger.info(f"FIREBASE_PRIVATE_KEY starts with: {private_key[:50] if private_key else 'EMPTY'}")
+                    
+                    # 複数の改行文字パターンに対応
+                    if private_key:
+                        private_key = private_key.replace('\\n', '\n').replace('\\\\n', '\n')
+                    
                     service_account_info = {
                         "type": "service_account",
                         "project_id": os.getenv('FIREBASE_PROJECT_ID'),
                         "private_key_id": os.getenv('FIREBASE_PRIVATE_KEY_ID'),
-                        "private_key": os.getenv('FIREBASE_PRIVATE_KEY', '').replace('\\n', '\n'),
+                        "private_key": private_key,
                         "client_email": os.getenv('FIREBASE_CLIENT_EMAIL'),
                         "client_id": os.getenv('FIREBASE_CLIENT_ID'),
                         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
@@ -45,6 +56,12 @@ class FirebaseService:
                         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
                         "client_x509_cert_url": f"https://www.googleapis.com/robot/v1/metadata/x509/{os.getenv('FIREBASE_CLIENT_EMAIL')}"
                     }
+                    
+                    # 必須フィールドの確認
+                    if not all([service_account_info.get(k) for k in ['project_id', 'private_key', 'client_email']]):
+                        logger.error("Missing required Firebase credentials")
+                        raise ValueError("Missing required Firebase credentials: Check environment variables")
+                    
                     cred = credentials.Certificate(service_account_info)
                 
                 firebase_admin.initialize_app(cred)
