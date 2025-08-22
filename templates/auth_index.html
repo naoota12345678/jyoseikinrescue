@@ -307,10 +307,10 @@
                 <p>Plan: <span id="planType"></span></p>
                 <p>残り質問数: <span id="remainingQuestions"></span> / <span id="totalQuestions"></span></p>
                 <div id="upgradeSection" class="hidden">
-                    <button onclick="upgradeToBasisPlan()" class="upgrade-button">
+                    <button id="basicPlanButton" onclick="upgradeToBasisPlan()" class="upgrade-button" style="display: none;">
                         ⬆️ 基本プランにアップグレード (月額3,000円)
                     </button>
-                    <button onclick="buyAdditionalPack()" class="upgrade-button">
+                    <button id="additionalPackButton" onclick="buyAdditionalPack()" class="upgrade-button" style="display: none;">
                         📦 50質問追加パック購入 (2,000円)
                     </button>
                 </div>
@@ -579,10 +579,29 @@
             document.getElementById('remainingQuestions').textContent = usageStats.remaining || 0;
             document.getElementById('totalQuestions').textContent = usageStats.questions_limit || 0;
             
-            // アップグレードボタンを表示するか判定
+            // アップグレードボタンの表示ロジック
             const upgradeSection = document.getElementById('upgradeSection');
+            const basicPlanButton = document.getElementById('basicPlanButton');
+            const additionalPackButton = document.getElementById('additionalPackButton');
+            const planType = usageStats.plan_type || 'trial';
+            
+            // 質問回数が少なくなったときのみ表示
             if (usageStats.remaining <= 5) {
                 upgradeSection.classList.remove('hidden');
+                
+                if (planType === 'trial') {
+                    // トライアルユーザー：基本プランのみ表示
+                    basicPlanButton.style.display = 'block';
+                    additionalPackButton.style.display = 'none';
+                } else if (planType === 'basic') {
+                    // 基本プランユーザー：追加パックのみ表示
+                    basicPlanButton.style.display = 'none';
+                    additionalPackButton.style.display = 'block';
+                } else {
+                    // その他：両方非表示
+                    basicPlanButton.style.display = 'none';
+                    additionalPackButton.style.display = 'none';
+                }
             } else {
                 upgradeSection.classList.add('hidden');
             }
