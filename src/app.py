@@ -162,29 +162,63 @@ def register():
         if not uid or not email:
             return jsonify({'error': 'UIDとメールアドレスが必要です'}), 400
         
-        # Stripe顧客を作成
-        stripe_customer_id = get_stripe_service().create_customer(
-            email=email,
-            name=display_name,
-            metadata={'firebase_uid': uid}
-        )
+        logger.info(f"Registering new user: {email} (uid: {uid})")
         
-        # ユーザーを作成
-        result = get_auth_service().create_user_with_stripe({
-            'uid': uid,
-            'email': email,
-            'display_name': display_name
-        }, stripe_customer_id)
-        
-        if result['success']:
+        # AUTH_ENABLEDがFalseの場合はダミーのレスポンスを返す
+        if not AUTH_ENABLED:
+            logger.warning("Auth is disabled, returning dummy response")
             return jsonify({
-                'user': result['user'],
+                'user': {'uid': uid, 'email': email},
                 'status': 'success'
             })
-        else:
-            return jsonify({
-                'error': result['error']
-            }), 500
+        
+        try:
+            # Stripe顧客を作成
+            stripe_customer_id = get_stripe_service().create_customer(
+                email=email,
+                name=display_name,
+                metadata={'firebase_uid': uid}
+            )
+            
+            # ユーザーを作成
+            result = get_auth_service().create_user_with_stripe({
+                'uid': uid,
+                'email': email,
+                'display_name': display_name
+            }, stripe_customer_id)
+            
+            if result['success']:
+                logger.info(f"User registered successfully: {email}")
+                return jsonify({
+                    'user': result['user'],
+                    'status': 'success'
+                })
+            else:
+                logger.error(f"User registration failed: {result['error']}")
+                return jsonify({
+                    'error': result['error']
+                }), 500
+                
+        except Exception as inner_e:
+            logger.error(f"Error creating user with Stripe: {str(inner_e)}")
+            # Stripeエラーの場合でも、ユーザー作成は試みる
+            try:
+                from models.user import User
+                user_service = User(firebase_service)
+                user_id = user_service.create_user({
+                    'uid': uid,
+                    'email': email,
+                    'display_name': display_name
+                })
+                user = user_service.get_user_by_id(user_id)
+                logger.info(f"User created without Stripe: {email}")
+                return jsonify({
+                    'user': user,
+                    'status': 'success'
+                })
+            except Exception as fallback_e:
+                logger.error(f"Fallback user creation failed: {str(fallback_e)}")
+                return jsonify({'error': str(fallback_e)}), 500
             
     except Exception as e:
         logger.error(f"Error in user registration: {str(e)}")

@@ -542,12 +542,19 @@
                     })
                 });
                 
+                const data = await response.json();
+                
                 if (!response.ok) {
-                    throw new Error('ユーザー登録に失敗しました');
+                    console.error('Registration response:', data);
+                    // エラーでも続行（Firebaseユーザーは作成済み）
+                    console.log('Continuing despite registration error');
+                } else {
+                    console.log('User registered successfully:', data);
                 }
             } catch (error) {
                 console.error('ユーザー登録エラー:', error);
-                alert('ユーザー登録に失敗しました。');
+                // エラーでも続行（Firebaseユーザーは作成済み）
+                console.log('Continuing despite network error');
             }
         }
         
