@@ -9,16 +9,18 @@ class ClaudeService:
     def __init__(self):
         api_key = os.getenv('ANTHROPIC_API_KEY')
         if not api_key:
-            logger.error("ANTHROPIC_API_KEY is not set in environment variables")
-            raise ValueError("ANTHROPIC_API_KEY is required")
-        
-        try:
-            self.client = anthropic.Anthropic(
-                api_key=api_key
-            )
-        except Exception as e:
-            logger.error(f"Failed to initialize Anthropic client: {str(e)}")
-            raise
+            logger.warning("ANTHROPIC_API_KEY is not set, using mock responses")
+            self.client = None
+            self.mock_mode = True
+        else:
+            self.mock_mode = False
+            try:
+                self.client = anthropic.Anthropic(
+                    api_key=api_key
+                )
+            except Exception as e:
+                logger.error(f"Failed to initialize Anthropic client: {str(e)}")
+                raise
         
         self.model = "claude-3-5-sonnet-20241022"
         
@@ -148,6 +150,31 @@ class ClaudeService:
         企業情報と質問を基に、助成金相談の回答を生成
         """
         try:
+            # モックモードの場合
+            if self.mock_mode:
+                return f"""
+【業務改善助成金 - AI相談サービス】
+
+ご質問: {question}
+
+業務改善助成金について回答いたします。
+
+**制度概要**
+業務改善助成金は、中小企業・小規模事業者が生産性向上のために設備投資等を行い、事業場内最低賃金を引き上げた場合に、その設備投資等にかかった費用の一部を助成する制度です。
+
+**主な要件**
+- 設備投資による業務改善
+- 最低賃金の引き上げ
+- 生産性向上の実現
+
+**助成額**
+引き上げる労働者数と引上げ額に応じて、30万円～600万円まで
+
+詳細な申請要件や手続きについては、最新の交付要綱をご確認ください。
+
+※現在はテストモードで動作中です。正式版では最新の公式情報に基づいた詳細な回答を提供いたします。
+"""
+            
             # 質問内容に応じてプロンプトを選択
             system_prompt = self._select_system_prompt(question)
             
