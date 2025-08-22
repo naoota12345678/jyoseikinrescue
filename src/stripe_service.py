@@ -12,8 +12,16 @@ class StripeService:
         
         # 料金設定
         self.BASIC_PLAN_PRICE = 3000  # 3,000円
-        self.ADDITIONAL_PACK_PRICE = 2000  # 2,000円
+        self.ADDITIONAL_PACK_PRICE = 3000  # 3,000円
         self.CURRENCY = 'jpy'
+        
+        # Stripe商品ID
+        self.BASIC_PLAN_PRODUCT_ID = 'prod_SujKOCieVMHURs'
+        self.ADDITIONAL_PACK_PRODUCT_ID = 'prod_SujMCgf719WkIX'
+        
+        # Stripe価格ID
+        self.BASIC_PLAN_PRICE_ID = 'price_1Ryts6JcdIKryf6lsvgm1q98'
+        self.ADDITIONAL_PACK_PRICE_ID = 'price_1RyttOJcdIKryf6l8GuUjVJC'
     
     def create_customer(self, email: str, name: str = '', metadata: Dict[str, str] = None) -> str:
         """Stripe顧客を作成"""
@@ -83,7 +91,7 @@ class StripeService:
                 customer=customer_id,
                 payment_method_types=['card'],
                 line_items=line_items,
-                mode='subscription' if any(item.get('price') for item in line_items) else 'payment',
+                mode='subscription' if any(item.get('price') == self.BASIC_PLAN_PRICE_ID for item in line_items) else 'payment',
                 success_url=success_url,
                 cancel_url=cancel_url,
                 metadata=metadata or {}
@@ -102,18 +110,7 @@ class StripeService:
     def create_basic_plan_checkout(self, customer_id: str, user_id: str, success_url: str, cancel_url: str) -> Dict[str, Any]:
         """基本プラン（月額3,000円）のチェックアウトを作成"""
         line_items = [{
-            'price_data': {
-                'currency': self.CURRENCY,
-                'unit_amount': self.BASIC_PLAN_PRICE,
-                'recurring': {
-                    'interval': 'month',
-                    'interval_count': 1
-                },
-                'product_data': {
-                    'name': '業務改善助成金 基本プラン',
-                    'description': '月50質問まで利用可能'
-                }
-            },
+            'price': self.BASIC_PLAN_PRICE_ID,
             'quantity': 1
         }]
         
@@ -126,16 +123,9 @@ class StripeService:
         )
     
     def create_additional_pack_checkout(self, customer_id: str, user_id: str, success_url: str, cancel_url: str) -> Dict[str, Any]:
-        """追加パック（2,000円）のチェックアウトを作成"""
+        """追加パック（3,000円）のチェックアウトを作成"""
         line_items = [{
-            'price_data': {
-                'currency': self.CURRENCY,
-                'unit_amount': self.ADDITIONAL_PACK_PRICE,
-                'product_data': {
-                    'name': '追加質問パック',
-                    'description': '50質問追加'
-                }
-            },
+            'price': self.ADDITIONAL_PACK_PRICE_ID,
             'quantity': 1
         }]
         
