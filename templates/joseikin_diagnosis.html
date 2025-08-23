@@ -181,7 +181,13 @@
                             <input type="checkbox" name="ageGroups" value="middle"> 50歳以上の中高年者がいる
                         </div>
                         <div class="option" onclick="selectMultiple(this, 'ageGroups')">
-                            <input type="checkbox" name="ageGroups" value="senior"> 60歳以上の高齢者がいる
+                            <input type="checkbox" name="ageGroups" value="senior60"> 60～64歳の高年齢者がいる
+                        </div>
+                        <div class="option" onclick="selectMultiple(this, 'ageGroups')">
+                            <input type="checkbox" name="ageGroups" value="senior65"> 65歳以上の高齢者がいる
+                        </div>
+                        <div class="option" onclick="selectMultiple(this, 'ageGroups')">
+                            <input type="checkbox" name="ageGroups" value="seniorHire"> 65歳以上の継続雇用制度がある・検討中
                         </div>
                     </div>
                 </div>
@@ -223,6 +229,7 @@
                     <h3>7. 賃金・処遇の状況</h3>
                     <label>事業場内最低賃金（時給）:</label>
                     <input type="number" name="minWage" placeholder="例: 900"><br><br>
+                    
                     <div class="options">
                         <div class="option" onclick="selectMultiple(this, 'wageImprovement')">
                             <input type="checkbox" name="wageImprovement" value="raise"> 賃金引上げを検討している
@@ -231,7 +238,7 @@
                             <input type="checkbox" name="wageImprovement" value="regularization"> 非正規を正社員化したい
                         </div>
                         <div class="option" onclick="selectMultiple(this, 'wageImprovement')">
-                            <input type="checkbox" name="wageImprovement" value="bonus"> 賞与制度を導入したい
+                            <input type="checkbox" name="wageImprovement" value="bonus"> 賞与・退職金制度を導入したい
                         </div>
                     </div>
                 </div>
@@ -387,7 +394,7 @@
                 resultsList.innerHTML = results.map(result => `
                     <div class="result-item">
                         <h4>${result.name}</h4>
-                        <p>${result.description}</p>
+                        <div style="white-space: pre-line;">${result.description}</div>
                         <p class="amount">💰 支給額: ${result.amount}</p>
                         <p><strong>対象要件:</strong> ${result.eligibility}</p>
                         <p><strong>専門相談:</strong> ${result.specialist}</p>

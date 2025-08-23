@@ -20,7 +20,8 @@
       "Read(/C:\\Users\\naoot\\Pictures\\Screenshots/**)",
       "Read(/C:\\Users\\naoot\\Pictures\\Screenshots/**)",
       "Read(/C:\\Users\\naoot\\Pictures\\Screenshots/**)",
-      "Read(/C:\\Users\\naoot\\Pictures\\Screenshots/**)"
+      "Read(/C:\\Users\\naoot\\Pictures\\Screenshots/**)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []
