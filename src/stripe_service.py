@@ -165,6 +165,10 @@ class StripeService:
     def verify_webhook_signature(self, payload: str, signature: str) -> bool:
         """Webhookの署名を検証"""
         try:
+            if not self.webhook_secret:
+                logger.warning("STRIPE_WEBHOOK_SECRET is not set")
+                return False
+            
             stripe.Webhook.construct_event(
                 payload, signature, self.webhook_secret
             )

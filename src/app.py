@@ -318,13 +318,18 @@ def create_basic_plan_checkout():
         # Stripe顧客IDがない場合は自動作成
         stripe_customer_id = current_user.get('stripe_customer_id')
         if not stripe_customer_id:
-            stripe_customer_id = get_stripe_service().create_customer(
-                email=current_user['email'],
-                name=current_user.get('display_name', ''),
-                metadata={'firebase_uid': current_user['uid']}
-            )
-            # ユーザーデータベースにStripe顧客IDを保存
-            get_auth_service().update_stripe_customer_id(current_user['id'], stripe_customer_id)
+            try:
+                stripe_customer_id = get_stripe_service().create_customer(
+                    email=current_user['email'],
+                    name=current_user.get('display_name', ''),
+                    metadata={'firebase_uid': current_user['uid']}
+                )
+                # ユーザーデータベースにStripe顧客IDを保存
+                get_auth_service().update_stripe_customer_id(current_user['id'], stripe_customer_id)
+                logger.info(f"Created Stripe customer: {stripe_customer_id}")
+            except Exception as e:
+                logger.error(f"Failed to create Stripe customer: {str(e)}")
+                return jsonify({'error': f'Stripe顧客作成エラー: {str(e)}'}), 500
         
         data = request.json
         success_url = data.get('success_url', 'https://your-domain.com/success')
@@ -357,13 +362,18 @@ def create_additional_pack_checkout():
         # Stripe顧客IDがない場合は自動作成
         stripe_customer_id = current_user.get('stripe_customer_id')
         if not stripe_customer_id:
-            stripe_customer_id = get_stripe_service().create_customer(
-                email=current_user['email'],
-                name=current_user.get('display_name', ''),
-                metadata={'firebase_uid': current_user['uid']}
-            )
-            # ユーザーデータベースにStripe顧客IDを保存
-            get_auth_service().update_stripe_customer_id(current_user['id'], stripe_customer_id)
+            try:
+                stripe_customer_id = get_stripe_service().create_customer(
+                    email=current_user['email'],
+                    name=current_user.get('display_name', ''),
+                    metadata={'firebase_uid': current_user['uid']}
+                )
+                # ユーザーデータベースにStripe顧客IDを保存
+                get_auth_service().update_stripe_customer_id(current_user['id'], stripe_customer_id)
+                logger.info(f"Created Stripe customer: {stripe_customer_id}")
+            except Exception as e:
+                logger.error(f"Failed to create Stripe customer: {str(e)}")
+                return jsonify({'error': f'Stripe顧客作成エラー: {str(e)}'}), 500
         
         data = request.json
         success_url = data.get('success_url', 'https://your-domain.com/success')
