@@ -205,8 +205,8 @@
         <div class="container">
             <div class="header-content">
                 <div>
-                    <h1>🚀 業務改善助成金レスキュー</h1>
-                    <p class="subtitle">AI専門相談で最大120万円の助成金を確実獲得</p>
+                    <h1>🎯 助成金レスキュー - 無料AI診断</h1>
+                    <p class="subtitle">29カテゴリー全網羅 | 3分で最適な助成金を診断</p>
                 </div>
             </div>
         </div>
@@ -215,49 +215,34 @@
     <main class="container">
         <div class="main-content">
             <div class="card">
-                <h2>📋 会社情報入力</h2>
-                <form id="companyForm">
-                    <div class="form-group">
-                        <label for="companyName">会社名</label>
-                        <input type="text" id="companyName" name="companyName" placeholder="株式会社〇〇">
+                <h2>🎯 無料助成金診断スタート</h2>
+                <div style="text-align: center; padding: 2rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
+                    <h3 style="color: #667eea; margin-bottom: 1rem;">令和7年度 100種類超完全網羅</h3>
+                    <p style="margin-bottom: 1.5rem; line-height: 1.8;">
+                        <strong style="color: #e74c3c;">最大1,200万円</strong>の助成金を見つけます<br>
+                        29カテゴリー・100種類超の助成金から最適なものを診断
+                    </p>
+                    
+                    <div style="background: #f8f9ff; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                        <h4 style="color: #495057; margin-bottom: 1rem;">📋 主要カテゴリー（29分野・100種類超）</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.9rem; text-align: left;">
+                            <div>✅ 雇用調整助成金</div>
+                            <div>✅ キャリアアップ助成金</div>
+                            <div>✅ 業務改善助成金</div>
+                            <div>✅ 人材開発支援助成金</div>
+                            <div>✅ 両立支援等助成金</div>
+                            <div>✅ 働き方改革推進支援</div>
+                            <div>✅ 65歳超雇用推進助成金</div>
+                            <div>✅ 障害者雇用関連助成金</div>
+                            <div style="grid-column: span 2; text-align: center; color: #666;">...他21カテゴリー</div>
+                        </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="industry">業種</label>
-                        <select id="industry" name="industry">
-                            <option value="">選択してください</option>
-                            <option value="製造業">製造業</option>
-                            <option value="小売業">小売業</option>
-                            <option value="飲食業">飲食業</option>
-                            <option value="サービス業">サービス業</option>
-                            <option value="IT・通信業">IT・通信業</option>
-                            <option value="建設業">建設業</option>
-                            <option value="運輸業">運輸業</option>
-                            <option value="その他">その他</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="employeeCount">従業員数</label>
-                        <input type="number" id="employeeCount" name="employeeCount" placeholder="例: 50">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="currentMinWage">現在の最低賃金 (円/時)</label>
-                        <input type="number" id="currentMinWage" name="currentMinWage" placeholder="例: 900">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="plannedInvestment">設備投資予定</label>
-                        <select id="plannedInvestment" name="plannedInvestment">
-                            <option value="">選択してください</option>
-                            <option value="あり">あり</option>
-                            <option value="なし">なし</option>
-                        </select>
-                    </div>
-                    
-                    <button type="button" onclick="checkGrants()">💡 利用可能な助成金をチェック</button>
-                </form>
+                    <button type="button" onclick="startDiagnosis()" style="font-size: 1.2rem; padding: 1.5rem 3rem;">
+                        🚀 無料診断を開始する（3分）
+                    </button>
+                </div>
             </div>
 
             <div class="card">
@@ -293,19 +278,19 @@
                 <h2>🌟 サービスの特徴</h2>
                 <div class="features-grid">
                     <div class="feature-card">
-                        <div class="feature-icon">🤖</div>
-                        <h3>業務改善助成金専門AI</h3>
-                        <p>公式文書を完全学習した高精度な専門AI</p>
+                        <div class="feature-icon">🎯</div>
+                        <h3>100種類超完全網羅</h3>
+                        <p>29カテゴリー・100種類超の助成金を漏れなく診断</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon">⚡</div>
-                        <h3>即座に回答</h3>
-                        <p>24時間365日、いつでも素早く専門的なアドバイスを提供</p>
+                        <h3>3分で完了</h3>
+                        <p>9つの質問に答えるだけで最適な助成金を瞬時に判定</p>
                     </div>
                     <div class="feature-card">
-                        <div class="feature-icon">💰</div>
-                        <h3>圧倒的コスパ</h3>
-                        <p>従来手数料の1/4で同等以上のサポートを実現</p>
+                        <div class="feature-icon">🆓</div>
+                        <h3>完全無料診断</h3>
+                        <p>登録不要・無料で本格的なAI助成金診断を体験</p>
                     </div>
                 </div>
             </div>
@@ -431,6 +416,11 @@
                 current_min_wage: document.getElementById('currentMinWage').value,
                 planned_investment: document.getElementById('plannedInvestment').value
             };
+        }
+
+        function startDiagnosis() {
+            // 診断ページに移動
+            window.location.href = '/diagnosis';
         }
 
         // Enterキーで送信
