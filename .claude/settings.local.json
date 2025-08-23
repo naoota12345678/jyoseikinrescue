@@ -16,7 +16,9 @@
       "Bash(gh run list:*)",
       "Bash(gcloud run services:*)",
       "Bash(curl:*)",
-      "Bash(move joseikin_diagnosis.html templates/)"
+      "Bash(move joseikin_diagnosis.html templates/)",
+      "Read(/C:\\Users\\naoot\\Pictures\\Screenshots/**)",
+      "Read(/C:\\Users\\naoot\\Pictures\\Screenshots/**)"
     ],
     "deny": [],
     "ask": []
