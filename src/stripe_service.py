@@ -7,12 +7,7 @@ logger = logging.getLogger(__name__)
 
 class StripeService:
     def __init__(self):
-        self.stripe_secret_key = os.getenv('STRIPE_SECRET_KEY')
-        if not self.stripe_secret_key:
-            logger.error("STRIPE_SECRET_KEY environment variable is not set")
-            raise ValueError("STRIPE_SECRET_KEY is required but not set")
-        
-        stripe.api_key = self.stripe_secret_key
+        stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
         self.webhook_secret = os.getenv('STRIPE_WEBHOOK_SECRET')
         
         # 料金設定

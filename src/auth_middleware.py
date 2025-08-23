@@ -154,6 +154,15 @@ class AuthService:
                 'error': str(e)
             }
     
+    def update_stripe_customer_id(self, user_id: str, stripe_customer_id: str) -> bool:
+        """ユーザーのStripe顧客IDを更新"""
+        try:
+            self.user_service.update_stripe_customer_id(user_id, stripe_customer_id)
+            return True
+        except Exception as e:
+            logger.error(f"Update stripe customer ID error: {str(e)}")
+            return False
+    
     def get_user_with_usage(self, uid: str) -> dict:
         """ユーザー情報と使用状況を取得"""
         try:

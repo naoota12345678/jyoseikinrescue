@@ -52,11 +52,7 @@ def get_auth_service():
 def get_stripe_service():
     global stripe_service
     if stripe_service is None:
-        try:
-            stripe_service = StripeService()
-        except ValueError as e:
-            logger.error(f"Failed to initialize Stripe service: {str(e)}")
-            raise ValueError(f"Stripe設定エラー: {str(e)}")
+        stripe_service = StripeService()
     return stripe_service
 
 def get_subscription_service():
@@ -320,33 +316,22 @@ def create_basic_plan_checkout():
         current_user = get_current_user()
         
         # Stripe顧客IDがない場合は自動作成
-        if not current_user.get('stripe_customer_id'):
-            logger.info(f"Creating Stripe customer for user: {current_user['email']}")
-            try:
-                stripe_service = get_stripe_service()
-                stripe_customer_id = stripe_service.create_customer(
-                    email=current_user['email'],
-                    name=current_user.get('display_name', ''),
-                    metadata={'firebase_uid': current_user['uid']}
-                )
-                
-                # ユーザー情報を更新
-                get_auth_service().update_stripe_customer_id(current_user['id'], stripe_customer_id)
-                current_user['stripe_customer_id'] = stripe_customer_id
-                
-            except ValueError as config_error:
-                logger.error(f"Stripe configuration error: {str(config_error)}")
-                return jsonify({'error': f'決済設定エラー: サーバー管理者にお問い合わせください'}), 500
-            except Exception as stripe_error:
-                logger.error(f"Failed to create Stripe customer: {str(stripe_error)}")
-                return jsonify({'error': f'Stripe顧客作成エラー: {str(stripe_error)}'}), 500
+        stripe_customer_id = current_user.get('stripe_customer_id')
+        if not stripe_customer_id:
+            stripe_customer_id = get_stripe_service().create_customer(
+                email=current_user['email'],
+                name=current_user.get('display_name', ''),
+                metadata={'firebase_uid': current_user['uid']}
+            )
+            # ユーザーデータベースにStripe顧客IDを保存
+            get_auth_service().update_stripe_customer_id(current_user['id'], stripe_customer_id)
         
         data = request.json
         success_url = data.get('success_url', 'https://your-domain.com/success')
         cancel_url = data.get('cancel_url', 'https://your-domain.com/cancel')
         
         checkout_session = get_stripe_service().create_basic_plan_checkout(
-            customer_id=current_user['stripe_customer_id'],
+            customer_id=stripe_customer_id,
             user_id=current_user['id'],
             success_url=success_url,
             cancel_url=cancel_url
@@ -370,33 +355,22 @@ def create_additional_pack_checkout():
         current_user = get_current_user()
         
         # Stripe顧客IDがない場合は自動作成
-        if not current_user.get('stripe_customer_id'):
-            logger.info(f"Creating Stripe customer for user: {current_user['email']}")
-            try:
-                stripe_service = get_stripe_service()
-                stripe_customer_id = stripe_service.create_customer(
-                    email=current_user['email'],
-                    name=current_user.get('display_name', ''),
-                    metadata={'firebase_uid': current_user['uid']}
-                )
-                
-                # ユーザー情報を更新
-                get_auth_service().update_stripe_customer_id(current_user['id'], stripe_customer_id)
-                current_user['stripe_customer_id'] = stripe_customer_id
-                
-            except ValueError as config_error:
-                logger.error(f"Stripe configuration error: {str(config_error)}")
-                return jsonify({'error': f'決済設定エラー: サーバー管理者にお問い合わせください'}), 500
-            except Exception as stripe_error:
-                logger.error(f"Failed to create Stripe customer: {str(stripe_error)}")
-                return jsonify({'error': f'Stripe顧客作成エラー: {str(stripe_error)}'}), 500
+        stripe_customer_id = current_user.get('stripe_customer_id')
+        if not stripe_customer_id:
+            stripe_customer_id = get_stripe_service().create_customer(
+                email=current_user['email'],
+                name=current_user.get('display_name', ''),
+                metadata={'firebase_uid': current_user['uid']}
+            )
+            # ユーザーデータベースにStripe顧客IDを保存
+            get_auth_service().update_stripe_customer_id(current_user['id'], stripe_customer_id)
         
         data = request.json
         success_url = data.get('success_url', 'https://your-domain.com/success')
         cancel_url = data.get('cancel_url', 'https://your-domain.com/cancel')
         
         checkout_session = get_stripe_service().create_additional_pack_checkout(
-            customer_id=current_user['stripe_customer_id'],
+            customer_id=stripe_customer_id,
             user_id=current_user['id'],
             success_url=success_url,
             cancel_url=cancel_url
