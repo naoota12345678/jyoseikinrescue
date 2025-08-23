@@ -31,18 +31,29 @@ class StripeService:
     def create_customer(self, email: str, name: str = '', metadata: Dict[str, str] = None) -> str:
         """Stripe顧客を作成"""
         try:
+            logger.info(f"Creating customer with email: {email}, name: {name}")
             customer = stripe.Customer.create(
                 email=email,
                 name=name,
                 metadata=metadata or {}
             )
             
-            if not customer or not hasattr(customer, 'id'):
-                logger.error(f"Invalid customer object returned: {customer}")
-                raise ValueError("Invalid customer object returned from Stripe")
+            logger.info(f"Customer object type: {type(customer)}")
+            logger.info(f"Customer object attributes: {dir(customer)}")
+            logger.info(f"Customer object: {customer}")
             
-            logger.info(f"Stripe customer created: {customer.id}")
-            return customer.id
+            if not customer:
+                logger.error("Customer object is None")
+                raise ValueError("Customer creation returned None")
+            
+            # idプロパティにアクセスしてみる
+            try:
+                customer_id = customer.id
+                logger.info(f"Successfully got customer ID: {customer_id}")
+                return customer_id
+            except AttributeError as attr_e:
+                logger.error(f"Customer object has no id attribute: {attr_e}")
+                raise ValueError(f"Customer object missing id: {attr_e}")
             
         except stripe.error.StripeError as e:
             logger.error(f"Stripe customer creation error: {str(e)}")
