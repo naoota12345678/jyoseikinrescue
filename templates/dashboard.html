@@ -372,8 +372,12 @@
                 
                 if (data.status === 'success') {
                     updateUserInterface(data.user, data.usage_stats);
+                } else {
+                    // エラーの場合はサイレントに処理（アラート表示なし）
+                    console.error('ユーザーデータ取得失敗:', data.error);
                 }
             } catch (error) {
+                // エラーの場合はサイレントに処理（アラート表示なし）
                 console.error('ユーザーデータ取得エラー:', error);
             }
         }
@@ -407,7 +411,7 @@
             // アップグレードプロンプトを作成
             const promptHtml = `
                 <div id="upgradePrompt" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 1000; max-width: 500px;">
-                    <h2 style="color: #e74c3c; margin-bottom: 1rem;">⚠️ 使用回数の上限に達しました</h2>
+                    <h2 style="color: #667eea; margin-bottom: 1rem;">使用回数の上限に達しました</h2>
                     <p style="margin-bottom: 1.5rem;">
                         ${planType === 'free' 
                             ? '無料プランの5回の質問回数を使い切りました。' 
@@ -481,11 +485,22 @@
                 if (data.status === 'success' && data.checkout_url) {
                     window.location.href = data.checkout_url;
                 } else {
-                    alert('決済ページの作成に失敗しました。');
+                    console.error('決済ページ作成失敗:', data.error);
+                    // ユーザーに優しいメッセージ
+                    const errorMsg = document.createElement('div');
+                    errorMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; z-index: 2000;';
+                    errorMsg.textContent = '決済ページの準備中です。しばらくお待ちください。';
+                    document.body.appendChild(errorMsg);
+                    setTimeout(() => errorMsg.remove(), 3000);
                 }
             } catch (error) {
                 console.error('決済エラー:', error);
-                alert('エラーが発生しました。');
+                // ユーザーに優しいメッセージ
+                const errorMsg = document.createElement('div');
+                errorMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; z-index: 2000;';
+                errorMsg.textContent = '接続エラーが発生しました。再度お試しください。';
+                document.body.appendChild(errorMsg);
+                setTimeout(() => errorMsg.remove(), 3000);
             }
         }
 
@@ -508,11 +523,22 @@
                 if (data.status === 'success' && data.checkout_url) {
                     window.location.href = data.checkout_url;
                 } else {
-                    alert('決済ページの作成に失敗しました。');
+                    console.error('決済ページ作成失敗:', data.error);
+                    // ユーザーに優しいメッセージ
+                    const errorMsg = document.createElement('div');
+                    errorMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; z-index: 2000;';
+                    errorMsg.textContent = '決済ページの準備中です。しばらくお待ちください。';
+                    document.body.appendChild(errorMsg);
+                    setTimeout(() => errorMsg.remove(), 3000);
                 }
             } catch (error) {
                 console.error('決済エラー:', error);
-                alert('エラーが発生しました。');
+                // ユーザーに優しいメッセージ
+                const errorMsg = document.createElement('div');
+                errorMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; z-index: 2000;';
+                errorMsg.textContent = '接続エラーが発生しました。再度お試しください。';
+                document.body.appendChild(errorMsg);
+                setTimeout(() => errorMsg.remove(), 3000);
             }
         }
 
