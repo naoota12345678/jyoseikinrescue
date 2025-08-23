@@ -346,7 +346,14 @@
 
         async function loadUserData() {
             try {
-                const response = await fetch('/api/auth/user');
+                // Firebaseトークンを取得
+                const token = await currentUser.getIdToken();
+                
+                const response = await fetch('/api/auth/user', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 const data = await response.json();
                 
                 if (data.status === 'success') {
@@ -449,10 +456,14 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
             
             try {
+                // Firebaseトークンを取得
+                const token = await currentUser.getIdToken();
+                
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
                         question: question,

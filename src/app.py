@@ -75,9 +75,9 @@ def diagnosis():
     return render_template('joseikin_diagnosis.html')
 
 @app.route('/dashboard')
-@require_auth
 def dashboard():
     """統合ダッシュボード（エージェント選択画面）"""
+    # 認証はクライアント側のFirebaseで行う
     return render_template('dashboard.html')
 
 @app.route('/api/chat', methods=['POST'])
