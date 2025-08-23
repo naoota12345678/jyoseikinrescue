@@ -71,7 +71,7 @@ def index():
 
 @app.route('/diagnosis')
 def diagnosis():
-    """助成金診断ページ"""
+    """助成金診断ページ（認証不要）"""
     return render_template('joseikin_diagnosis.html')
 
 @app.route('/api/chat', methods=['POST'])
