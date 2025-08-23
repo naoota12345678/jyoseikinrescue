@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>助成金レスキュー - ダッシュボード</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        /* 共通ヘッダー */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-left h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .usage-info {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .free-diagnosis-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .free-diagnosis-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        /* メインコンテンツ */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 20px;
+        }
+        
+        .agent-selector {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .agent-selector h2 {
+            color: #495057;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .selector-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .diagnosis-option {
+            text-align: center;
+            padding: 2rem;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .diagnosis-option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .diagnosis-option .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .diagnosis-option h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        
+        .diagnosis-option p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .agent-dropdown {
+            margin-top: 2rem;
+        }
+        
+        .dropdown-container {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        select {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+        }
+        
+        .go-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .go-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .agent-chat-area {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .agent-title {
+            color: #667eea;
+            margin-bottom: 2rem;
+            text-align: center;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 1rem;
+        }
+        
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            margin-bottom: 1rem;
+        }
+        
+        .message {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        
+        .user-message {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .ai-message {
+            background: #f3e5f5;
+            border-left: 4px solid #9c27b0;
+            white-space: pre-wrap;
+        }
+        
+        .input-area {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .input-area textarea {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-family: inherit;
+            resize: vertical;
+        }
+        
+        .send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- 共通ヘッダー -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1>🚀 助成金レスキュー</h1>
+                <div class="usage-info" id="usageInfo">
+                    残り質問数: <span id="remainingQuestions">-</span> | プラン: <span id="planType">-</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <a href="/diagnosis" class="free-diagnosis-btn">🎯 無料診断（100種類超）</a>
+                <div class="user-info" id="userInfo">
+                    <span id="userEmail">読み込み中...</span>
+                    <button onclick="logout()" style="padding: 0.5rem 1rem; background: #dc3545; color: white; border: none; border-radius: 4px;">ログアウト</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <div class="container">
+        <!-- エージェント選択エリア -->
+        <div class="agent-selector" id="agentSelector">
+            <h2>🤖 専門AIエージェントを選択してください</h2>
+            
+            <div class="selector-grid">
+                <div class="diagnosis-option" onclick="window.location.href='/diagnosis'">
+                    <div class="icon">🎯</div>
+                    <h3>無料診断から選択</h3>
+                    <p>9つの質問に答えて、最適なエージェントを自動選択</p>
+                </div>
+                
+                <div class="diagnosis-option" onclick="document.getElementById('agentDropdown').scrollIntoView({behavior: 'smooth'})">
+                    <div class="icon">📝</div>
+                    <h3>直接エージェントを選択</h3>
+                    <p>目的の助成金が決まっている場合はこちら</p>
+                </div>
+            </div>
+            
+            <div class="agent-dropdown" id="agentDropdown">
+                <h3>専門エージェントを選択：</h3>
+                <div class="dropdown-container">
+                    <select id="agentSelect">
+                        <option value="">エージェントを選択してください</option>
+                        <option value="gyoumukaizen">業務改善助成金専門エージェント</option>
+                        <option value="career-up">キャリアアップ助成金専門エージェント</option>
+                        <option value="jinzai-kaihatsu">人材開発支援助成金専門エージェント</option>
+                        <option value="65sai-koyo">65歳超雇用推進助成金専門エージェント</option>
+                        <option value="hataraki-kaikaku">働き方改革推進支援助成金専門エージェント</option>
+                        <option value="ryoritsu-shien">両立支援等助成金専門エージェント</option>
+                        <option value="koyo-chosei">雇用調整助成金専門エージェント</option>
+                        <option value="shogaisha-koyo">障害者雇用関連助成金専門エージェント</option>
+                        <option value="judokien-boshi">受動喫煙防止対策助成金専門エージェント</option>
+                        <option value="other">その他の助成金エージェント</option>
+                    </select>
+                    <button class="go-btn" onclick="selectAgent()">エージェント開始</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- エージェントチャットエリア -->
+        <div class="agent-chat-area" id="agentChatArea">
+            <h2 class="agent-title" id="agentTitle">エージェント名</h2>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message ai-message" id="welcomeMessage">
+                    専門エージェントを選択してください。
+                </div>
+            </div>
+            
+            <div class="input-area">
+                <textarea id="userQuestion" placeholder="質問を入力してください..." rows="3"></textarea>
+                <button class="send-btn" onclick="sendQuestion()">📤 送信</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let usageStats = null;
+        let currentAgent = null;
+
+        // Firebase初期化
+        const firebaseConfig = {
+            // Firebase設定は実際の設定に置き換える
+            apiKey: "your-api-key",
+            authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project-id"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const auth = firebase.auth();
+
+        // 認証状態の監視
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadUserData();
+            } else {
+                window.location.href = '/';
+            }
+        });
+
+        async function loadUserData() {
+            try {
+                const response = await fetch('/api/auth/user');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    updateUserInterface(data.user, data.usage_stats);
+                }
+            } catch (error) {
+                console.error('ユーザーデータ取得エラー:', error);
+            }
+        }
+
+        function updateUserInterface(user, usage) {
+            document.getElementById('userEmail').textContent = user.email;
+            
+            const remaining = usage.plan_type === 'free' 
+                ? Math.max(0, 5 - (usage.questions_used || 0))
+                : Math.max(0, (usage.monthly_questions || 50) - (usage.questions_used || 0));
+            
+            document.getElementById('remainingQuestions').textContent = remaining;
+            document.getElementById('planType').textContent = 
+                usage.plan_type === 'free' ? '無料' : 
+                usage.plan_type === 'basic' ? 'ベーシック' : '不明';
+        }
+
+        function selectAgent() {
+            const agentSelect = document.getElementById('agentSelect');
+            const selectedAgent = agentSelect.value;
+            
+            if (!selectedAgent) {
+                alert('エージェントを選択してください');
+                return;
+            }
+            
+            currentAgent = selectedAgent;
+            showAgentChat(selectedAgent);
+        }
+
+        function showAgentChat(agentType) {
+            document.getElementById('agentSelector').style.display = 'none';
+            document.getElementById('agentChatArea').style.display = 'block';
+            
+            // エージェントごとの設定
+            const agentConfigs = {
+                'gyoumukaizen': {
+                    title: '💼 業務改善助成金専門エージェント',
+                    welcome: 'こんにちは！業務改善助成金の専門エージェントです。\n設備投資による生産性向上と最低賃金引上げに関するご相談をお受けします。'
+                },
+                'career-up': {
+                    title: '📈 キャリアアップ助成金専門エージェント', 
+                    welcome: 'こんにちは！キャリアアップ助成金の専門エージェントです。\n非正規社員の正社員化や処遇改善に関するご相談をお受けします。'
+                },
+                'jinzai-kaihatsu': {
+                    title: '🎓 人材開発支援助成金専門エージェント',
+                    welcome: 'こんにちは！人材開発支援助成金の専門エージェントです。\n従業員の職業訓練や能力開発に関するご相談をお受けします。'
+                }
+            };
+            
+            const config = agentConfigs[agentType] || {
+                title: '🤖 助成金専門エージェント',
+                welcome: 'こんにちは！助成金専門エージェントです。ご質問をお聞かせください。'
+            };
+            
+            document.getElementById('agentTitle').textContent = config.title;
+            document.getElementById('welcomeMessage').textContent = config.welcome;
+            
+            // チャットエリアにスクロール
+            document.getElementById('agentChatArea').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function sendQuestion() {
+            const questionInput = document.getElementById('userQuestion');
+            const question = questionInput.value.trim();
+            
+            if (!question) {
+                alert('質問を入力してください');
+                return;
+            }
+            
+            if (!currentAgent) {
+                alert('エージェントを選択してください');
+                return;
+            }
+            
+            const chatMessages = document.getElementById('chatMessages');
+            
+            // ユーザーの質問を表示
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user-message';
+            userMessage.textContent = question;
+            chatMessages.appendChild(userMessage);
+            
+            // 入力をクリア
+            questionInput.value = '';
+            
+            // ローディング表示
+            const loadingMessage = document.createElement('div');
+            loadingMessage.className = 'message ai-message';
+            loadingMessage.textContent = 'AI が回答を生成中...';
+            chatMessages.appendChild(loadingMessage);
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: question,
+                        agent_type: currentAgent,
+                        company_info: {}
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // ローディングメッセージを削除
+                chatMessages.removeChild(loadingMessage);
+                
+                if (data.status === 'success') {
+                    const aiMessage = document.createElement('div');
+                    aiMessage.className = 'message ai-message';
+                    aiMessage.textContent = data.response;
+                    chatMessages.appendChild(aiMessage);
+                    
+                    // 使用状況更新
+                    if (data.usage_stats) {
+                        updateUserInterface(currentUser, data.usage_stats);
+                    }
+                } else {
+                    const errorMessage = document.createElement('div');
+                    errorMessage.className = 'message ai-message';
+                    errorMessage.textContent = 'エラー: ' + (data.error || '不明なエラーが発生しました');
+                    chatMessages.appendChild(errorMessage);
+                }
+                
+            } catch (error) {
+                chatMessages.removeChild(loadingMessage);
+                
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'message ai-message';
+                errorMessage.textContent = 'ネットワークエラーが発生しました。';
+                chatMessages.appendChild(errorMessage);
+            }
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = '/';
+            });
+        }
+
+        // Enterキーで送信
+        document.getElementById('userQuestion').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendQuestion();
+            }
+        });
+    </script>
+</body>
+</html>

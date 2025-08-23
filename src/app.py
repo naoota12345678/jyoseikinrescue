@@ -74,6 +74,12 @@ def diagnosis():
     """助成金診断ページ（認証不要）"""
     return render_template('joseikin_diagnosis.html')
 
+@app.route('/dashboard')
+@require_auth
+def dashboard():
+    """統合ダッシュボード（エージェント選択画面）"""
+    return render_template('dashboard.html')
+
 @app.route('/api/chat', methods=['POST'])
 @require_auth
 @check_usage_limit

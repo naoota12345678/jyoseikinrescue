@@ -392,7 +392,15 @@
                         <p><strong>対象要件:</strong> ${result.eligibility}</p>
                         <p><strong>専門相談:</strong> ${result.specialist}</p>
                     </div>
-                `).join('');
+                `).join('') + `
+                    <div style="text-align: center; margin-top: 2rem; padding: 2rem; background: #f8f9ff; border-radius: 12px; border: 2px solid #667eea;">
+                        <h3 style="color: #667eea; margin-bottom: 1rem;">🚀 より詳しい相談をご希望ですか？</h3>
+                        <p style="margin-bottom: 1.5rem;">専門AIエージェントが個別に詳しくご相談にお答えします</p>
+                        <a href="/dashboard" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">
+                            📋 専門エージェントで相談する
+                        </a>
+                    </div>
+                `;
             }
             
             resultsDiv.style.display = 'block';

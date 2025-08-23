@@ -443,9 +443,8 @@
         // 認証状態の監視
         auth.onAuthStateChanged(async (user) => {
             if (user) {
-                currentUser = user;
-                await loadUserData();
-                showMainContent();
+                // ログイン済みの場合はダッシュボードにリダイレクト
+                window.location.href = '/dashboard';
             } else {
                 currentUser = null;
                 showLoginForm();
