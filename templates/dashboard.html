@@ -390,9 +390,10 @@
                 usage.plan_type === 'free' ? '無料' : 
                 usage.plan_type === 'basic' ? 'ベーシック' : '不明';
             
-            // 使用上限に達した場合のアップグレード表示
-            if (remaining === 0) {
-                showUpgradePrompt(usage.plan_type);
+            // 使用上限に達した場合のアップグレード表示（ページロード時に1回だけ）
+            if (remaining === 0 && !window.upgradePromptShown) {
+                window.upgradePromptShown = true;
+                setTimeout(() => showUpgradePrompt(usage.plan_type), 500);
             }
         }
 
@@ -524,6 +525,18 @@
                 return;
             }
             
+            // 残り回数チェック
+            const remainingText = document.getElementById('remainingQuestions').textContent;
+            const remaining = parseInt(remainingText) || 0;
+            
+            if (remaining <= 0) {
+                const planType = document.getElementById('planType').textContent === 'ベーシック' ? 'basic' : 'free';
+                showUpgradePrompt(planType);
+                // エージェント選択をリセット
+                agentSelect.value = '';
+                return;
+            }
+            
             currentAgent = selectedAgent;
             showAgentChat(selectedAgent);
         }
@@ -639,13 +652,6 @@
                     errorMessage.className = 'message ai-message';
                     errorMessage.textContent = 'エラー: ' + (data.error || '不明なエラーが発生しました');
                     chatMessages.appendChild(errorMessage);
-                    
-                    // 使用上限エラーの場合、アップグレードプロンプトを表示
-                    if (data.error && data.error.includes('上限')) {
-                        // 現在のプランタイプを取得
-                        const planType = document.getElementById('planType').textContent === 'ベーシック' ? 'basic' : 'free';
-                        setTimeout(() => showUpgradePrompt(planType), 1000);
-                    }
                 }
                 
             } catch (error) {
