@@ -485,22 +485,22 @@
                 if (data.status === 'success' && data.checkout_url) {
                     window.location.href = data.checkout_url;
                 } else {
-                    console.error('決済ページ作成失敗:', data.error);
-                    // ユーザーに優しいメッセージ
+                    console.error('決済ページ作成失敗:', data);
+                    // 具体的なエラー内容を表示
                     const errorMsg = document.createElement('div');
-                    errorMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; z-index: 2000;';
-                    errorMsg.textContent = '決済ページの準備中です。しばらくお待ちください。';
+                    errorMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; z-index: 2000; max-width: 300px;';
+                    errorMsg.textContent = `決済エラー: ${data.error || 'サーバー応答なし'}`;
                     document.body.appendChild(errorMsg);
-                    setTimeout(() => errorMsg.remove(), 3000);
+                    setTimeout(() => errorMsg.remove(), 5000);
                 }
             } catch (error) {
                 console.error('決済エラー:', error);
-                // ユーザーに優しいメッセージ
+                // 詳細なエラー情報を表示
                 const errorMsg = document.createElement('div');
-                errorMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; z-index: 2000;';
-                errorMsg.textContent = '接続エラーが発生しました。再度お試しください。';
+                errorMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; z-index: 2000; max-width: 300px;';
+                errorMsg.textContent = `接続エラー: ${error.message || error}`;
                 document.body.appendChild(errorMsg);
-                setTimeout(() => errorMsg.remove(), 3000);
+                setTimeout(() => errorMsg.remove(), 5000);
             }
         }
 
@@ -523,22 +523,22 @@
                 if (data.status === 'success' && data.checkout_url) {
                     window.location.href = data.checkout_url;
                 } else {
-                    console.error('決済ページ作成失敗:', data.error);
-                    // ユーザーに優しいメッセージ
+                    console.error('決済ページ作成失敗:', data);
+                    // 具体的なエラー内容を表示
                     const errorMsg = document.createElement('div');
-                    errorMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; z-index: 2000;';
-                    errorMsg.textContent = '決済ページの準備中です。しばらくお待ちください。';
+                    errorMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; z-index: 2000; max-width: 300px;';
+                    errorMsg.textContent = `決済エラー: ${data.error || 'サーバー応答なし'}`;
                     document.body.appendChild(errorMsg);
-                    setTimeout(() => errorMsg.remove(), 3000);
+                    setTimeout(() => errorMsg.remove(), 5000);
                 }
             } catch (error) {
                 console.error('決済エラー:', error);
-                // ユーザーに優しいメッセージ
+                // 詳細なエラー情報を表示
                 const errorMsg = document.createElement('div');
-                errorMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; z-index: 2000;';
-                errorMsg.textContent = '接続エラーが発生しました。再度お試しください。';
+                errorMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; z-index: 2000; max-width: 300px;';
+                errorMsg.textContent = `接続エラー: ${error.message || error}`;
                 document.body.appendChild(errorMsg);
-                setTimeout(() => errorMsg.remove(), 3000);
+                setTimeout(() => errorMsg.remove(), 5000);
             }
         }
 
