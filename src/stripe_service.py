@@ -36,8 +36,45 @@ class StripeService:
     
     def create_customer(self, email: str, name: str = '', metadata: Dict[str, str] = None) -> str:
         """Stripe顧客を作成"""
+        import requests
+        import json
+        
         try:
             logger.info(f"Creating customer with email: {email}, name: {name}")
+            
+            # Stripe APIを直接呼び出し
+            url = "https://api.stripe.com/v1/customers"
+            headers = {
+                "Authorization": f"Bearer {self.stripe_secret_key}",
+                "Content-Type": "application/x-www-form-urlencoded"
+            }
+            data = {
+                "email": email,
+                "name": name,
+            }
+            
+            # metadataを追加
+            if metadata:
+                for key, value in metadata.items():
+                    data[f"metadata[{key}]"] = value
+            
+            logger.info(f"Making direct API call to Stripe")
+            response = requests.post(url, headers=headers, data=data)
+            
+            logger.info(f"Stripe API response status: {response.status_code}")
+            
+            if response.status_code == 200:
+                customer_data = response.json()
+                customer_id = customer_data.get('id')
+                logger.info(f"Customer created successfully: {customer_id}")
+                return customer_id
+            else:
+                logger.error(f"Stripe API error: {response.status_code}, {response.text}")
+                raise ValueError(f"Stripe API error: {response.status_code}")
+                
+        except Exception as e:
+            logger.error(f"Direct API call error: {str(e)}")
+            # フォールバックとして元のStripe呼び出しを試す
             try:
                 customer = stripe.Customer.create(
                     email=email,
