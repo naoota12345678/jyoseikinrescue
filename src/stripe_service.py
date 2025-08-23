@@ -8,12 +8,18 @@ logger = logging.getLogger(__name__)
 class StripeService:
     def __init__(self):
         self.stripe_secret_key = os.getenv('STRIPE_SECRET_KEY')
+        logger.info(f"STRIPE_SECRET_KEY exists: {self.stripe_secret_key is not None}")
+        logger.info(f"STRIPE_SECRET_KEY starts with: {self.stripe_secret_key[:20] if self.stripe_secret_key else 'None'}")
+        
         if not self.stripe_secret_key:
             logger.error("STRIPE_SECRET_KEY environment variable is not set")
             raise ValueError("STRIPE_SECRET_KEY is required but not set")
         
         stripe.api_key = self.stripe_secret_key
+        logger.info(f"Set stripe.api_key: {stripe.api_key[:20] if stripe.api_key else 'None'}")
+        
         self.webhook_secret = os.getenv('STRIPE_WEBHOOK_SECRET')
+        logger.info(f"STRIPE_WEBHOOK_SECRET exists: {self.webhook_secret is not None}")
         
         # 料金設定
         self.BASIC_PLAN_PRICE = 3000  # 3,000円
