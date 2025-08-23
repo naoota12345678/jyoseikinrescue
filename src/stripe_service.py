@@ -32,11 +32,18 @@ class StripeService:
                 metadata=metadata or {}
             )
             
+            if not customer or not hasattr(customer, 'id'):
+                logger.error(f"Invalid customer object returned: {customer}")
+                raise ValueError("Invalid customer object returned from Stripe")
+            
             logger.info(f"Stripe customer created: {customer.id}")
             return customer.id
             
         except stripe.error.StripeError as e:
             logger.error(f"Stripe customer creation error: {str(e)}")
+            raise
+        except Exception as e:
+            logger.error(f"Unexpected error in customer creation: {str(e)}")
             raise
     
     def create_subscription(self, customer_id: str, price_id: str, metadata: Dict[str, str] = None) -> Dict[str, Any]:
