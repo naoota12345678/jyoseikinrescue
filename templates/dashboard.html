@@ -342,6 +342,13 @@
             if (user) {
                 currentUser = user;
                 await loadUserData();
+                // URLパラメータをチェック（Stripe決済後の処理）
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('payment') === 'success') {
+                    alert('決済が完了しました。プランがアップグレードされました。');
+                    // URLパラメータを削除
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
             } else {
                 // 未認証の場合はログインページにリダイレクト
                 // パス名が '/' でない場合のみリダイレクト
@@ -445,11 +452,12 @@
         function closeUpgradePrompt() {
             const prompt = document.getElementById('upgradePrompt');
             if (prompt) {
+                // オーバーレイも一緒に削除
+                const overlay = prompt.nextElementSibling;
+                if (overlay && overlay.style.position === 'fixed') {
+                    overlay.remove();
+                }
                 prompt.remove();
-            }
-            const overlay = prompt?.nextElementSibling;
-            if (overlay) {
-                overlay.remove();
             }
         }
 
@@ -631,6 +639,13 @@
                     errorMessage.className = 'message ai-message';
                     errorMessage.textContent = 'エラー: ' + (data.error || '不明なエラーが発生しました');
                     chatMessages.appendChild(errorMessage);
+                    
+                    // 使用上限エラーの場合、アップグレードプロンプトを表示
+                    if (data.error && data.error.includes('上限')) {
+                        // 現在のプランタイプを取得
+                        const planType = document.getElementById('planType').textContent === 'ベーシック' ? 'basic' : 'free';
+                        setTimeout(() => showUpgradePrompt(planType), 1000);
+                    }
                 }
                 
             } catch (error) {
