@@ -423,6 +423,26 @@
             window.location.href = '/diagnosis';
         }
 
+        function goToConsultation() {
+            // 認証状態をチェック
+            fetch('/api/auth/user')
+                .then(response => {
+                    if (response.ok) {
+                        // 認証済みの場合はダッシュボードに
+                        window.location.href = '/dashboard';
+                    } else {
+                        // 未認証の場合はログインページに
+                        alert('専門エージェントをご利用いただくにはログインが必要です。');
+                        window.location.href = '/';
+                    }
+                })
+                .catch(() => {
+                    // エラーの場合もログインページに
+                    alert('専門エージェントをご利用いただくにはログインが必要です。');
+                    window.location.href = '/';
+                });
+        }
+
         // Enterキーで送信
         document.getElementById('userQuestion').addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {

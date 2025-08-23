@@ -396,15 +396,35 @@
                     <div style="text-align: center; margin-top: 2rem; padding: 2rem; background: #f8f9ff; border-radius: 12px; border: 2px solid #667eea;">
                         <h3 style="color: #667eea; margin-bottom: 1rem;">🚀 より詳しい相談をご希望ですか？</h3>
                         <p style="margin-bottom: 1.5rem;">専門AIエージェントが個別に詳しくご相談にお答えします</p>
-                        <a href="/dashboard" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">
+                        <button onclick="goToConsultation()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem 2rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer;">
                             📋 専門エージェントで相談する
-                        </a>
+                        </button>
                     </div>
                 `;
             }
             
             resultsDiv.style.display = 'block';
             resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function goToConsultation() {
+            // 認証状態をチェック
+            fetch('/api/auth/user')
+                .then(response => {
+                    if (response.ok) {
+                        // 認証済みの場合はダッシュボードに
+                        window.location.href = '/dashboard';
+                    } else {
+                        // 未認証の場合はログインページに
+                        alert('専門エージェントをご利用いただくにはログインが必要です。');
+                        window.location.href = '/';
+                    }
+                })
+                .catch(() => {
+                    // エラーの場合もログインページに
+                    alert('専門エージェントをご利用いただくにはログインが必要です。');
+                    window.location.href = '/';
+                });
         }
     </script>
 </body>
