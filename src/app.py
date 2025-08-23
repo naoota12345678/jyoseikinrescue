@@ -156,6 +156,34 @@ def _load_joseikin_knowledge():
         logger.error(f"Error loading 2025 subsidy data: {str(e)}")
         return "助成金データの読み込みに失敗しました。"
 
+# 利用制限管理（メモリベース、本格運用時はRedis推奨）
+diagnosis_rate_limit = {}
+
+def _check_diagnosis_rate_limit(client_ip):
+    """診断の利用制限チェック（1時間あたり10回まで）"""
+    import time
+    current_time = time.time()
+    
+    # 1時間以上前の記録を削除
+    if client_ip in diagnosis_rate_limit:
+        diagnosis_rate_limit[client_ip] = [
+            timestamp for timestamp in diagnosis_rate_limit[client_ip] 
+            if current_time - timestamp < 3600  # 1時間 = 3600秒
+        ]
+    
+    # 現在の利用回数をチェック
+    usage_count = len(diagnosis_rate_limit.get(client_ip, []))
+    
+    if usage_count >= 10:  # 1時間あたり10回制限
+        return False
+    
+    # 利用記録を追加
+    if client_ip not in diagnosis_rate_limit:
+        diagnosis_rate_limit[client_ip] = []
+    diagnosis_rate_limit[client_ip].append(current_time)
+    
+    return True
+
 def _format_diagnosis_response(text):
     """診断結果の改行を強制的に整理"""
     import re
@@ -180,6 +208,14 @@ def _format_diagnosis_response(text):
 @app.route('/api/joseikin-diagnosis', methods=['POST'])
 def joseikin_diagnosis():
     try:
+        # 利用制限チェック
+        client_ip = request.environ.get('HTTP_X_FORWARDED_FOR', request.environ.get('REMOTE_ADDR', ''))
+        if not _check_diagnosis_rate_limit(client_ip):
+            return jsonify({
+                'error': '利用制限に達しました。1時間後に再度お試しください。',
+                'message': '適切な利用にご協力ください。'
+            }), 429
+        
         data = request.json
         diagnosis_data = data.get('diagnosis_data', {})
         
@@ -327,6 +363,12 @@ def joseikin_diagnosis():
 ---
 【重要】
 このサービスは厚生労働省管轄の助成金専門です。IT導入補助金・ものづくり補助金・事業再構築補助金等の補助金については一切回答しません。
+
+【適正利用について】
+- この診断は一般的な情報提供を目的としています
+- 助成金の申請代行業務は社会保険労務士の独占業務です
+- 無資格による助成金申請代行は法律で禁止されています
+- 正式な申請については必ず有資格者にご相談ください
 
 【次のステップ】
 診断結果を保存して、詳細な相談に進むことをお勧めします。
