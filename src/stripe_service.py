@@ -32,11 +32,15 @@ class StripeService:
         """Stripe顧客を作成"""
         try:
             logger.info(f"Creating customer with email: {email}, name: {name}")
-            customer = stripe.Customer.create(
-                email=email,
-                name=name,
-                metadata=metadata or {}
-            )
+            try:
+                customer = stripe.Customer.create(
+                    email=email,
+                    name=name,
+                    metadata=metadata or {}
+                )
+            except Exception as create_error:
+                logger.error(f"Error during stripe.Customer.create: {type(create_error).__name__}: {str(create_error)}")
+                raise
             
             logger.info(f"Customer object type: {type(customer)}")
             logger.info(f"Customer object attributes: {dir(customer)}")
