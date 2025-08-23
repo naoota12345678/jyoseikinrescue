@@ -322,10 +322,13 @@
 
         // Firebase初期化
         const firebaseConfig = {
-            // Firebase設定は実際の設定に置き換える
-            apiKey: "your-api-key",
-            authDomain: "your-project.firebaseapp.com",
-            projectId: "your-project-id"
+            apiKey: "AIzaSyDzRzS-C104mWNloO94GNH7Jv93F5gWVto",
+            authDomain: "jyoseikinrescue.firebaseapp.com",
+            projectId: "jyoseikinrescue",
+            storageBucket: "jyoseikinrescue.firebasestorage.app",
+            messagingSenderId: "453016168690",
+            appId: "1:453016168690:web:6658e01bdd588ea63f886b",
+            measurementId: "G-V8WP53NEH4"
         };
 
         if (!firebase.apps.length) {
@@ -340,7 +343,11 @@
                 currentUser = user;
                 await loadUserData();
             } else {
-                window.location.href = '/';
+                // 未認証の場合はログインページにリダイレクト
+                // パス名が '/' でない場合のみリダイレクト
+                if (window.location.pathname !== '/') {
+                    window.location.href = '/';
+                }
             }
         });
 

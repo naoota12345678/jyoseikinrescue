@@ -444,7 +444,10 @@
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 // ログイン済みの場合はダッシュボードにリダイレクト
-                window.location.href = '/dashboard';
+                // ただし、既にリダイレクト中の場合は何もしない
+                if (!window.location.pathname.includes('/dashboard')) {
+                    window.location.href = '/dashboard';
+                }
             } else {
                 currentUser = null;
                 showLoginForm();
