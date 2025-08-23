@@ -104,6 +104,14 @@ class StripeService:
                 metadata=metadata or {}
             )
             
+            if not session:
+                logger.error("Checkout session creation returned None")
+                raise ValueError("Failed to create checkout session")
+            
+            if not hasattr(session, 'id') or not hasattr(session, 'url'):
+                logger.error(f"Invalid session object: {session}")
+                raise ValueError("Invalid session object returned from Stripe")
+            
             logger.info(f"Checkout session created: {session.id}")
             return {
                 'id': session.id,
