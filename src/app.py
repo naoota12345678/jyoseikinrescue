@@ -160,21 +160,21 @@ def _load_joseikin_knowledge():
 diagnosis_rate_limit = {}
 
 def _check_diagnosis_rate_limit(client_ip):
-    """診断の利用制限チェック（1時間あたり10回まで）"""
+    """診断の利用制限チェック（1日あたり5回まで）"""
     import time
     current_time = time.time()
     
-    # 1時間以上前の記録を削除
+    # 1日以上前の記録を削除
     if client_ip in diagnosis_rate_limit:
         diagnosis_rate_limit[client_ip] = [
             timestamp for timestamp in diagnosis_rate_limit[client_ip] 
-            if current_time - timestamp < 3600  # 1時間 = 3600秒
+            if current_time - timestamp < 86400  # 1日 = 86400秒
         ]
     
     # 現在の利用回数をチェック
     usage_count = len(diagnosis_rate_limit.get(client_ip, []))
     
-    if usage_count >= 10:  # 1時間あたり10回制限
+    if usage_count >= 5:  # 1日あたり5回制限
         return False
     
     # 利用記録を追加
@@ -212,8 +212,8 @@ def joseikin_diagnosis():
         client_ip = request.environ.get('HTTP_X_FORWARDED_FOR', request.environ.get('REMOTE_ADDR', ''))
         if not _check_diagnosis_rate_limit(client_ip):
             return jsonify({
-                'error': '利用制限に達しました。1時間後に再度お試しください。',
-                'message': '適切な利用にご協力ください。'
+                'error': '1日の利用制限（5回）に達しました。明日再度お試しください。',
+                'message': 'より詳しい相談は専門AIエージェントをご利用ください。'
             }), 429
         
         data = request.json
@@ -364,11 +364,8 @@ def joseikin_diagnosis():
 【重要】
 このサービスは厚生労働省管轄の助成金専門です。IT導入補助金・ものづくり補助金・事業再構築補助金等の補助金については一切回答しません。
 
-【適正利用について】
-- この診断は一般的な情報提供を目的としています
-- 助成金の申請代行業務は社会保険労務士の独占業務です
-- 無資格による助成金申請代行は法律で禁止されています
-- 正式な申請については必ず有資格者にご相談ください
+【ご利用について】
+この診断は情報提供を目的としています。正式な申請手続きについては社会保険労務士等の有資格者にご相談ください。
 
 【次のステップ】
 診断結果を保存して、詳細な相談に進むことをお勧めします。
