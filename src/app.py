@@ -156,6 +156,27 @@ def _load_joseikin_knowledge():
         logger.error(f"Error loading 2025 subsidy data: {str(e)}")
         return "助成金データの読み込みに失敗しました。"
 
+def _format_diagnosis_response(text):
+    """診断結果の改行を強制的に整理"""
+    import re
+    
+    # 助成金名の前に改行を強制挿入
+    text = re.sub(r'(\d+\.)\s*([^-\n]+助成金)', r'\n\n\1 \2\n', text)
+    
+    # 項目（-で始まる行）の前に適切な改行
+    text = re.sub(r'([^\n])\s*-\s*(支給額|適用要件|申請準備|専門エージェント)', r'\1\n- \2', text)
+    
+    # カテゴリ見出し（【】で囲まれた部分）の前後に改行
+    text = re.sub(r'([^\n])【([^】]+)】', r'\1\n\n【\2】\n', text)
+    
+    # 連続する改行を整理（3個以上の改行を2個に）
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    
+    # 先頭と末尾の余分な改行を削除
+    text = text.strip()
+    
+    return text
+
 @app.route('/api/joseikin-diagnosis', methods=['POST'])
 def joseikin_diagnosis():
     try:
@@ -263,7 +284,10 @@ def joseikin_diagnosis():
 """
         
         # Claude AIに問い合わせ
-        response = get_claude_service().chat(prompt, "")
+        raw_response = get_claude_service().chat(prompt, "")
+        
+        # 強制的に改行を整理
+        response = _format_diagnosis_response(raw_response)
         
         # レスポンスを構造化
         applicable_grants = [{
