@@ -69,6 +69,11 @@ def index():
     else:
         return render_template('index.html')
 
+@app.route('/diagnosis')
+def diagnosis():
+    """助成金診断ページ"""
+    return render_template('joseikin_diagnosis.html')
+
 @app.route('/api/chat', methods=['POST'])
 @require_auth
 @check_usage_limit
@@ -129,6 +134,77 @@ def grant_check():
     except Exception as e:
         logger.error(f"Error in grant check endpoint: {str(e)}")
         return jsonify({'error': 'サーバーエラーが発生しました'}), 500
+
+@app.route('/api/joseikin-diagnosis', methods=['POST'])
+def joseikin_diagnosis():
+    try:
+        data = request.json
+        diagnosis_data = data.get('diagnosis_data', {})
+        
+        # Claude AIを使用して包括的な助成金診断
+        prompt = f"""
+あなたは令和7年度雇用・労働分野の助成金の専門家です。以下の企業情報を基に、該当する可能性のある助成金をすべて判定してください。
+
+【企業情報】
+業種: {diagnosis_data.get('industry', 'なし')}
+従業員数: {diagnosis_data.get('totalEmployees', 'なし')}
+雇用保険被保険者数: {diagnosis_data.get('insuredEmployees', 'なし')}
+有期契約労働者数: {diagnosis_data.get('temporaryEmployees', 'なし')}
+短時間労働者数: {diagnosis_data.get('partTimeEmployees', 'なし')}
+年齢構成: {diagnosis_data.get('ageGroups', 'なし')}
+特別配慮労働者: {diagnosis_data.get('specialNeeds', 'なし')}
+経営状況: {diagnosis_data.get('businessSituation', 'なし')}
+事業場内最低賃金: {diagnosis_data.get('minWage', 'なし')}円/時
+賃金・処遇改善: {diagnosis_data.get('wageImprovement', 'なし')}
+投資・改善予定: {diagnosis_data.get('investments', 'なし')}
+両立支援: {diagnosis_data.get('workLifeBalance', 'なし')}
+
+以下の29カテゴリーから該当するものを判定し、具体的な支給額と適用条件を含めて回答してください：
+
+1. 雇用調整助成金 2. 産業雇用安定助成金 3. 早期再就職支援等助成金 4. 特定求職者雇用開発助成金
+5. トライアル雇用助成金 6. 地域雇用開発助成金 7. 人材確保等支援助成金 8. 通年雇用助成金
+9. 65歳超雇用推進助成金 10. キャリアアップ助成金 11. 両立支援等助成金 12. 人材開発支援助成金
+13. 障害者作業施設設置等助成金 14. 障害者福祉施設設置等助成金 15. 障害者介助等助成金
+16. 職場適応援助者助成金 17. 重度障害者等通勤対策助成金 18. 重度障害者多数雇用事業所施設設置等助成金
+19. 障害者雇用相談援助助成金 20. 障害者能力開発助成金 21. 職場適応訓練費 22. 業務改善助成金
+23. 働き方改革推進支援助成金 24. 受動喫煙防止対策助成金 25. 団体経由産業保健活動推進助成金
+26. 高度安全機械等導入支援補助金 27. エイジフレンドリー補助金 28. 個人ばく露測定定着促進補助金
+29. 中小企業退職金共済制度に係る新規加入等掛金助成
+
+該当する助成金について、適用可能性の高い順に最大10件まで、以下の情報を含めて具体的に回答してください：
+- 助成金名（正確なコース名を含む）
+- 支給額（具体的な金額）
+- 適用要件（詳細な条件）
+- 申請に必要な準備
+- 専門エージェント名
+
+可能性が低くても検討すべき助成金があれば、その理由も含めて言及してください。
+"""
+        
+        # Claude AIに問い合わせ
+        response = get_claude_service().chat(prompt, "")
+        
+        # レスポンスを構造化
+        applicable_grants = [{
+            'name': 'AI診断結果',
+            'description': response,
+            'amount': '上記診断結果をご確認ください',
+            'eligibility': '詳細な適用要件は診断結果に記載',
+            'specialist': '該当する専門エージェント',
+            'probability': 'AI判定済み'
+        }]
+        
+        return jsonify({
+            'status': 'success',
+            'applicable_grants': applicable_grants
+        })
+                
+    except Exception as e:
+        logger.error(f"Error in joseikin diagnosis: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'error': str(e)
+        }), 500
 
 # ===== 認証・ユーザー管理関連のAPIエンドポイント =====
 

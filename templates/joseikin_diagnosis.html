@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>助成金診断システム - 詳細版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 2rem;
+        }
+        
+        .question {
+            margin-bottom: 2rem;
+        }
+        
+        .question h3 {
+            margin-bottom: 1rem;
+            color: #495057;
+        }
+        
+        .options {
+            display: grid;
+            gap: 0.5rem;
+        }
+        
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .option:hover {
+            border-color: #667eea;
+            background-color: #f8f9ff;
+        }
+        
+        .option input {
+            margin-right: 0.75rem;
+        }
+        
+        .option.selected {
+            border-color: #667eea;
+            background-color: #f8f9ff;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 2rem;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .results {
+            display: none;
+        }
+        
+        .result-item {
+            background: #f8f9ff;
+            border-left: 4px solid #667eea;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+        }
+        
+        .result-item h4 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        
+        .amount {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 助成金適用診断システム</h1>
+        
+        <div class="card">
+            <form id="diagnosisForm">
+                <!-- 基本情報 -->
+                <div class="question">
+                    <h3>1. 会社の基本情報</h3>
+                    <label>業種:</label>
+                    <div class="options">
+                        <div class="option" onclick="selectOption(this, 'industry', 'construction')">
+                            <input type="radio" name="industry" value="construction"> 建設業
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'industry', 'manufacturing')">
+                            <input type="radio" name="industry" value="manufacturing"> 製造業
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'industry', 'service')">
+                            <input type="radio" name="industry" value="service"> サービス業
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'industry', 'it')">
+                            <input type="radio" name="industry" value="it"> IT・通信業
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'industry', 'other')">
+                            <input type="radio" name="industry" value="other"> その他
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <h3>2. 従業員数</h3>
+                    <label>総従業員数:</label>
+                    <input type="number" name="totalEmployees" placeholder="例: 25">
+                </div>
+
+                <div class="question">
+                    <h3>3. 雇用形態別の人数</h3>
+                    <label>雇用保険被保険者数:</label>
+                    <input type="number" name="insuredEmployees" placeholder="例: 20"><br><br>
+                    <label>有期契約労働者数:</label>
+                    <input type="number" name="temporaryEmployees" placeholder="例: 5"><br><br>
+                    <label>短時間労働者数（週20時間未満）:</label>
+                    <input type="number" name="partTimeEmployees" placeholder="例: 3">
+                </div>
+
+                <div class="question">
+                    <h3>4. 労働者の年齢構成</h3>
+                    <div class="options">
+                        <div class="option" onclick="selectMultiple(this, 'ageGroups')">
+                            <input type="checkbox" name="ageGroups" value="young"> 35歳未満の若年者がいる
+                        </div>
+                        <div class="option" onclick="selectMultiple(this, 'ageGroups')">
+                            <input type="checkbox" name="ageGroups" value="middle"> 50歳以上の中高年者がいる
+                        </div>
+                        <div class="option" onclick="selectMultiple(this, 'ageGroups')">
+                            <input type="checkbox" name="ageGroups" value="senior"> 60歳以上の高齢者がいる
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <h3>5. 特別な配慮が必要な労働者</h3>
+                    <div class="options">
+                        <div class="option" onclick="selectMultiple(this, 'specialNeeds')">
+                            <input type="checkbox" name="specialNeeds" value="disability"> 障害者雇用がある・予定がある
+                        </div>
+                        <div class="option" onclick="selectMultiple(this, 'specialNeeds')">
+                            <input type="checkbox" name="specialNeeds" value="female"> 女性労働者の活躍推進
+                        </div>
+                        <div class="option" onclick="selectMultiple(this, 'specialNeeds')">
+                            <input type="checkbox" name="specialNeeds" value="foreign"> 外国人労働者がいる
+                        </div>
+                        <div class="option" onclick="selectMultiple(this, 'specialNeeds')">
+                            <input type="checkbox" name="specialNeeds" value="singleParent"> 母子・父子家庭の労働者がいる
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <h3>6. 現在の経営状況</h3>
+                    <div class="options">
+                        <div class="option" onclick="selectOption(this, 'businessSituation', 'declining')">
+                            <input type="radio" name="businessSituation" value="declining"> 売上減少・事業縮小している
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'businessSituation', 'stable')">
+                            <input type="radio" name="businessSituation" value="stable"> 安定している
+                        </div>
+                        <div class="option" onclick="selectOption(this, 'businessSituation', 'growing')">
+                            <input type="radio" name="businessSituation" value="growing"> 成長・拡大している
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <h3>7. 賃金・処遇の状況</h3>
+                    <label>事業場内最低賃金（時給）:</label>
+                    <input type="number" name="minWage" placeholder="例: 900"><br><br>
+                    <div class="options">
+                        <div class="option" onclick="selectMultiple(this, 'wageImprovement')">
+                            <input type="checkbox" name="wageImprovement" value="raise"> 賃金引上げを検討している
+                        </div>
+                        <div class="option" onclick="selectMultiple(this, 'wageImprovement')">
+                            <input type="checkbox" name="wageImprovement" value="regularization"> 非正規を正社員化したい
+                        </div>
+                        <div class="option" onclick="selectMultiple(this, 'wageImprovement')">
+                            <input type="checkbox" name="wageImprovement" value="bonus"> 賞与制度を導入したい
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <h3>8. 投資・改善の予定</h3>
+                    <div class="options">
+                        <div class="option" onclick="selectMultiple(this, 'investments')">
+                            <input type="checkbox" name="investments" value="equipment"> 設備投資・機器導入
+                        </div>
+                        <div class="option" onclick="selectMultiple(this, 'investments')">
+                            <input type="checkbox" name="investments" value="training"> 職業訓練・研修実施
+                        </div>
+                        <div class="option" onclick="selectMultiple(this, 'investments')">
+                            <input type="checkbox" name="investments" value="it"> IT化・DX推進
+                        </div>
+                        <div class="option" onclick="selectMultiple(this, 'investments')">
+                            <input type="checkbox" name="investments" value="workStyle"> 働き方改革（テレワーク等）
+                        </div>
+                        <div class="option" onclick="selectMultiple(this, 'investments')">
+                            <input type="checkbox" name="investments" value="safety"> 安全衛生対策
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <h3>9. 両立支援・職場環境</h3>
+                    <div class="options">
+                        <div class="option" onclick="selectMultiple(this, 'workLifeBalance')">
+                            <input type="checkbox" name="workLifeBalance" value="childcare"> 育児支援制度を充実させたい
+                        </div>
+                        <div class="option" onclick="selectMultiple(this, 'workLifeBalance')">
+                            <input type="checkbox" name="workLifeBalance" value="eldercare"> 介護支援制度を充実させたい
+                        </div>
+                        <div class="option" onclick="selectMultiple(this, 'workLifeBalance')">
+                            <input type="checkbox" name="workLifeBalance" value="health"> 健康経営を推進したい
+                        </div>
+                        <div class="option" onclick="selectMultiple(this, 'workLifeBalance')">
+                            <input type="checkbox" name="workLifeBalance" value="smoking"> 受動喫煙防止対策が必要
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" onclick="diagnose()">📋 助成金診断を実行</button>
+            </form>
+        </div>
+
+        <div class="card results" id="results">
+            <h2>🎯 診断結果</h2>
+            <div id="resultsList"></div>
+        </div>
+    </div>
+
+    <script>
+        function selectOption(element, name, value) {
+            // 同じname属性の他の選択肢を非選択状態に
+            document.querySelectorAll(`input[name="${name}"]`).forEach(input => {
+                input.closest('.option').classList.remove('selected');
+                input.checked = false;
+            });
+            
+            // 選択された項目を選択状態に
+            element.classList.add('selected');
+            element.querySelector('input').checked = true;
+        }
+
+        function selectMultiple(element, name) {
+            const input = element.querySelector('input');
+            input.checked = !input.checked;
+            element.classList.toggle('selected');
+        }
+
+        async function diagnose() {
+            const formData = new FormData(document.getElementById('diagnosisForm'));
+            const data = {};
+            
+            // 基本データの収集
+            for (let [key, value] of formData.entries()) {
+                if (data[key]) {
+                    if (Array.isArray(data[key])) {
+                        data[key].push(value);
+                    } else {
+                        data[key] = [data[key], value];
+                    }
+                } else {
+                    data[key] = value;
+                }
+            }
+
+            // ローディング表示
+            displayLoading();
+
+            try {
+                // Claude AIに診断を依頼
+                const response = await fetch('/api/joseikin-diagnosis', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        diagnosis_data: data
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    displayResults(result.applicable_grants);
+                } else {
+                    displayError('診断中にエラーが発生しました: ' + result.error);
+                }
+                
+            } catch (error) {
+                console.error('診断エラー:', error);
+                displayError('ネットワークエラーが発生しました。しばらく時間をおいて再度お試しください。');
+            }
+        }
+
+        function displayLoading() {
+            const resultsDiv = document.getElementById('results');
+            const resultsList = document.getElementById('resultsList');
+            
+            resultsList.innerHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <div style="animation: spin 1s linear infinite; width: 50px; height: 50px; border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%; margin: 0 auto 1rem;"></div>
+                    <p>AI専門家が全29カテゴリーの助成金を診断中...</p>
+                    <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">令和7年度の最新情報で判定しています</p>
+                </div>
+                <style>
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                </style>
+            `;
+            
+            resultsDiv.style.display = 'block';
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function displayError(message) {
+            const resultsList = document.getElementById('resultsList');
+            resultsList.innerHTML = `<div style="color: #e74c3c; text-align: center; padding: 2rem;">${message}</div>`;
+        }
+
+        function displayResults(results) {
+            const resultsDiv = document.getElementById('results');
+            const resultsList = document.getElementById('resultsList');
+            
+            if (results.length === 0) {
+                resultsList.innerHTML = '<p>申し訳ございません。現在の条件では該当する助成金が見つかりませんでした。条件を見直すか、個別相談をご利用ください。</p>';
+            } else {
+                resultsList.innerHTML = results.map(result => `
+                    <div class="result-item">
+                        <h4>${result.name}</h4>
+                        <p>${result.description}</p>
+                        <p class="amount">💰 支給額: ${result.amount}</p>
+                        <p><strong>対象要件:</strong> ${result.eligibility}</p>
+                        <p><strong>専門相談:</strong> ${result.specialist}</p>
+                    </div>
+                `).join('');
+            }
+            
+            resultsDiv.style.display = 'block';
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

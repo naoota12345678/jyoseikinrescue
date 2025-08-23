@@ -292,3 +292,45 @@ class ClaudeService:
             formatted.append(f"事業目標: {company_info['business_goals']}")
         
         return "\n".join(formatted) if formatted else "企業情報が提供されていません"
+    
+    def chat(self, prompt: str, context: str = "") -> str:
+        """
+        一般的なチャット機能（助成金診断用）
+        """
+        try:
+            # モックモードの場合
+            if self.mock_mode:
+                return f"""
+【助成金診断結果 - テストモード】
+
+{prompt}
+
+申し訳ございませんが、現在はテスト環境で動作中です。
+ANTHROPIC_API_KEYが設定されていないため、実際のAI診断は行えません。
+
+実際の運用時には、Claude AIが以下のような詳細な診断を行います：
+- 29カテゴリーの助成金から該当するものを抽出
+- 具体的な支給額の算定
+- 申請要件の詳細説明
+- 専門エージェントの推奨
+
+本格運用には環境変数の設定が必要です。
+"""
+            
+            message = self.client.messages.create(
+                model=self.model,
+                max_tokens=4000,
+                temperature=0.3,
+                messages=[
+                    {
+                        "role": "user", 
+                        "content": f"{context}\n\n{prompt}"
+                    }
+                ]
+            )
+            
+            return message.content[0].text
+            
+        except Exception as e:
+            logger.error(f"Claude chat error: {str(e)}")
+            return f"申し訳ございません。AI診断中にエラーが発生しました: {str(e)}"

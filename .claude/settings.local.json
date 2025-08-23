@@ -14,7 +14,9 @@
       "Bash(wc:*)",
       "Bash(done)",
       "Bash(gh run list:*)",
-      "Bash(gcloud run services:*)"
+      "Bash(gcloud run services:*)",
+      "Bash(curl:*)",
+      "Bash(move joseikin_diagnosis.html templates/)"
     ],
     "deny": [],
     "ask": []
