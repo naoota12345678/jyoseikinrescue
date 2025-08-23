@@ -7,19 +7,8 @@ logger = logging.getLogger(__name__)
 
 class StripeService:
     def __init__(self):
-        self.stripe_secret_key = os.getenv('STRIPE_SECRET_KEY')
-        logger.info(f"STRIPE_SECRET_KEY exists: {self.stripe_secret_key is not None}")
-        logger.info(f"STRIPE_SECRET_KEY starts with: {self.stripe_secret_key[:20] if self.stripe_secret_key else 'None'}")
-        
-        if not self.stripe_secret_key:
-            logger.error("STRIPE_SECRET_KEY environment variable is not set")
-            raise ValueError("STRIPE_SECRET_KEY is required but not set")
-        
-        stripe.api_key = self.stripe_secret_key
-        logger.info(f"Set stripe.api_key: {stripe.api_key[:20] if stripe.api_key else 'None'}")
-        
+        stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
         self.webhook_secret = os.getenv('STRIPE_WEBHOOK_SECRET')
-        logger.info(f"STRIPE_WEBHOOK_SECRET exists: {self.webhook_secret is not None}")
         
         # 料金設定
         self.BASIC_PLAN_PRICE = 3000  # 3,000円
@@ -36,77 +25,18 @@ class StripeService:
     
     def create_customer(self, email: str, name: str = '', metadata: Dict[str, str] = None) -> str:
         """Stripe顧客を作成"""
-        import requests
-        import json
-        
         try:
-            logger.info(f"Creating customer with email: {email}, name: {name}")
+            customer = stripe.Customer.create(
+                email=email,
+                name=name,
+                metadata=metadata or {}
+            )
             
-            # Stripe APIを直接呼び出し
-            url = "https://api.stripe.com/v1/customers"
-            headers = {
-                "Authorization": f"Bearer {self.stripe_secret_key}",
-                "Content-Type": "application/x-www-form-urlencoded"
-            }
-            data = {
-                "email": email,
-                "name": name,
-            }
-            
-            # metadataを追加
-            if metadata:
-                for key, value in metadata.items():
-                    data[f"metadata[{key}]"] = value
-            
-            logger.info(f"Making direct API call to Stripe")
-            response = requests.post(url, headers=headers, data=data)
-            
-            logger.info(f"Stripe API response status: {response.status_code}")
-            
-            if response.status_code == 200:
-                customer_data = response.json()
-                customer_id = customer_data.get('id')
-                logger.info(f"Customer created successfully: {customer_id}")
-                return customer_id
-            else:
-                logger.error(f"Stripe API error: {response.status_code}, {response.text}")
-                raise ValueError(f"Stripe API error: {response.status_code}")
-                
-        except Exception as e:
-            logger.error(f"Direct API call error: {str(e)}")
-            # フォールバックとして元のStripe呼び出しを試す
-            try:
-                customer = stripe.Customer.create(
-                    email=email,
-                    name=name,
-                    metadata=metadata or {}
-                )
-            except Exception as create_error:
-                logger.error(f"Error during stripe.Customer.create: {type(create_error).__name__}: {str(create_error)}")
-                raise
-            
-            logger.info(f"Customer object type: {type(customer)}")
-            logger.info(f"Customer object attributes: {dir(customer)}")
-            logger.info(f"Customer object: {customer}")
-            
-            if not customer:
-                logger.error("Customer object is None")
-                raise ValueError("Customer creation returned None")
-            
-            # idプロパティにアクセスしてみる
-            try:
-                customer_id = customer.id
-                logger.info(f"Successfully got customer ID: {customer_id}")
-                return customer_id
-            except AttributeError as attr_e:
-                logger.error(f"Customer object has no id attribute: {attr_e}")
-                raise ValueError(f"Customer object missing id: {attr_e}")
+            logger.info(f"Stripe customer created: {customer.id}")
+            return customer.id
             
         except stripe.error.StripeError as e:
             logger.error(f"Stripe customer creation error: {str(e)}")
-            raise
-        except Exception as e:
-            logger.error(f"Unexpected error in customer creation: {str(e)}")
             raise
     
     def create_subscription(self, customer_id: str, price_id: str, metadata: Dict[str, str] = None) -> Dict[str, Any]:
@@ -166,14 +96,6 @@ class StripeService:
                 cancel_url=cancel_url,
                 metadata=metadata or {}
             )
-            
-            if not session:
-                logger.error("Checkout session creation returned None")
-                raise ValueError("Failed to create checkout session")
-            
-            if not hasattr(session, 'id') or not hasattr(session, 'url'):
-                logger.error(f"Invalid session object: {session}")
-                raise ValueError("Invalid session object returned from Stripe")
             
             logger.info(f"Checkout session created: {session.id}")
             return {
@@ -243,10 +165,6 @@ class StripeService:
     def verify_webhook_signature(self, payload: str, signature: str) -> bool:
         """Webhookの署名を検証"""
         try:
-            if not self.webhook_secret:
-                logger.warning("STRIPE_WEBHOOK_SECRET is not set")
-                return False
-            
             stripe.Webhook.construct_event(
                 payload, signature, self.webhook_secret
             )
