@@ -34,15 +34,37 @@
         }
         
         .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
         
         .logo-icon {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            position: relative;
+        }
+        
+        .logo-wave {
             font-size: 1.8rem;
+            letter-spacing: -0.3rem;
+            margin-right: 0.2rem;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        .logo-text {
+            font-size: 1.3rem;
+            font-weight: bold;
+            letter-spacing: 0.05em;
+        }
+        
+        .logo-tagline {
+            font-size: 0.7rem;
+            font-weight: normal;
+            opacity: 0.9;
+            margin-left: 1rem;
         }
         
         .container {
@@ -158,8 +180,11 @@
     <div class="header">
         <div class="header-content">
             <div class="logo">
-                <span class="logo-icon">📈</span>
-                <span>助成金レスキュー</span>
+                <div class="logo-icon">
+                    <span class="logo-wave">⋀⋀</span>
+                    <span class="logo-text">助成金レスキュー</span>
+                </div>
+                <span class="logo-tagline">AIが助成金に関する質問に1分でお答え。特許出願中！</span>
             </div>
         </div>
     </div>
