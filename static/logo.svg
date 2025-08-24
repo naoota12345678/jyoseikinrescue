@@ -1,28 +1,28 @@
-<svg width="280" height="60" viewBox="0 0 280 60" xmlns="http://www.w3.org/2000/svg">
-  <!-- 心電図のような波形パターン -->
-  <g stroke="currentColor" stroke-width="1.5" fill="none">
+<svg width="400" height="80" viewBox="0 0 400 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- 心電図のような波形パターン（左端に配置） -->
+  <g stroke="currentColor" stroke-width="2" fill="none">
     <!-- 基準線 -->
-    <line x1="5" y1="25" x2="15" y2="25" />
+    <line x1="10" y1="35" x2="20" y2="35" />
     
     <!-- 小さな波 -->
-    <path d="M15 25 L20 20 L25 30 L30 25" />
+    <path d="M20 35 L25 30 L30 40 L35 35" />
     
     <!-- 大きなスパイク -->
-    <path d="M30 25 L35 8 L40 42 L45 25" />
+    <path d="M35 35 L40 15 L45 55 L50 35" />
     
     <!-- 中くらいの波 -->
-    <path d="M45 25 L50 18 L55 32 L60 25" />
+    <path d="M50 35 L55 25 L60 45 L65 35" />
     
     <!-- 終了線 -->
-    <line x1="60" y1="25" x2="70" y2="25" />
+    <line x1="65" y1="35" x2="75" y2="35" />
   </g>
   
-  <!-- メインテキスト「助成金レスキュー」 -->
-  <text x="10" y="50" font-family="'Hiragino Sans', 'Yu Gothic', sans-serif" font-size="16" font-weight="bold" fill="currentColor">助成金レスキュー</text>
+  <!-- メインテキスト「助成金レスキュー」（心電図の右隣に配置） -->
+  <text x="85" y="45" font-family="'Hiragino Sans', 'Yu Gothic', sans-serif" font-size="22" font-weight="bold" fill="currentColor">助成金レスキュー</text>
   
   <!-- 商標マーク -->
-  <text x="175" y="45" font-family="Arial" font-size="10" fill="currentColor">®</text>
+  <text x="280" y="40" font-family="Arial" font-size="12" fill="currentColor">®</text>
   
   <!-- サブテキスト -->
-  <text x="10" y="58" font-family="'Hiragino Sans', 'Yu Gothic', sans-serif" font-size="8" fill="currentColor" opacity="0.8">AIが助成金に関する質問に1分でお答え。特許出願中！</text>
+  <text x="85" y="62" font-family="'Hiragino Sans', 'Yu Gothic', sans-serif" font-size="10" fill="currentColor" opacity="0.8">AIが助成金に関する質問に1分でお答え。特許出願中！</text>
 </svg>
