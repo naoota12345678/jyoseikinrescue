@@ -18,6 +18,33 @@
             background-color: #f8f9fa;
         }
         
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .logo-icon {
+            font-size: 1.8rem;
+        }
+        
         .container {
             max-width: 800px;
             margin: 0 auto;
@@ -32,10 +59,11 @@
             margin-bottom: 2rem;
         }
         
-        h1 {
+        .page-title {
             text-align: center;
             color: #667eea;
             margin-bottom: 2rem;
+            font-size: 1.8rem;
         }
         
         .question {
@@ -127,8 +155,17 @@
     </style>
 </head>
 <body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <span class="logo-icon">📈</span>
+                <span>助成金レスキュー</span>
+            </div>
+        </div>
+    </div>
+    
     <div class="container">
-        <h1>🎯 助成金適用診断システム</h1>
+        <h1 class="page-title">助成金適用診断システム</h1>
         
         <div class="card">
             <form id="diagnosisForm">
