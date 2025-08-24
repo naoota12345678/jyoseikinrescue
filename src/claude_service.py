@@ -145,7 +145,54 @@ class ClaudeService:
         # 曖昧な質問は専門外として処理
         return self.general_prompt
     
-    def get_grant_consultation(self, company_info: Dict, question: str) -> str:
+    def _select_system_prompt_by_agent(self, agent_type: str, question: str) -> str:
+        """エージェントタイプに応じてシステムプロンプトを選択"""
+        if agent_type == 'gyoumukaizen':
+            return self.business_improvement_prompt
+        elif agent_type.startswith('jinzai-kaihatsu'):
+            # 人材開発支援助成金の各コースに対応
+            course = agent_type.replace('jinzai-kaihatsu_', '') if '_' in agent_type else ''
+            return self._get_jinzai_kaihatsu_prompt(course)
+        else:
+            # その他のエージェントは既存のロジックを使用
+            return self._select_system_prompt(question)
+    
+    def _get_jinzai_kaihatsu_prompt(self, course: str) -> str:
+        """人材開発支援助成金の各コース用プロンプトを生成"""
+        course_info = {
+            'jinzai-ikusei': '人材育成支援コース',
+            'kyoiku-kunren-kyuka': '教育訓練休暇等付与コース',
+            'hito-toshi': '人への投資促進コース',
+            'reskilling': '事業展開等リスキリング支援コース',
+            'sonota': 'その他のコース'
+        }
+        
+        course_name = course_info.get(course, '人材開発支援助成金')
+        
+        return f"""
+あなたは{course_name}の専門AIエージェントです。
+
+【専門分野】
+- {course_name}に関する質問のみ回答
+- 研修・教育訓練・人材育成に関する助成金制度
+- 申請手続き、要件、支給額の詳細説明
+
+【回答方針】
+1. {course_name}に特化した正確な情報を提供
+2. 申請要件を詳しく説明
+3. 支給額・助成率を具体的に記載
+4. 申請手続きの流れを説明
+5. よくある質問にも対応
+
+【注意事項】
+- 厚生労働省管轄の助成金のみ対応
+- 補助金についての質問には「専門外です」と回答
+- 不明な点は最新の公式情報の確認を推奨
+
+質問者の企業情報を踏まえ、{course_name}について専門的で実用的なアドバイスを提供してください。
+"""
+    
+    def get_grant_consultation(self, company_info: Dict, question: str, agent_type: str = 'gyoumukaizen') -> str:
         """
         企業情報と質問を基に、助成金相談の回答を生成
         """
@@ -175,8 +222,8 @@ class ClaudeService:
 ※現在はテストモードで動作中です。正式版では最新の公式情報に基づいた詳細な回答を提供いたします。
 """
             
-            # 質問内容に応じてプロンプトを選択
-            system_prompt = self._select_system_prompt(question)
+            # エージェントタイプに応じてプロンプトを選択
+            system_prompt = self._select_system_prompt_by_agent(agent_type, question)
             
             # 企業情報を整理
             company_context = self._format_company_info(company_info)

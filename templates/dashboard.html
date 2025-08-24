@@ -282,7 +282,7 @@
             <div class="agent-dropdown" id="agentDropdown">
                 <h3>専門エージェントを選択：</h3>
                 <div class="dropdown-container">
-                    <select id="agentSelect">
+                    <select id="agentSelect" onchange="handleAgentChange()">
                         <option value="">エージェントを選択してください</option>
                         <option value="gyoumukaizen">業務改善助成金専門エージェント</option>
                         <option value="career-up">キャリアアップ助成金専門エージェント</option>
@@ -295,6 +295,18 @@
                         <option value="judokien-boshi">受動喫煙防止対策助成金専門エージェント</option>
                         <option value="other">その他の助成金エージェント</option>
                     </select>
+                    
+                    <!-- 2段階目のドロップダウン（人材開発支援助成金選択時に表示） -->
+                    <div id="courseSelection" style="display: none; margin-top: 1rem;">
+                        <select id="courseSelect">
+                            <option value="">コースを選択してください</option>
+                            <option value="jinzai-ikusei">人材育成支援コース</option>
+                            <option value="kyoiku-kunren-kyuka">教育訓練休暇等付与コース</option>
+                            <option value="hito-toshi">人への投資促進コース</option>
+                            <option value="reskilling">事業展開等リスキリング支援コース</option>
+                            <option value="sonota">その他のコース</option>
+                        </select>
+                    </div>
                     <button class="go-btn" onclick="selectAgent()">エージェント開始</button>
                 </div>
             </div>
@@ -544,13 +556,37 @@
             }
         }
 
+        function handleAgentChange() {
+            const agentSelect = document.getElementById('agentSelect');
+            const courseSelection = document.getElementById('courseSelection');
+            const courseSelect = document.getElementById('courseSelect');
+            
+            if (agentSelect.value === 'jinzai-kaihatsu') {
+                courseSelection.style.display = 'block';
+                courseSelect.value = ''; // リセット
+            } else {
+                courseSelection.style.display = 'none';
+                courseSelect.value = '';
+            }
+        }
+
         function selectAgent() {
             const agentSelect = document.getElementById('agentSelect');
+            const courseSelect = document.getElementById('courseSelect');
             const selectedAgent = agentSelect.value;
             
             if (!selectedAgent) {
                 alert('エージェントを選択してください');
                 return;
+            }
+            
+            // 人材開発支援助成金の場合、コース選択が必要
+            if (selectedAgent === 'jinzai-kaihatsu') {
+                const selectedCourse = courseSelect.value;
+                if (!selectedCourse) {
+                    alert('コースを選択してください');
+                    return;
+                }
             }
             
             // 残り回数チェック
@@ -562,11 +598,18 @@
                 showUpgradePrompt(planType);
                 // エージェント選択をリセット
                 agentSelect.value = '';
+                document.getElementById('courseSelection').style.display = 'none';
                 return;
             }
             
-            currentAgent = selectedAgent;
-            showAgentChat(selectedAgent);
+            // 人材開発支援助成金の場合、コースも含めて設定
+            if (selectedAgent === 'jinzai-kaihatsu') {
+                currentAgent = selectedAgent + '_' + courseSelect.value;
+            } else {
+                currentAgent = selectedAgent;
+            }
+            
+            showAgentChat(currentAgent);
         }
 
         function showAgentChat(agentType) {

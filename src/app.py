@@ -103,8 +103,11 @@ def chat():
         # セッションに会社情報を保存
         session['company_info'] = company_info
         
-        # Claude APIに質問を送信
-        response = get_claude_service().get_grant_consultation(company_info, question)
+        # エージェントタイプを取得（フロントエンドから送信される）
+        agent_type = data.get('agent_type', 'gyoumukaizen')  # デフォルトは業務改善助成金
+        
+        # Claude APIに質問を送信（エージェントタイプも渡す）
+        response = get_claude_service().get_grant_consultation(company_info, question, agent_type)
         
         # 質問使用回数を増加
         result = get_subscription_service().use_question(current_user['id'])
