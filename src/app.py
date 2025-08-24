@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, send_from_directory
 import os
 import sys
 from dotenv import load_dotenv
@@ -29,6 +29,11 @@ except Exception as e:
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-here')
+
+# Static files route
+@app.route('/static/<path:filename>')
+def static_files(filename):
+    return send_from_directory('../static', filename)
 
 # サービスの遅延初期化
 claude_service = None

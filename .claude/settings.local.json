@@ -23,9 +23,14 @@
       "Read(/C:\\Users\\naoot\\Pictures\\Screenshots/**)",
       "WebSearch",
       "Read(/C:\\Users\\naoot\\Pictures\\Screenshots/**)",
-      "Read(/C:\\Users\\naoot\\Pictures\\Screenshots/**)"
+      "Read(/C:\\Users\\naoot\\Pictures\\Screenshots/**)",
+      "Read(/C:\\Users\\naoot\\Pictures\\Screenshots/**)",
+      "Bash(copy:*)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "additionalDirectories": [
+      "C:\\Users\\naoot\\Pictures\\Screenshots"
+    ]
   }
 }
