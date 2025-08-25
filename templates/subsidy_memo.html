@@ -470,6 +470,12 @@
             
             if (user) {
                 currentUser = user;
+                // 認証状態をコンソールに詳細表示
+                console.log('=== 認証ユーザー詳細 ===');
+                console.log('UID:', user.uid);
+                console.log('Email:', user.email);
+                console.log('Display Name:', user.displayName);
+                console.log('====================');
                 authStateChecked = true;
                 console.log('メモ画面: ユーザー認証成功、ページ初期化開始');
                 initializePage();

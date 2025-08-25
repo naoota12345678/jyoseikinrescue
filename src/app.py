@@ -674,7 +674,11 @@ def get_subsidies():
         from subsidy_service import SubsidyService
         
         service = SubsidyService(firebase_service.get_db())
+        # まずFirebase UIDで試し、見つからない場合はDatabase User IDでも試す
         subsidies = service.get_user_subsidies(current_user['uid'])
+        if not subsidies and current_user.get('id'):
+            logger.info(f"No subsidies found with Firebase UID, trying database user ID: {current_user['id']}")
+            subsidies = service.get_user_subsidies(current_user['id'])
         
         logger.info(f"API GET: Found {len(subsidies)} subsidies for user")
         
@@ -705,7 +709,9 @@ def create_subsidy():
         from subsidy_service import SubsidyService
         service = SubsidyService(firebase_service.get_db())
         
-        memo = service.create_subsidy_memo(current_user['uid'], data)
+        # Firebase UIDを優先的に使用（取得時と一貫性を保つため）
+        user_id_for_save = current_user['uid']
+        memo = service.create_subsidy_memo(user_id_for_save, data)
         
         logger.info(f"API: Successfully created memo with ID: {memo.id}")
         
@@ -797,6 +803,7 @@ def get_deadlines():
         from subsidy_service import SubsidyService
         service = SubsidyService(firebase_service.get_db())
         
+        # Firebase UIDを使用（他のAPIと一貫性を保つため）
         deadlines = service.get_upcoming_deadlines(current_user['uid'], days)
         
         return jsonify(deadlines)
