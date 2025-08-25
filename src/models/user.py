@@ -92,6 +92,16 @@ class User:
     def create_initial_subscription(self, user_id: str):
         """初回サブスクリプションを作成"""
         try:
+            # 既存のアクティブなサブスクリプションがあるかチェック
+            existing_subs = self.db.collection('subscriptions')\
+                .where('user_id', '==', user_id)\
+                .where('status', '==', 'active')\
+                .limit(1).get()
+            
+            if existing_subs:
+                logger.info(f"Active subscription already exists for user {user_id}, skipping creation")
+                return
+            
             # 現在の日付から1ヶ月後をリセット日に設定
             reset_date = datetime.now() + timedelta(days=30)
             
@@ -108,6 +118,7 @@ class User:
             }
             
             self.db.collection('subscriptions').add(subscription_data)
+            logger.info(f"Initial subscription created for user {user_id}")
             
         except Exception as e:
             logger.error(f"Initial subscription creation error: {str(e)}")
