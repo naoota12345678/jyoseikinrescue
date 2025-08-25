@@ -187,6 +187,61 @@
             color: #6b7280;
             line-height: 1.4;
         }
+        
+        /* AI診断結果詳細表示 */
+        .ai-result-detail {
+            padding: 15px;
+        }
+        
+        .result-timestamp {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+        
+        .result-summary {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .result-items {
+            margin-top: 15px;
+        }
+        
+        .result-item {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .result-item h4 {
+            color: #667eea;
+            margin: 0 0 10px 0;
+            font-size: 15px;
+        }
+        
+        .result-item p {
+            margin: 5px 0;
+            font-size: 13px;
+            color: #4b5563;
+        }
+        
+        .item-description {
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #6b7280;
+            max-height: 200px;
+            overflow-y: auto;
+        }
 
         /* 中央：助成金メモエリア */
         .subsidy-memo-area {
@@ -1170,7 +1225,8 @@
         }
         
         function goToAIConsultation() {
-            window.location.href = '/agent-select';
+            // ダッシュボード（エージェント選択画面）に遷移
+            window.location.href = '/dashboard';
         }
         
         // AI診断結果の管理
@@ -1232,8 +1288,49 @@
         }
         
         function selectAIResult(resultId) {
-            // TODO: 選択されたAI結果の詳細を表示する機能
-            console.log('Selected AI result:', resultId);
+            // AI診断結果の詳細を右側のチャット履歴エリアに表示
+            const result = aiResults.find(r => (r.id || r.timestamp) === resultId);
+            if (!result) return;
+            
+            const chatMessages = document.getElementById('chatMessages');
+            const chatHeader = document.querySelector('.chat-header');
+            
+            // ヘッダーを更新
+            chatHeader.innerHTML = '🤖 AI診断結果詳細';
+            
+            // 診断結果の詳細を表示
+            let detailHTML = `
+                <div class="ai-result-detail">
+                    <div class="result-timestamp">
+                        📅 ${formatDateTime(result.timestamp)}
+                    </div>
+                    <div class="result-summary">
+                        ${result.summary || 'AI診断結果'}
+                    </div>
+            `;
+            
+            if (result.content && Array.isArray(result.content)) {
+                detailHTML += '<div class="result-items">';
+                result.content.forEach((item, index) => {
+                    detailHTML += `
+                        <div class="result-item">
+                            <h4>${index + 1}. ${item.name || '助成金候補'}</h4>
+                            <p><strong>支給額:</strong> ${item.amount || '詳細は診断結果参照'}</p>
+                            <p><strong>対象:</strong> ${item.eligibility || '詳細は診断結果参照'}</p>
+                            ${item.description ? `<div class="item-description">${item.description}</div>` : ''}
+                        </div>
+                    `;
+                });
+                detailHTML += '</div>';
+            } else if (result.content) {
+                detailHTML += `<div class="result-content">${JSON.stringify(result.content, null, 2)}</div>`;
+            }
+            
+            detailHTML += '</div>';
+            chatMessages.innerHTML = detailHTML;
+            
+            // チャットアクションボタンを非表示
+            document.getElementById('chatActions').style.display = 'none';
         }
     </script>
 </body>
