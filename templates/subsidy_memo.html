@@ -82,62 +82,148 @@
             gap: 20px;
         }
         
-        /* 左端：AI診断パネル */
-        .ai-actions-panel {
+        /* 左端：AI診断結果パネル */
+        .ai-results-panel {
             background: white;
             border-radius: 15px;
-            padding: 25px;
+            padding: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             height: fit-content;
+            min-height: 400px;
         }
         
-        .ai-actions-panel h3 {
-            margin: 0 0 20px 0;
-            color: #374151;
-            font-size: 18px;
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
             border-bottom: 2px solid #f3f4f6;
-            padding-bottom: 10px;
         }
         
-        .ai-btn {
-            width: 100%;
-            padding: 12px 15px;
-            margin-bottom: 10px;
+        .panel-header h3 {
+            margin: 0;
+            color: #374151;
+            font-size: 16px;
+        }
+        
+        .panel-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            width: 32px;
+            height: 32px;
             border: none;
-            border-radius: 10px;
-            font-weight: 600;
+            border-radius: 8px;
+            background: #f3f4f6;
             cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: left;
+            transition: all 0.3s;
             font-size: 14px;
         }
         
-        .diagnosis-btn {
+        .action-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .ai-results-content {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .start-diagnosis-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 15px;
         }
         
-        .history-btn {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
+        .ai-result-item {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
         }
         
-        .consultation-btn {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
+        .ai-result-item:hover {
+            background: #f3f4f6;
+            border-color: #667eea;
+            transform: translateX(3px);
         }
         
-        .ai-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        
+        .result-title {
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+            flex: 1;
+        }
+        
+        .result-date {
+            font-size: 12px;
+            color: #6b7280;
+            white-space: nowrap;
+            margin-left: 10px;
+        }
+        
+        .result-preview {
+            font-size: 12px;
+            color: #6b7280;
+            line-height: 1.4;
         }
 
-        /* 中央：メモエリア */
-        .memo-area {
+        /* 中央：助成金メモエリア */
+        .subsidy-memo-area {
             background: white;
             border-radius: 15px;
             padding: 25px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .memo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .memo-header h3 {
+            margin: 0;
+            color: #374151;
+            font-size: 18px;
+        }
+        
+        .add-new-btn {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+        
+        .add-new-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
         }
         
         .search-bar {
@@ -469,12 +555,13 @@
                 gap: 15px;
             }
             
-            .ai-actions-panel {
+            .ai-results-panel {
                 order: 1;
                 padding: 15px;
+                min-height: 300px;
             }
             
-            .memo-area {
+            .subsidy-memo-area {
                 order: 2;
                 padding: 15px;
             }
@@ -485,9 +572,8 @@
                 padding: 15px;
             }
             
-            .ai-btn {
-                padding: 10px 12px;
-                font-size: 13px;
+            .panel-header h3, .memo-header h3 {
+                font-size: 16px;
             }
         }
     </style>
@@ -511,27 +597,41 @@
         </div>
         
         <div class="main-content">
-            <!-- 左端：AI診断結果・履歴ボタン -->
-            <div class="ai-actions-panel">
-                <h3>🤖 AI診断</h3>
-                <button class="ai-btn diagnosis-btn" onclick="goToDiagnosis()">
-                    📋 新規診断実行
-                </button>
-                <button class="ai-btn history-btn" onclick="showDiagnosisHistory()">
-                    📚 診断履歴
-                </button>
-                <button class="ai-btn consultation-btn" onclick="goToAIConsultation()">
-                    💬 AI相談
-                </button>
+            <!-- 左端：AI診断結果表示エリア -->
+            <div class="ai-results-panel">
+                <div class="panel-header">
+                    <h3>🤖 AI診断結果</h3>
+                    <div class="panel-actions">
+                        <button class="action-btn" onclick="goToDiagnosis()" title="新規診断">📋</button>
+                        <button class="action-btn" onclick="goToAIConsultation()" title="AI相談">💬</button>
+                    </div>
+                </div>
+                
+                <div class="ai-results-content" id="aiResultsContent">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <div class="empty-state-text">まだ診断結果がありません</div>
+                        <button class="start-diagnosis-btn" onclick="goToDiagnosis()">
+                            最初の診断を実行
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <!-- 中央：メモエリア -->
-            <div class="memo-area">
+            <!-- 中央：助成金メモエリア -->
+            <div class="subsidy-memo-area">
+                <div class="memo-header">
+                    <h3>📝 助成金メモ管理</h3>
+                    <button class="add-new-btn" onclick="showNewSubsidyModal()">
+                        ➕ 新規追加
+                    </button>
+                </div>
+                
                 <div class="search-bar">
                     <input type="text" id="searchInput" placeholder="助成金名や対象者で検索..." onkeyup="searchSubsidies()">
                 </div>
                 
-                <div id="subsidiesList">
+                <div id="subsidiesList" class="subsidy-cards">
                     <!-- 助成金カードがここに表示される -->
                 </div>
             </div>
@@ -609,6 +709,7 @@
                 authStateChecked = true;
                 console.log('メモ画面: ユーザー認証成功、ページ初期化開始');
                 initializePage();
+                loadAIResults(); // AI診断結果をロード
             } else if (authStateChecked) {
                 // 認証状態が一度確認された後にnullになった場合のみリダイレクト
                 console.log('メモ画面: ユーザー未認証、ログインページにリダイレクト');
@@ -1062,6 +1163,67 @@
         
         function goToAIConsultation() {
             window.location.href = '/agent-select';
+        }
+        
+        // AI診断結果の管理
+        let aiResults = []; // 診断結果データを格納
+        
+        function loadAIResults() {
+            // TODO: 将来的にはサーバーからAI診断結果を取得
+            // 現在は診断結果保存時にlocalStorageに保存されたデータを使用
+            const savedResults = localStorage.getItem('aiDiagnosisResults');
+            if (savedResults) {
+                aiResults = JSON.parse(savedResults);
+                displayAIResults();
+            }
+        }
+        
+        function addAIResult(result) {
+            const newResult = {
+                id: Date.now().toString(),
+                timestamp: new Date().toISOString(),
+                type: 'diagnosis', // 'diagnosis' or 'consultation'
+                content: result,
+                title: result.name || 'AI診断結果'
+            };
+            
+            aiResults.unshift(newResult); // 最新を先頭に
+            localStorage.setItem('aiDiagnosisResults', JSON.stringify(aiResults));
+            displayAIResults();
+        }
+        
+        function displayAIResults() {
+            const container = document.getElementById('aiResultsContent');
+            
+            if (aiResults.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <div class="empty-state-text">まだ診断結果がありません</div>
+                        <button class="start-diagnosis-btn" onclick="goToDiagnosis()">
+                            最初の診断を実行
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = aiResults.map(result => `
+                <div class="ai-result-item" onclick="selectAIResult('${result.id}')">
+                    <div class="result-header">
+                        <div class="result-title">${result.title}</div>
+                        <div class="result-date">${formatDate(result.timestamp)}</div>
+                    </div>
+                    <div class="result-preview">
+                        ${result.content.description ? result.content.description.substring(0, 100) + '...' : 'AI診断結果'}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function selectAIResult(resultId) {
+            // TODO: 選択されたAI結果の詳細を表示する機能
+            console.log('Selected AI result:', resultId);
         }
     </script>
 </body>
