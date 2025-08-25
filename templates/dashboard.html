@@ -406,16 +406,22 @@
                 if (data.status === 'success') {
                     updateUserInterface(data.user, data.usage_stats);
                 } else {
-                    // エラーの場合はサイレントに処理（アラート表示なし）
+                    // エラーの場合はデフォルト値で表示
                     console.error('ユーザーデータ取得失敗:', data.error);
+                    updateUserInterface(null, null);
                 }
             } catch (error) {
-                // エラーの場合はサイレントに処理（アラート表示なし）
+                // エラーの場合はデフォルト値で表示
                 console.error('ユーザーデータ取得エラー:', error);
+                updateUserInterface(null, null);
             }
         }
 
         function updateUserInterface(user, usage) {
+            // デフォルト値を設定
+            if (!user) user = { email: 'ユーザー' };
+            if (!usage) usage = { plan_type: 'free', questions_used: 0 };
+            
             document.getElementById('userEmail').textContent = user.email;
             
             const remaining = usage.plan_type === 'free' 
@@ -430,7 +436,7 @@
             // 使用上限に達した場合のアップグレード表示（ページロード時に1回だけ）
             if (remaining === 0 && !window.upgradePromptShown) {
                 window.upgradePromptShown = true;
-                setTimeout(() => showUpgradePrompt(usage.plan_type), 500);
+                setTimeout(() => showUpgradePrompt(usage.plan_type || 'free'), 500);
             }
         }
 
@@ -860,7 +866,7 @@
         auth.onAuthStateChanged(function(user) {
             if (user) {
                 currentUser = user;
-                initializeApp();
+                loadUserData();
                 // 診断結果の変換チェック
                 setTimeout(checkPendingDiagnosis, 1000);
             } else {
