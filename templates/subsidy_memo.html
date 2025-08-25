@@ -1275,13 +1275,11 @@
             container.innerHTML = aiResults.map(result => `
                 <div class="ai-result-item" onclick="selectAIResult('${result.id || result.timestamp}')">
                     <div class="result-header">
-                        <div class="result-title">${result.summary || 'AI診断結果'}</div>
+                        <div class="result-title">${result.summary || '診断結果'}</div>
                         <div class="result-date">${formatDate(result.timestamp)}</div>
                     </div>
                     <div class="result-preview">
-                        ${result.content && result.content.length > 0 ? 
-                            `${result.content.length}件の助成金候補` : 
-                            'AI診断結果'}
+                        クリックで詳細表示
                     </div>
                 </div>
             `).join('');
@@ -1305,7 +1303,7 @@
                         📅 ${formatDateTime(result.timestamp)}
                     </div>
                     <div class="result-summary">
-                        ${result.summary || 'AI診断結果'}
+                        ${result.summary || '診断結果'}
                     </div>
             `;
             
