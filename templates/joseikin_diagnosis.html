@@ -740,19 +740,12 @@ ${result.description}`
                         const memo = await response.json();
                         console.log('保存成功:', memo);
                         
-                        // 診断結果をチャット履歴として追加
-                        const initialMemo = `【助成金診断結果】
-業種: ${companyInfo.industry || '未設定'}
-従業員数: ${companyInfo.employees || '未設定'}
-現在の状況: ${companyInfo.situation || '未設定'}
-目標: ${companyInfo.goals ? companyInfo.goals.join(', ') : '未設定'}
+                        // 診断結果をチャット履歴として追加（シンプル版）
+                        const now = new Date();
+                        const dateStr = now.toLocaleDateString('ja-JP') + ' ' + now.toLocaleTimeString('ja-JP');
+                        
+                        const initialMemo = `【助成金診断結果 - ${dateStr}】
 
-【診断結果】
-${result.name}が適用可能
-支給額: ${result.amount}
-対象要件: ${result.eligibility}
-
-【詳細説明】
 ${result.description}`;
                         
                         await fetch(`/api/subsidies/${memo.id}/memo`, {

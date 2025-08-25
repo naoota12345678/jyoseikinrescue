@@ -244,6 +244,46 @@
             border-color: #9ca3af;
         }
         
+        /* 新しいボタンレイアウト */
+        .chat-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .chat-actions .add-memo-btn {
+            width: auto;
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 13px;
+            border-radius: 20px;
+            border: 1px solid #667eea;
+            background: white;
+            color: #667eea;
+        }
+        
+        .add-subsidy-btn {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 13px;
+            border-radius: 20px;
+            border: none;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .chat-actions .add-memo-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .add-subsidy-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        }
+        
         .modal {
             display: none;
             position: fixed;
@@ -421,9 +461,14 @@
                         <div class="empty-state-text">助成金を選択してください</div>
                     </div>
                 </div>
-                <button class="add-memo-btn" onclick="addMemo()" style="display: none;" id="addMemoBtn">
-                    ➕ メモを追加
-                </button>
+                <div class="chat-actions" style="display: none;" id="chatActions">
+                    <button class="add-memo-btn" onclick="addMemo()">
+                        💬 メモを追加
+                    </button>
+                    <button class="add-subsidy-btn" onclick="showNewSubsidyModal()">
+                        ➕ 新規助成金追加
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -612,7 +657,7 @@
             
             if (subsidy) {
                 displayChatHistory(subsidy);
-                document.getElementById('addMemoBtn').style.display = 'block';
+                document.getElementById('chatActions').style.display = 'flex';
                 
                 // アクティブ状態を更新
                 document.querySelectorAll('.subsidy-card').forEach(card => {
