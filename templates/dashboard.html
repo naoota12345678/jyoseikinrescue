@@ -70,6 +70,23 @@
             background: rgba(255,255,255,0.3);
         }
         
+        .memo-btn {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .memo-btn:hover {
+            background: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-1px);
+        }
+        
         .user-info {
             display: flex;
             align-items: center;
@@ -258,6 +275,7 @@
             </div>
             <div class="header-right">
                 <a href="/diagnosis" class="free-diagnosis-btn">🎯 無料診断（100種類超）</a>
+                <a href="/subsidy-memo" class="memo-btn">📝 メモ管理</a>
                 <div class="user-info" id="userInfo">
                     <span id="userEmail">読み込み中...</span>
                     <button onclick="logout()" style="padding: 0.5rem 1rem; background: #dc3545; color: white; border: none; border-radius: 4px;">ログアウト</button>
@@ -485,7 +503,7 @@
                         <div style="background: #fff5f5; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
                             <h3 style="color: #e74c3c; margin-bottom: 1rem;">📦 追加パック</h3>
                             <ul style="list-style: none; padding: 0;">
-                                <li>✅ 追加20回分の質問回数</li>
+                                <li>✅ 追加50回分の質問回数</li>
                                 <li>✅ 即座に利用可能</li>
                                 <li style="font-weight: bold; color: #e74c3c;">💰 2,000円（都度購入）</li>
                             </ul>
