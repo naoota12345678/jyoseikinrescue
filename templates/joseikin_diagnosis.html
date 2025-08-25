@@ -558,6 +558,7 @@
         
         async function saveDiagnosisResults(results) {
             try {
+                const companyInfo = getCurrentCompanyInfo();
                 const diagnosisData = {
                     subsidies: results.map(result => ({
                         subsidy_name: result.name,
@@ -569,10 +570,24 @@
                         plan_documents: result.plan_documents || [],
                         payment_deadline: result.payment_deadline || null,
                         payment_documents: result.payment_documents || ['実績報告書', '領収書'],
-                        diagnosis_summary: `${result.name}が適用可能です。支給額: ${result.amount}`
+                        diagnosis_summary: `${result.name}が適用可能です。支給額: ${result.amount}`,
+                        // 診断時の企業情報と結果をメモとして保存
+                        initial_memo: `【助成金診断結果】
+業種: ${companyInfo.industry || '未設定'}
+従業員数: ${companyInfo.employees || '未設定'}
+現在の状況: ${companyInfo.situation || '未設定'}
+目標: ${companyInfo.goals ? companyInfo.goals.join(', ') : '未設定'}
+
+【診断結果】
+${result.name}が適用可能
+支給額: ${result.amount}
+対象要件: ${result.eligibility}
+
+【詳細説明】
+${result.description}`
                     })),
                     timestamp: new Date().toISOString(),
-                    company_info: getCurrentCompanyInfo()
+                    company_info: companyInfo
                 };
                 
                 const response = await fetch('/api/diagnosis/save-temp', {

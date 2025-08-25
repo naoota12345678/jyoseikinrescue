@@ -230,29 +230,41 @@ class SubsidyService:
             if not temp_result:
                 return None
             
+            # 最初の助成金のデータを使用（複数ある場合は最初のもの）
+            subsidies = temp_result.get('subsidies', [])
+            if not subsidies:
+                return None
+            
+            first_subsidy = subsidies[0]
+            
             # メモデータを構築
             memo_data = {
-                'name': temp_result.get('subsidy_name', ''),
-                'target_person': temp_result.get('target', ''),
+                'name': first_subsidy.get('subsidy_name', ''),
+                'target_person': first_subsidy.get('target', ''),
                 'plan_application': {
-                    'required': temp_result.get('plan_required', False),
-                    'deadline': temp_result.get('plan_deadline'),
+                    'required': first_subsidy.get('plan_required', False),
+                    'deadline': first_subsidy.get('plan_deadline'),
                     'documents': [{'name': doc, 'completed': False} 
-                                for doc in temp_result.get('plan_documents', [])],
-                    'memo': temp_result.get('plan_memo', '')
+                                for doc in first_subsidy.get('plan_documents', [])],
+                    'memo': first_subsidy.get('plan_memo', '')
                 },
                 'payment_application': {
                     'required': True,
-                    'deadline': temp_result.get('payment_deadline'),
+                    'deadline': first_subsidy.get('payment_deadline'),
                     'documents': [{'name': doc, 'completed': False} 
-                                for doc in temp_result.get('payment_documents', [])],
-                    'memo': temp_result.get('payment_memo', '')
+                                for doc in first_subsidy.get('payment_documents', [])],
+                    'memo': first_subsidy.get('payment_memo', '')
                 },
                 'source': 'free_diagnosis'
             }
             
             # メモを作成
             memo = self.create_subsidy_memo(user_id, memo_data)
+            
+            # 診断時のメモをチャット履歴として追加
+            initial_memo = first_subsidy.get('initial_memo', '')
+            if initial_memo:
+                self.add_chat_history(user_id, memo.id, initial_memo)
             
             # 一時診断結果を削除
             self.db.collection('temp_diagnosis').document(session_id).delete()
