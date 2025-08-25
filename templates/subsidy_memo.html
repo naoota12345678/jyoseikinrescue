@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>助成金メモ・スケジュール管理 | 助成金レスキュー</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -441,19 +445,61 @@
     <script>
         let currentSubsidyId = null;
         let subsidiesData = [];
+        let currentUser = null;
         
-        // ページ読み込み時の初期化
-        document.addEventListener('DOMContentLoaded', function() {
+        // Firebase設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyDqiKQF3_Y2iqxvnSo0X_dqO4rBr0EeD2I",
+            authDomain: "jyoseikinrescue-8d5ca.firebaseapp.com",
+            projectId: "jyoseikinrescue-8d5ca",
+            storageBucket: "jyoseikinrescue-8d5ca.firebasestorage.app",
+            messagingSenderId: "1021988542050",
+            appId: "1:1021988542050:web:1234567890abcdef"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        
+        // 認証状態の監視
+        auth.onAuthStateChanged(function(user) {
+            if (user) {
+                currentUser = user;
+                initializePage();
+            } else {
+                // 未認証の場合はログインページへ
+                window.location.href = '/';
+            }
+        });
+        
+        // ページ初期化
+        function initializePage() {
             loadSubsidies();
             checkPendingDiagnosis();
-        });
+        }
+        
+        // 認証トークンを取得
+        async function getAuthToken() {
+            if (!currentUser) return null;
+            try {
+                return await currentUser.getIdToken();
+            } catch (error) {
+                console.error('トークン取得エラー:', error);
+                return null;
+            }
+        }
         
         // 助成金リストを読み込む
         async function loadSubsidies() {
             try {
+                const token = await getAuthToken();
+                if (!token) {
+                    console.error('認証トークンの取得に失敗');
+                    return;
+                }
+                
                 const response = await fetch('/api/subsidies', {
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('idToken')
+                        'Authorization': 'Bearer ' + token
                     }
                 });
                 
@@ -645,11 +691,14 @@
             const memoContent = prompt('メモを入力してください:');
             if (memoContent) {
                 try {
+                    const token = await getAuthToken();
+                    if (!token) return;
+                    
                     const response = await fetch(`/api/subsidies/${currentSubsidyId}/memo`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + localStorage.getItem('idToken')
+                            'Authorization': 'Bearer ' + token
                         },
                         body: JSON.stringify({ content: memoContent })
                     });
@@ -683,11 +732,14 @@
             };
             
             try {
+                const token = await getAuthToken();
+                if (!token) return;
+                
                 const response = await fetch('/api/subsidies', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + localStorage.getItem('idToken')
+                        'Authorization': 'Bearer ' + token
                     },
                     body: JSON.stringify(subsidyData)
                 });
@@ -742,9 +794,12 @@
         // 期限確認
         async function showUpcomingDeadlines() {
             try {
+                const token = await getAuthToken();
+                if (!token) return;
+                
                 const response = await fetch('/api/subsidies/deadlines', {
                     headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('idToken')
+                        'Authorization': 'Bearer ' + token
                     }
                 });
                 
@@ -763,10 +818,13 @@
             const sessionId = new URLSearchParams(window.location.search).get('session');
             if (sessionId) {
                 try {
+                    const token = await getAuthToken();
+                    if (!token) return;
+                    
                     const response = await fetch(`/api/diagnosis/convert/${sessionId}`, {
                         method: 'POST',
                         headers: {
-                            'Authorization': 'Bearer ' + localStorage.getItem('idToken')
+                            'Authorization': 'Bearer ' + token
                         }
                     });
                     
