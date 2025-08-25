@@ -696,11 +696,26 @@ ${result.description}`
                 console.log('保存された会社情報:', savedCompanyInfo);
                 console.log('現在のフォーム情報:', getCurrentCompanyInfo());
                 
-                // 各診断結果をメモとして保存
+                // AI診断結果を左端パネル用に保存
+                const aiResultData = {
+                    type: 'diagnosis',
+                    timestamp: new Date().toISOString(),
+                    content: currentDiagnosisResults,
+                    summary: `診断結果: ${currentDiagnosisResults.length}件の助成金候補`
+                };
+                
+                // localStorageに保存（将来的にはサーバーに保存）
+                let aiResults = JSON.parse(localStorage.getItem('aiDiagnosisResults') || '[]');
+                aiResults.unshift(aiResultData);
+                localStorage.setItem('aiDiagnosisResults', JSON.stringify(aiResults));
+                
+                // 各診断結果から具体的な助成金をメモとして保存
                 for (const result of currentDiagnosisResults) {
-                    const subsidyData = {
-                        name: result.name,
-                        target_person: result.eligibility,
+                    // 具体的な助成金名がある場合のみメモとして保存
+                    if (result.name && result.name !== 'AI診断結果') {
+                        const subsidyData = {
+                            name: result.subsidy_name || result.name || '新規助成金',
+                            target_person: result.eligibility,
                         plan_application: {
                             required: result.plan_required || false,
                             deadline: result.plan_deadline || null,
@@ -764,6 +779,7 @@ ${result.description}`;
                         alert(`メモの保存に失敗しました（エラー ${response.status}）`);
                         return; // エラー時は処理を中断
                     }
+                    }  // if (result.name && result.name !== 'AI診断結果') の閉じ括弧
                 }
                 
                 alert('診断結果をメモに保存しました！メモ管理画面で確認できます。');
