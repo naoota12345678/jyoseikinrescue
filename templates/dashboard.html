@@ -418,19 +418,29 @@
         }
 
         function updateUserInterface(user, usage) {
+            // デバッグ用ログ
+            console.log('=== updateUserInterface実行 ===');
+            console.log('user:', user);
+            console.log('usage:', usage);
+            
             // デフォルト値を設定
             if (!user) user = { email: 'ユーザー' };
             if (!usage) usage = { plan_type: 'free', questions_used: 0 };
             
             document.getElementById('userEmail').textContent = user.email;
             
-            const remaining = usage.plan_type === 'free' 
-                ? Math.max(0, 5 - (usage.questions_used || 0))
-                : Math.max(0, (usage.monthly_questions || 50) - (usage.questions_used || 0));
+            const remaining = (usage.plan_type === 'free' || usage.plan_type === 'trial') 
+                ? Math.max(0, (usage.questions_limit || 5) - (usage.questions_used || 0))
+                : Math.max(0, (usage.questions_limit || usage.monthly_questions || 50) - (usage.questions_used || 0));
+            
+            console.log('計算結果 - remaining:', remaining);
+            console.log('questions_limit:', usage.questions_limit);
+            console.log('questions_used:', usage.questions_used);
+            console.log('plan_type:', usage.plan_type);
             
             document.getElementById('remainingQuestions').textContent = remaining;
             document.getElementById('planType').textContent = 
-                usage.plan_type === 'free' ? '無料' : 
+                (usage.plan_type === 'free' || usage.plan_type === 'trial') ? '無料' : 
                 usage.plan_type === 'basic' ? 'ベーシック' : '不明';
             
             // 使用上限に達した場合のアップグレード表示（ページロード時に1回だけ）
