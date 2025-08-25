@@ -78,11 +78,62 @@
         
         .main-content {
             display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 30px;
+            grid-template-columns: 300px 1fr 350px;
+            gap: 20px;
         }
         
-        .subsidies-list {
+        /* 左端：AI診断パネル */
+        .ai-actions-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+        
+        .ai-actions-panel h3 {
+            margin: 0 0 20px 0;
+            color: #374151;
+            font-size: 18px;
+            border-bottom: 2px solid #f3f4f6;
+            padding-bottom: 10px;
+        }
+        
+        .ai-btn {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            font-size: 14px;
+        }
+        
+        .diagnosis-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .history-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
+        .consultation-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .ai-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* 中央：メモエリア */
+        .memo-area {
             background: white;
             border-radius: 15px;
             padding: 25px;
@@ -415,10 +466,28 @@
         @media (max-width: 1024px) {
             .main-content {
                 grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .ai-actions-panel {
+                order: 1;
+                padding: 15px;
+            }
+            
+            .memo-area {
+                order: 2;
+                padding: 15px;
             }
             
             .chat-history {
+                order: 3;
                 height: 400px;
+                padding: 15px;
+            }
+            
+            .ai-btn {
+                padding: 10px 12px;
+                font-size: 13px;
             }
         }
     </style>
@@ -442,7 +511,22 @@
         </div>
         
         <div class="main-content">
-            <div class="subsidies-list">
+            <!-- 左端：AI診断結果・履歴ボタン -->
+            <div class="ai-actions-panel">
+                <h3>🤖 AI診断</h3>
+                <button class="ai-btn diagnosis-btn" onclick="goToDiagnosis()">
+                    📋 新規診断実行
+                </button>
+                <button class="ai-btn history-btn" onclick="showDiagnosisHistory()">
+                    📚 診断履歴
+                </button>
+                <button class="ai-btn consultation-btn" onclick="goToAIConsultation()">
+                    💬 AI相談
+                </button>
+            </div>
+
+            <!-- 中央：メモエリア -->
+            <div class="memo-area">
                 <div class="search-bar">
                     <input type="text" id="searchInput" placeholder="助成金名や対象者で検索..." onkeyup="searchSubsidies()">
                 </div>
@@ -452,6 +536,7 @@
                 </div>
             </div>
             
+            <!-- 右端：チャット履歴 -->
             <div class="chat-history">
                 <div class="chat-header">
                     📝 チャット履歴・メモ
@@ -964,6 +1049,19 @@
         function formatDateTime(dateString) {
             const date = new Date(dateString);
             return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+        }
+        
+        // AI診断パネルの関数
+        function goToDiagnosis() {
+            window.location.href = '/';
+        }
+        
+        function showDiagnosisHistory() {
+            alert('診断履歴機能は今後実装予定です');
+        }
+        
+        function goToAIConsultation() {
+            window.location.href = '/agent-select';
         }
     </script>
 </body>
