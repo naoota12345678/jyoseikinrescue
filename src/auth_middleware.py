@@ -33,7 +33,9 @@ def require_auth(f):
                 }), 401
             
             # ユーザー情報を取得
-            uid = decoded_token['uid']
+            logger.info(f"Decoded token: {decoded_token}")
+            uid = decoded_token.get('uid') or decoded_token.get('user_id') or decoded_token.get('sub')
+            logger.info(f"Extracted UID: {uid}")
             user_service = User(firebase_service)
             user = user_service.get_user_by_uid(uid)
             
