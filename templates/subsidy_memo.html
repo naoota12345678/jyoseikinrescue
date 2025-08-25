@@ -449,33 +449,44 @@
         
         // Firebase設定
         const firebaseConfig = {
-            apiKey: "AIzaSyDqiKQF3_Y2iqxvnSo0X_dqO4rBr0EeD2I",
-            authDomain: "jyoseikinrescue-8d5ca.firebaseapp.com",
-            projectId: "jyoseikinrescue-8d5ca",
-            storageBucket: "jyoseikinrescue-8d5ca.firebasestorage.app",
-            messagingSenderId: "1021988542050",
-            appId: "1:1021988542050:web:1234567890abcdef"
+            apiKey: "AIzaSyDzRzS-C104mWNloO94GNH7Jv93F5gWVto",
+            authDomain: "jyoseikinrescue.firebaseapp.com",
+            projectId: "jyoseikinrescue",
+            storageBucket: "jyoseikinrescue.firebasestorage.app",
+            messagingSenderId: "453016168690",
+            appId: "1:453016168690:web:6658e01bdd588ea63f886b",
+            measurementId: "G-V8WP53NEH4"
         };
         
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const auth = firebase.auth();
         
         // 認証状態の監視
+        let authStateChecked = false;
         auth.onAuthStateChanged(function(user) {
             console.log('メモ画面: 認証状態変更', user ? user.uid : 'ログアウト');
             
             if (user) {
                 currentUser = user;
+                authStateChecked = true;
                 console.log('メモ画面: ユーザー認証成功、ページ初期化開始');
                 initializePage();
-            } else {
+            } else if (authStateChecked) {
+                // 認証状態が一度確認された後にnullになった場合のみリダイレクト
                 console.log('メモ画面: ユーザー未認証、ログインページにリダイレクト');
-                // 3秒待ってからリダイレクト（Firebase初期化を待つ）
+                window.location.href = '/';
+            } else {
+                // 初回の認証チェック中は少し待つ
+                console.log('メモ画面: 初回認証チェック中、待機...');
                 setTimeout(() => {
+                    authStateChecked = true;
                     if (!currentUser) {
+                        console.log('メモ画面: 認証タイムアウト、ログインページにリダイレクト');
                         window.location.href = '/';
                     }
-                }, 3000);
+                }, 5000); // 5秒待つ
             }
         });
         
