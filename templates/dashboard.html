@@ -100,8 +100,8 @@
         
         .selector-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 1.5rem;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
             margin-bottom: 2rem;
         }
         
@@ -284,11 +284,17 @@
                     <h3>メモ・スケジュール管理</h3>
                     <p>保存された診断結果の確認と申請準備の管理</p>
                 </div>
-                
-                <div class="diagnosis-option" onclick="document.getElementById('agentDropdown').scrollIntoView({behavior: 'smooth'})">
-                    <div class="icon">📝</div>
-                    <h3>直接エージェントを選択</h3>
-                    <p>目的の助成金が決まっている場合はこちら</p>
+            </div>
+            
+            <!-- 直接エージェントを選択するエリア（メインでない） -->
+            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e9ecef;">
+                <h3 style="text-align: center; color: #6c757d; margin-bottom: 1rem;">または</h3>
+                <div style="text-align: center;">
+                    <button onclick="document.getElementById('agentDropdown').scrollIntoView({behavior: 'smooth'})" 
+                            style="background: #f8f9fa; color: #495057; border: 2px solid #dee2e6; padding: 1rem 2rem; border-radius: 8px; font-weight: 500; cursor: pointer;">
+                        📝 直接エージェントを選択
+                    </button>
+                    <p style="font-size: 0.9rem; color: #6c757d; margin-top: 0.5rem;">目的の助成金が決まっている場合</p>
                 </div>
             </div>
             
