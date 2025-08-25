@@ -712,8 +712,6 @@ ${result.description}`
                     };
                     
                     // メモを作成
-                    console.log('保存データ:', JSON.stringify(subsidyData, null, 2));
-                    
                     const response = await fetch('/api/subsidies', {
                         method: 'POST',
                         headers: {
@@ -723,11 +721,8 @@ ${result.description}`
                         body: JSON.stringify(subsidyData)
                     });
                     
-                    console.log('レスポンス状態:', response.status);
-                    
                     if (response.ok) {
                         const memo = await response.json();
-                        console.log('保存成功:', memo);
                         
                         // 診断結果をチャット履歴として追加
                         const initialMemo = `【助成金診断結果】
@@ -752,13 +747,6 @@ ${result.description}`;
                             },
                             body: JSON.stringify({ content: initialMemo })
                         });
-                    } else {
-                        // エラーハンドリング
-                        console.error('メモ作成エラー:', response.status);
-                        const errorText = await response.text();
-                        console.error('エラー詳細:', errorText);
-                        alert(`メモの保存に失敗しました（エラー ${response.status}）`);
-                        return; // エラー時は処理を中断
                     }
                 }
                 
