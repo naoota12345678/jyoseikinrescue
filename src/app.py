@@ -438,7 +438,11 @@ def get_user():
     """現在のユーザー情報と使用状況を取得"""
     try:
         current_user = get_current_user()
-        usage_stats = get_usage_stats()
+        
+        # 使用状況を直接取得
+        usage_stats = None
+        if current_user:
+            usage_stats = get_subscription_service().get_usage_stats(current_user['id'])
         
         return jsonify({
             'user': current_user,
