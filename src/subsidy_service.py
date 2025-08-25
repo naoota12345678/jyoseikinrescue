@@ -19,6 +19,17 @@ class SubsidyService:
     def create_subsidy_memo(self, user_id: str, memo_data: Dict) -> SubsidyMemo:
         """新規助成金メモを作成"""
         try:
+            logger.info(f"SERVICE: Creating memo for user_id: '{user_id}'")
+            logger.info(f"SERVICE: user_id type: {type(user_id)}")
+            logger.info(f"SERVICE: user_id length: {len(user_id) if user_id else 0}")
+            
+            # 入力検証
+            if not user_id or not isinstance(user_id, str) or len(user_id.strip()) == 0:
+                logger.error(f"SERVICE: Invalid user_id for memo creation: '{user_id}'")
+                raise ValueError("Invalid user_id")
+                
+            user_id = user_id.strip()  # 余分な空白を除去
+            
             memo_id = str(uuid.uuid4())
             
             # デフォルト値を設定
@@ -76,13 +87,24 @@ class SubsidyService:
         """ユーザーの全助成金メモを取得"""
         try:
             subsidies = []
-            logger.info(f"Fetching subsidies for user: {user_id}")
+            logger.info(f"SERVICE: Fetching subsidies for user_id: '{user_id}'")
+            logger.info(f"SERVICE: user_id type: {type(user_id)}")
+            logger.info(f"SERVICE: user_id length: {len(user_id) if user_id else 0}")
+            
+            # 入力検証
+            if not user_id or not isinstance(user_id, str) or len(user_id.strip()) == 0:
+                logger.error(f"SERVICE: Invalid user_id: '{user_id}'")
+                return []
+            
+            user_id = user_id.strip()  # 余分な空白を除去
             
             # デバッグ: コレクションパスを確認
             collection_path = f'users/{user_id}/subsidies'
-            logger.info(f"Collection path: {collection_path}")
+            logger.info(f"SERVICE: Collection path: {collection_path}")
             
-            docs = self.db.collection('users').document(user_id).collection('subsidies').stream()
+            # コレクション参照を取得
+            collection_ref = self.db.collection('users').document(user_id).collection('subsidies')
+            docs = collection_ref.stream()
             
             doc_count = 0
             for doc in docs:
