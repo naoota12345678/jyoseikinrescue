@@ -279,7 +279,7 @@
                     <p>9つの質問に答えて、最適なエージェントを自動選択</p>
                 </div>
                 
-                <div class="diagnosis-option" onclick="window.location.href='/subsidy-memo'">
+                <div class="diagnosis-option" onclick="goToMemoPage()">
                     <div class="icon">📋</div>
                     <h3>メモ・スケジュール管理</h3>
                     <p>保存された診断結果の確認と申請準備の管理</p>
@@ -852,6 +852,51 @@
                     </button>
                 `;
                 agentSelection.insertBefore(memoLink, agentSelection.firstChild);
+            }
+        }
+        
+        // メモページに移動（認証チェック付き）
+        async function goToMemoPage() {
+            // ボタンを無効化してローディング表示
+            const memoButton = event.currentTarget;
+            const originalHTML = memoButton.innerHTML;
+            memoButton.style.opacity = '0.7';
+            memoButton.style.pointerEvents = 'none';
+            memoButton.innerHTML = `
+                <div class="icon">⏳</div>
+                <h3>読み込み中...</h3>
+                <p>認証を確認しています</p>
+            `;
+            
+            if (!currentUser) {
+                setTimeout(() => {
+                    memoButton.innerHTML = originalHTML;
+                    memoButton.style.opacity = '1';
+                    memoButton.style.pointerEvents = 'auto';
+                    alert('認証を確認中です。しばらくお待ちください...');
+                }, 1000);
+                return;
+            }
+            
+            try {
+                // 認証トークンが有効かチェック
+                const token = await currentUser.getIdToken();
+                if (token) {
+                    window.location.href = '/subsidy-memo';
+                } else {
+                    memoButton.innerHTML = originalHTML;
+                    memoButton.style.opacity = '1';
+                    memoButton.style.pointerEvents = 'auto';
+                    alert('認証に問題があります。再度ログインしてください。');
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('認証エラー:', error);
+                memoButton.innerHTML = originalHTML;
+                memoButton.style.opacity = '1';
+                memoButton.style.pointerEvents = 'auto';
+                alert('認証に問題があります。再度ログインしてください。');
+                window.location.href = '/';
             }
         }
         
