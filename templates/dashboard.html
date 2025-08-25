@@ -739,6 +739,11 @@
                     aiMessage.textContent = data.response;
                     chatMessages.appendChild(aiMessage);
                     
+                    // 専門エージェントとの会話をlocalStorageに保存（左側パネル用）
+                    console.log('エージェント会話保存を開始:', question, currentAgent);
+                    saveAgentConversation(question, data.response, currentAgent);
+                    console.log('エージェント会話保存完了');
+                    
                     // 使用状況更新
                     if (data.usage_stats) {
                         updateUserInterface(currentUser, data.usage_stats);
@@ -762,6 +767,70 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
+        // 専門エージェントとの会話を保存する関数
+        function saveAgentConversation(question, response, agentType) {
+            console.log('=== saveAgentConversation実行開始 ===');
+            console.log('question:', question);
+            console.log('response:', response);
+            console.log('agentType:', agentType);
+            
+            // エージェント名の取得
+            const agentNames = {
+                'gyoumukaizen': '業務改善助成金',
+                'career-up': 'キャリアアップ助成金',
+                'jinzai-kaihatsu': '人材開発支援助成金',
+                '65sai-koyo': '65歳超雇用推進助成金',
+                'hataraki-kaikaku': '働き方改革推進支援助成金',
+                'ryoritsu-shien': '両立支援等助成金',
+                'koyo-chosei': '雇用調整助成金',
+                'shogaisha-koyo': '障害者雇用関連助成金',
+                'judokien-boshi': '受動喫煙防止対策助成金',
+                'other': 'その他の助成金'
+            };
+            
+            // エージェント名を取得（人材開発支援助成金のコース対応）
+            let agentName = agentNames[agentType.split('_')[0]] || 'AI相談';
+            if (agentType.includes('jinzai-kaihatsu_')) {
+                const courseName = agentType.split('_')[1];
+                agentName += ` (${courseName})`;
+            }
+            
+            // AI診断結果と同じ形式で保存
+            const conversationData = {
+                type: 'consultation',
+                timestamp: new Date().toISOString(),
+                agentName: agentName,
+                summary: `${agentName}専門エージェント`,
+                content: {
+                    question: question,
+                    response: response,
+                    agentType: agentType
+                }
+            };
+            
+            // localStorageから既存のデータを取得
+            let aiResults = JSON.parse(localStorage.getItem('aiDiagnosisResults') || '[]');
+            
+            // 新しい会話を先頭に追加
+            aiResults.unshift(conversationData);
+            
+            // 最大100件まで保存（古いものは削除）
+            if (aiResults.length > 100) {
+                aiResults = aiResults.slice(0, 100);
+            }
+            
+            // localStorageに保存
+            localStorage.setItem('aiDiagnosisResults', JSON.stringify(aiResults));
+            
+            console.log('エージェント会話を保存しました:', conversationData);
+            
+            // 保存されたデータを検証
+            const savedData = JSON.parse(localStorage.getItem('aiDiagnosisResults') || '[]');
+            console.log('保存検証 - 全体データ件数:', savedData.length);
+            console.log('保存検証 - 最新データ:', savedData[0]);
+            console.log('=== saveAgentConversation完了 ===');
+        }
+        
         function logout() {
             auth.signOut().then(() => {
                 window.location.href = '/';

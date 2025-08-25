@@ -231,6 +231,51 @@
             color: #4b5563;
         }
         
+        /* エージェント会話表示 */
+        .consultation-detail {
+            margin-top: 10px;
+        }
+        
+        .consultation-header {
+            color: #667eea;
+            font-size: 16px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .consultation-content {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .question-section, .response-section {
+            margin-bottom: 20px;
+        }
+        
+        .question-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .section-label {
+            font-weight: bold;
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .section-content {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #4b5563;
+            white-space: pre-wrap;
+        }
+        
         .item-description {
             margin-top: 10px;
             padding: 10px;
@@ -1272,17 +1317,30 @@
                 return;
             }
             
-            container.innerHTML = aiResults.map(result => `
-                <div class="ai-result-item" onclick="selectAIResult('${result.id || result.timestamp}')">
-                    <div class="result-header">
-                        <div class="result-title">${result.summary || '診断結果'}</div>
-                        <div class="result-date">${formatDate(result.timestamp)}</div>
+            container.innerHTML = aiResults.map(result => {
+                let preview = 'クリックで詳細表示';
+                let icon = '🤖';
+                
+                if (result.type === 'consultation') {
+                    preview = `${result.agentName}専門エージェント相談`;
+                    icon = '💼';
+                } else if (result.type === 'diagnosis') {
+                    preview = '助成金診断結果';
+                    icon = '🔍';
+                }
+                
+                return `
+                    <div class="ai-result-item" onclick="selectAIResult('${result.id || result.timestamp}')">
+                        <div class="result-header">
+                            <div class="result-title">${icon} ${result.summary || '診断結果'}</div>
+                            <div class="result-date">${formatDate(result.timestamp)}</div>
+                        </div>
+                        <div class="result-preview">
+                            ${preview}
+                        </div>
                     </div>
-                    <div class="result-preview">
-                        クリックで詳細表示
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
         
         function selectAIResult(resultId) {
@@ -1293,35 +1351,61 @@
             const chatMessages = document.getElementById('chatMessages');
             const chatHeader = document.querySelector('.chat-header');
             
-            // ヘッダーを更新
-            chatHeader.innerHTML = '🤖 AI診断結果詳細';
-            
-            // 診断結果の詳細を表示
             let detailHTML = `
                 <div class="ai-result-detail">
                     <div class="result-timestamp">
                         📅 ${formatDateTime(result.timestamp)}
                     </div>
+            `;
+            
+            // タイプに応じて表示内容を変更
+            if (result.type === 'consultation') {
+                // エージェント会話の場合
+                chatHeader.innerHTML = `🤖 ${result.agentName}専門エージェント`;
+                
+                detailHTML += `
+                    <div class="consultation-detail">
+                        <div class="consultation-header">
+                            <strong>専門エージェント相談</strong>
+                        </div>
+                        <div class="consultation-content">
+                            <div class="question-section">
+                                <div class="section-label">質問:</div>
+                                <div class="section-content">${result.content.question}</div>
+                            </div>
+                            <div class="response-section">
+                                <div class="section-label">回答:</div>
+                                <div class="section-content">${result.content.response}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // 診断結果の場合
+                chatHeader.innerHTML = '🤖 AI診断結果詳細';
+                
+                detailHTML += `
                     <div class="result-summary">
                         ${result.summary || '診断結果'}
                     </div>
-            `;
-            
-            if (result.content && Array.isArray(result.content)) {
-                detailHTML += '<div class="result-items">';
-                result.content.forEach((item, index) => {
-                    detailHTML += `
-                        <div class="result-item">
-                            <h4>${index + 1}. ${item.name || '助成金候補'}</h4>
-                            <p><strong>支給額:</strong> ${item.amount || '詳細は診断結果参照'}</p>
-                            <p><strong>対象:</strong> ${item.eligibility || '詳細は診断結果参照'}</p>
-                            ${item.description ? `<div class="item-description">${item.description}</div>` : ''}
-                        </div>
-                    `;
-                });
-                detailHTML += '</div>';
-            } else if (result.content) {
-                detailHTML += `<div class="result-content">${JSON.stringify(result.content, null, 2)}</div>`;
+                `;
+                
+                if (result.content && Array.isArray(result.content)) {
+                    detailHTML += '<div class="result-items">';
+                    result.content.forEach((item, index) => {
+                        detailHTML += `
+                            <div class="result-item">
+                                <h4>${index + 1}. ${item.name || '助成金候補'}</h4>
+                                <p><strong>支給額:</strong> ${item.amount || '詳細は診断結果参照'}</p>
+                                <p><strong>対象:</strong> ${item.eligibility || '詳細は診断結果参照'}</p>
+                                ${item.description ? `<div class="item-description">${item.description}</div>` : ''}
+                            </div>
+                        `;
+                    });
+                    detailHTML += '</div>';
+                } else if (result.content) {
+                    detailHTML += `<div class="result-content">${result.content}</div>`;
+                }
             }
             
             detailHTML += '</div>';
