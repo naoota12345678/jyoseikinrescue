@@ -509,8 +509,8 @@
             try {
                 const response = await fetch('/api/auth/user');
                 if (response.ok) {
-                    // 認証済みの場合はダッシュボードに
-                    window.location.href = '/dashboard';
+                    // 認証済みの場合はメモ管理画面に直接
+                    window.location.href = '/subsidy-memo';
                 } else {
                     // 未認証の場合は登録ページへ
                     window.location.href = '/';
