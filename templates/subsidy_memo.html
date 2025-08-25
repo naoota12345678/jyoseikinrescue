@@ -462,12 +462,20 @@
         
         // 認証状態の監視
         auth.onAuthStateChanged(function(user) {
+            console.log('メモ画面: 認証状態変更', user ? user.uid : 'ログアウト');
+            
             if (user) {
                 currentUser = user;
+                console.log('メモ画面: ユーザー認証成功、ページ初期化開始');
                 initializePage();
             } else {
-                // 未認証の場合はログインページへ
-                window.location.href = '/';
+                console.log('メモ画面: ユーザー未認証、ログインページにリダイレクト');
+                // 3秒待ってからリダイレクト（Firebase初期化を待つ）
+                setTimeout(() => {
+                    if (!currentUser) {
+                        window.location.href = '/';
+                    }
+                }, 3000);
             }
         });
         
@@ -479,9 +487,13 @@
         
         // 認証トークンを取得
         async function getAuthToken() {
+            console.log('トークン取得開始', currentUser ? 'ユーザー存在' : 'ユーザー不在');
             if (!currentUser) return null;
+            
             try {
-                return await currentUser.getIdToken();
+                const token = await currentUser.getIdToken();
+                console.log('トークン取得成功', token ? '取得済み' : 'トークンなし');
+                return token;
             } catch (error) {
                 console.error('トークン取得エラー:', error);
                 return null;
@@ -490,21 +502,27 @@
         
         // 助成金リストを読み込む
         async function loadSubsidies() {
+            console.log('loadSubsidies開始');
             try {
                 const token = await getAuthToken();
                 if (!token) {
                     console.error('認証トークンの取得に失敗');
+                    // APIを呼ばずに空のリストを表示
+                    displaySubsidies([]);
                     return;
                 }
                 
+                console.log('API呼び出し開始');
                 const response = await fetch('/api/subsidies', {
                     headers: {
                         'Authorization': 'Bearer ' + token
                     }
                 });
                 
+                console.log('API応答:', response.status);
                 if (response.ok) {
                     subsidiesData = await response.json();
+                    console.log('データ取得成功:', subsidiesData.length, '件');
                     displaySubsidies(subsidiesData);
                 } else if (response.status === 401) {
                     // 認証エラーの場合
@@ -513,14 +531,13 @@
                     window.location.href = '/';
                 } else {
                     console.error('API Error:', response.status);
+                    // エラーでも空のリストを表示
+                    displaySubsidies([]);
                 }
             } catch (error) {
                 console.error('Error loading subsidies:', error);
-                // ネットワークエラーや認証エラーの場合
-                if (error.message.includes('401') || error.message.includes('AUTH_REQUIRED')) {
-                    alert('認証に問題があります。再度ログインしてください。');
-                    window.location.href = '/';
-                }
+                // エラーでも空のリストを表示
+                displaySubsidies([]);
             }
         }
         
