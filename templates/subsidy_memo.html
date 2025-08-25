@@ -506,9 +506,21 @@
                 if (response.ok) {
                     subsidiesData = await response.json();
                     displaySubsidies(subsidiesData);
+                } else if (response.status === 401) {
+                    // 認証エラーの場合
+                    console.error('認証エラー: ログインページにリダイレクト');
+                    alert('セッションが期限切れです。再度ログインしてください。');
+                    window.location.href = '/';
+                } else {
+                    console.error('API Error:', response.status);
                 }
             } catch (error) {
                 console.error('Error loading subsidies:', error);
+                // ネットワークエラーや認証エラーの場合
+                if (error.message.includes('401') || error.message.includes('AUTH_REQUIRED')) {
+                    alert('認証に問題があります。再度ログインしてください。');
+                    window.location.href = '/';
+                }
             }
         }
         

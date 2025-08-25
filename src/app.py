@@ -654,9 +654,8 @@ def stripe_webhook():
 # ===== 助成金メモ・スケジュール管理API =====
 
 @app.route('/subsidy-memo')
-@require_auth
 def subsidy_memo_page():
-    """助成金メモ・スケジュール管理ページ"""
+    """助成金メモ・スケジュール管理ページ（認証はクライアント側で実行）"""
     return render_template('subsidy_memo.html')
 
 @app.route('/api/subsidies', methods=['GET'])
