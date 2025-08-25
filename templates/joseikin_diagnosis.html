@@ -693,13 +693,19 @@ ${result.description}`
                         plan_application: {
                             required: result.plan_required || false,
                             deadline: result.plan_deadline || null,
-                            documents: result.plan_documents || [],
+                            documents: (result.plan_documents || []).map(doc => ({
+                                name: doc,
+                                completed: false
+                            })),
                             memo: ''
                         },
                         payment_application: {
                             required: true,
                             deadline: result.payment_deadline || null,
-                            documents: result.payment_documents || ['実績報告書', '領収書'],
+                            documents: (result.payment_documents || ['実績報告書', '領収書']).map(doc => ({
+                                name: doc,
+                                completed: false
+                            })),
                             memo: ''
                         },
                         source: 'diagnosis_direct'
