@@ -100,9 +100,16 @@
         
         .selector-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.5rem;
             margin-bottom: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .selector-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
         }
         
         .diagnosis-option {
@@ -270,6 +277,12 @@
                     <div class="icon">🎯</div>
                     <h3>無料診断から選択</h3>
                     <p>9つの質問に答えて、最適なエージェントを自動選択</p>
+                </div>
+                
+                <div class="diagnosis-option" onclick="window.location.href='/subsidy-memo'">
+                    <div class="icon">📋</div>
+                    <h3>メモ・スケジュール管理</h3>
+                    <p>保存された診断結果の確認と申請準備の管理</p>
                 </div>
                 
                 <div class="diagnosis-option" onclick="document.getElementById('agentDropdown').scrollIntoView({behavior: 'smooth'})">
