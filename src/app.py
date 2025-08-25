@@ -664,15 +664,21 @@ def get_subsidies():
     """ユーザーの助成金メモ一覧を取得"""
     try:
         current_user = get_current_user()
+        logger.info(f"API: Fetching subsidies for user: {current_user.get('uid', 'Unknown')}")
+        
         from subsidy_service import SubsidyService
         
         service = SubsidyService(firebase_service.get_db())
         subsidies = service.get_user_subsidies(current_user['uid'])
         
-        return jsonify([s.to_dict() for s in subsidies])
+        logger.info(f"API: Found {len(subsidies)} subsidies for user")
+        
+        result = [s.to_dict() for s in subsidies]
+        return jsonify(result)
         
     except Exception as e:
-        logger.error(f"Error fetching subsidies: {str(e)}")
+        logger.error(f"Error fetching subsidies in API: {str(e)}")
+        logger.error(f"Current user: {current_user if 'current_user' in locals() else 'Not available'}")
         return jsonify({'error': '助成金メモの取得に失敗しました'}), 500
 
 @app.route('/api/subsidies', methods=['POST'])
@@ -683,15 +689,22 @@ def create_subsidy():
         current_user = get_current_user()
         data = request.json
         
+        logger.info(f"API: Creating subsidy for user: {current_user.get('uid', 'Unknown')}")
+        logger.info(f"API: Received data keys: {list(data.keys()) if data else 'None'}")
+        
         from subsidy_service import SubsidyService
         service = SubsidyService(firebase_service.get_db())
         
         memo = service.create_subsidy_memo(current_user['uid'], data)
         
+        logger.info(f"API: Successfully created memo with ID: {memo.id}")
+        
         return jsonify(memo.to_dict()), 201
         
     except Exception as e:
-        logger.error(f"Error creating subsidy: {str(e)}")
+        logger.error(f"Error creating subsidy in API: {str(e)}")
+        logger.error(f"Request data: {request.json if request.json else 'No JSON data'}")
+        logger.error(f"Current user: {current_user if 'current_user' in locals() else 'Not available'}")
         return jsonify({'error': '助成金メモの作成に失敗しました'}), 500
 
 @app.route('/api/subsidies/<subsidy_id>', methods=['PUT'])

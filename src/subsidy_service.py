@@ -52,9 +52,20 @@ class SubsidyService:
             
             # Firestoreに保存
             doc_ref = self.db.collection('users').document(user_id).collection('subsidies').document(memo_id)
-            doc_ref.set(memo.to_dict())
+            memo_dict = memo.to_dict()
             
-            logger.info(f"Created subsidy memo: {memo_id} for user: {user_id}")
+            logger.info(f"Saving memo to path: users/{user_id}/subsidies/{memo_id}")
+            logger.info(f"Memo data keys: {list(memo_dict.keys())}")
+            
+            doc_ref.set(memo_dict)
+            
+            # 保存確認
+            saved_doc = doc_ref.get()
+            if saved_doc.exists:
+                logger.info(f"✓ Successfully saved subsidy memo: {memo_id} for user: {user_id}")
+            else:
+                logger.error(f"✗ Failed to save subsidy memo: {memo_id} for user: {user_id}")
+            
             return memo
             
         except Exception as e:
@@ -65,12 +76,28 @@ class SubsidyService:
         """ユーザーの全助成金メモを取得"""
         try:
             subsidies = []
+            logger.info(f"Fetching subsidies for user: {user_id}")
+            
+            # デバッグ: コレクションパスを確認
+            collection_path = f'users/{user_id}/subsidies'
+            logger.info(f"Collection path: {collection_path}")
+            
             docs = self.db.collection('users').document(user_id).collection('subsidies').stream()
             
+            doc_count = 0
             for doc in docs:
+                doc_count += 1
+                logger.info(f"Found document: {doc.id}")
                 data = doc.to_dict()
+                logger.info(f"Document data keys: {list(data.keys()) if data else 'None'}")
                 data['id'] = doc.id
-                subsidies.append(SubsidyMemo.from_dict(data))
+                try:
+                    subsidies.append(SubsidyMemo.from_dict(data))
+                except Exception as parse_error:
+                    logger.error(f"Error parsing document {doc.id}: {str(parse_error)}")
+                    continue
+            
+            logger.info(f"Total documents found: {doc_count}, Successfully parsed: {len(subsidies)}")
             
             # 更新日時でソート（新しい順）
             subsidies.sort(key=lambda x: x.updated_at, reverse=True)
@@ -79,6 +106,7 @@ class SubsidyService:
             
         except Exception as e:
             logger.error(f"Error fetching subsidies: {str(e)}")
+            logger.error(f"Exception type: {type(e).__name__}")
             return []
     
     def get_subsidy_by_id(self, user_id: str, subsidy_id: str) -> Optional[SubsidyMemo]:
