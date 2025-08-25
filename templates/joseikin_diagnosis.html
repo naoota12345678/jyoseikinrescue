@@ -696,7 +696,7 @@ ${result.description}`
                 console.log('保存された会社情報:', savedCompanyInfo);
                 console.log('現在のフォーム情報:', getCurrentCompanyInfo());
                 
-                // AI診断結果を左端パネル用に保存
+                // AI診断結果を左端パネル用に保存（メモとしては保存しない）
                 const aiResultData = {
                     type: 'diagnosis',
                     timestamp: new Date().toISOString(),
@@ -709,80 +709,9 @@ ${result.description}`
                 aiResults.unshift(aiResultData);
                 localStorage.setItem('aiDiagnosisResults', JSON.stringify(aiResults));
                 
-                // 各診断結果から具体的な助成金をメモとして保存
-                for (const result of currentDiagnosisResults) {
-                    // 具体的な助成金名がある場合のみメモとして保存
-                    if (result.name && result.name !== 'AI診断結果') {
-                        const subsidyData = {
-                            name: result.subsidy_name || result.name || '新規助成金',
-                            target_person: result.eligibility,
-                        plan_application: {
-                            required: result.plan_required || false,
-                            deadline: result.plan_deadline || null,
-                            documents: (result.plan_documents || []).map(doc => ({
-                                name: doc,
-                                completed: false
-                            })),
-                            memo: ''
-                        },
-                        payment_application: {
-                            required: true,
-                            deadline: result.payment_deadline || null,
-                            documents: (result.payment_documents || ['実績報告書', '領収書']).map(doc => ({
-                                name: doc,
-                                completed: false
-                            })),
-                            memo: ''
-                        },
-                        source: 'diagnosis_direct'
-                    };
-                    
-                    // メモを作成
-                    console.log('保存データ:', JSON.stringify(subsidyData, null, 2));
-                    
-                    const response = await fetch('/api/subsidies', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + token
-                        },
-                        body: JSON.stringify(subsidyData)
-                    });
-                    
-                    console.log('レスポンス状態:', response.status);
-                    
-                    if (response.ok) {
-                        const memo = await response.json();
-                        console.log('保存成功:', memo);
-                        
-                        // 診断結果をチャット履歴として追加（シンプル版）
-                        const now = new Date();
-                        const dateStr = now.toLocaleDateString('ja-JP') + ' ' + now.toLocaleTimeString('ja-JP');
-                        
-                        const initialMemo = `【助成金診断結果 - ${dateStr}】
-
-${result.description}`;
-                        
-                        await fetch(`/api/subsidies/${memo.id}/memo`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': 'Bearer ' + token
-                            },
-                            body: JSON.stringify({ content: initialMemo })
-                        });
-                    } else {
-                        // エラーハンドリング
-                        console.error('メモ作成エラー:', response.status);
-                        const errorText = await response.text();
-                        console.error('エラー詳細:', errorText);
-                        alert(`メモの保存に失敗しました（エラー ${response.status}）`);
-                        return; // エラー時は処理を中断
-                    }
-                    }  // if (result.name && result.name !== 'AI診断結果') の閉じ括弧
-                }
+                console.log('AI診断結果を左側パネル用に保存しました:', aiResultData);
                 
-                alert('診断結果をメモに保存しました！メモ管理画面で確認できます。');
+                alert('診断結果を保存しました！');
                 // メモ管理画面に遷移
                 if (confirm('メモ管理画面を開きますか？')) {
                     window.location.href = '/subsidy-memo';

@@ -796,8 +796,12 @@
         function displaySubsidies(subsidies) {
             const listElement = document.getElementById('subsidiesList');
             
-            // 「AI診断結果」という名前のメモは表示しない（旧形式のデータ）
-            const filteredSubsidies = subsidies.filter(s => s.name !== 'AI診断結果');
+            // AI診断から自動作成されたメモは表示しない（手動追加のメモのみ表示）
+            const filteredSubsidies = subsidies.filter(s => 
+                s.name !== 'AI診断結果' && 
+                s.source !== 'diagnosis_direct' && 
+                s.source !== 'free_diagnosis'
+            );
             
             if (filteredSubsidies.length === 0) {
                 listElement.innerHTML = `
@@ -1212,13 +1216,15 @@
             }
             
             container.innerHTML = aiResults.map(result => `
-                <div class="ai-result-item" onclick="selectAIResult('${result.id}')">
+                <div class="ai-result-item" onclick="selectAIResult('${result.id || result.timestamp}')">
                     <div class="result-header">
-                        <div class="result-title">${result.title}</div>
+                        <div class="result-title">${result.summary || 'AI診断結果'}</div>
                         <div class="result-date">${formatDate(result.timestamp)}</div>
                     </div>
                     <div class="result-preview">
-                        ${result.content.description ? result.content.description.substring(0, 100) + '...' : 'AI診断結果'}
+                        ${result.content && result.content.length > 0 ? 
+                            `${result.content.length}件の助成金候補` : 
+                            'AI診断結果'}
                     </div>
                 </div>
             `).join('');
