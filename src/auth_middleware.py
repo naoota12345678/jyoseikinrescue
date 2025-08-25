@@ -79,7 +79,8 @@ def check_usage_limit(f):
                     'code': 'AUTH_REQUIRED'
                 }), 401
             
-            user_id = g.current_user['id']
+            # user_idフィールドを使用（ドキュメントIDではなく）
+            user_id = g.current_user.get('user_id') or g.current_user.get('uid') or g.current_user['id']
             subscription_service = SubscriptionService(firebase_service)
             
             # 使用状況を確認

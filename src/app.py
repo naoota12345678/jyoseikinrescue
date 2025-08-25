@@ -110,13 +110,13 @@ def chat():
         response = get_claude_service().get_grant_consultation(company_info, question, agent_type)
         
         # 質問使用回数を増加
-        result = get_subscription_service().use_question(current_user['id'])
+        result = get_subscription_service().use_question(current_user.get('user_id') or current_user['id'])
         
         if not result['success']:
             logger.error(f"Failed to record question usage: {result.get('error')}")
         
         # 最新の使用状況を取得
-        updated_usage = get_subscription_service().get_usage_stats(current_user['id'])
+        updated_usage = get_subscription_service().get_usage_stats(current_user.get('user_id') or current_user['id'])
         
         return jsonify({
             'response': response,
@@ -442,7 +442,7 @@ def get_user():
         # 使用状況を直接取得
         usage_stats = None
         if current_user:
-            usage_stats = get_subscription_service().get_usage_stats(current_user['id'])
+            usage_stats = get_subscription_service().get_usage_stats(current_user.get('user_id') or current_user['id'])
         
         return jsonify({
             'user': current_user,
@@ -460,7 +460,7 @@ def debug_create_subscription():
     """デバッグ用: 現在のユーザーにサブスクリプションを作成"""
     try:
         current_user = get_current_user()
-        user_id = current_user['id']
+        user_id = current_user.get('user_id') or current_user['id']
         
         # UserServiceのcreate_initial_subscriptionを使用
         get_user_service().create_initial_subscription(user_id)
@@ -569,7 +569,7 @@ def create_basic_plan_checkout():
                     metadata={'firebase_uid': current_user['user_id']}
                 )
                 # ユーザーデータベースにStripe顧客IDを保存
-                get_auth_service().update_stripe_customer_id(current_user['id'], stripe_customer_id)
+                get_auth_service().update_stripe_customer_id(current_user.get('user_id') or current_user['id'], stripe_customer_id)
                 logger.info(f"Created Stripe customer: {stripe_customer_id}")
             except Exception as e:
                 logger.error(f"Failed to create Stripe customer: {str(e)}")
@@ -581,7 +581,7 @@ def create_basic_plan_checkout():
         
         checkout_session = get_stripe_service().create_basic_plan_checkout(
             customer_id=stripe_customer_id,
-            user_id=current_user['id'],
+            user_id=current_user.get('user_id') or current_user['id'],
             success_url=success_url,
             cancel_url=cancel_url
         )
@@ -613,7 +613,7 @@ def create_additional_pack_checkout():
                     metadata={'firebase_uid': current_user['user_id']}
                 )
                 # ユーザーデータベースにStripe顧客IDを保存
-                get_auth_service().update_stripe_customer_id(current_user['id'], stripe_customer_id)
+                get_auth_service().update_stripe_customer_id(current_user.get('user_id') or current_user['id'], stripe_customer_id)
                 logger.info(f"Created Stripe customer: {stripe_customer_id}")
             except Exception as e:
                 logger.error(f"Failed to create Stripe customer: {str(e)}")
@@ -625,7 +625,7 @@ def create_additional_pack_checkout():
         
         checkout_session = get_stripe_service().create_additional_pack_checkout(
             customer_id=stripe_customer_id,
-            user_id=current_user['id'],
+            user_id=current_user.get('user_id') or current_user['id'],
             success_url=success_url,
             cancel_url=cancel_url
         )
