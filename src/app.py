@@ -454,6 +454,28 @@ def get_user():
         logger.error(f"Error getting user info: {str(e)}")
         return jsonify({'error': 'ユーザー情報の取得に失敗しました'}), 500
 
+@app.route('/api/debug/create-subscription', methods=['POST'])
+@require_auth 
+def debug_create_subscription():
+    """デバッグ用: 現在のユーザーにサブスクリプションを作成"""
+    try:
+        current_user = get_current_user()
+        user_id = current_user['id']
+        
+        # UserServiceのcreate_initial_subscriptionを使用
+        get_user_service().create_initial_subscription(user_id)
+        
+        # 作成後に確認
+        usage_stats = get_subscription_service().get_usage_stats(user_id)
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'サブスクリプション作成完了',
+            'usage_stats': usage_stats
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/auth/register', methods=['POST'])
 def register():
     """新規ユーザー登録（Firebase認証後）"""
