@@ -15,7 +15,7 @@ class User:
             user_ref = self.db.collection('users').document()
             
             user_record = {
-                'uid': user_data.get('uid'),
+                'user_id': user_data.get('uid'),
                 'email': user_data.get('email'),
                 'display_name': user_data.get('display_name', ''),
                 'stripe_customer_id': None,
@@ -39,7 +39,7 @@ class User:
     def get_user_by_uid(self, uid: str) -> Optional[Dict[str, Any]]:
         """UIDでユーザーを取得"""
         try:
-            users = self.db.collection('users').where('uid', '==', uid).limit(1).get()
+            users = self.db.collection('users').where('user_id', '==', uid).limit(1).get()
             
             if users:
                 user_doc = users[0]

@@ -566,7 +566,7 @@ def create_basic_plan_checkout():
                 stripe_customer_id = get_stripe_service().create_customer(
                     email=current_user['email'],
                     name=current_user.get('display_name', ''),
-                    metadata={'firebase_uid': current_user['uid']}
+                    metadata={'firebase_uid': current_user['user_id']}
                 )
                 # ユーザーデータベースにStripe顧客IDを保存
                 get_auth_service().update_stripe_customer_id(current_user['id'], stripe_customer_id)
@@ -610,7 +610,7 @@ def create_additional_pack_checkout():
                 stripe_customer_id = get_stripe_service().create_customer(
                     email=current_user['email'],
                     name=current_user.get('display_name', ''),
-                    metadata={'firebase_uid': current_user['uid']}
+                    metadata={'firebase_uid': current_user['user_id']}
                 )
                 # ユーザーデータベースにStripe顧客IDを保存
                 get_auth_service().update_stripe_customer_id(current_user['id'], stripe_customer_id)
@@ -690,7 +690,7 @@ def get_subsidies():
     """ユーザーの助成金メモ一覧を取得"""
     try:
         current_user = get_current_user()
-        uid = current_user.get('uid', 'Unknown')
+        uid = current_user.get('user_id', 'Unknown')
         user_id = current_user.get('id', 'Unknown')
         logger.info(f"API GET: current_user keys: {list(current_user.keys())}")
         logger.info(f"API GET: Firebase UID: {uid}")
@@ -701,7 +701,7 @@ def get_subsidies():
         
         service = SubsidyService(firebase_service.get_db())
         # まずFirebase UIDで試し、見つからない場合はDatabase User IDでも試す
-        subsidies = service.get_user_subsidies(current_user['uid'])
+        subsidies = service.get_user_subsidies(current_user['user_id'])
         if not subsidies and current_user.get('id'):
             logger.info(f"No subsidies found with Firebase UID, trying database user ID: {current_user['id']}")
             subsidies = service.get_user_subsidies(current_user['id'])
@@ -723,7 +723,7 @@ def create_subsidy():
     try:
         current_user = get_current_user()
         data = request.json
-        uid = current_user.get('uid', 'Unknown')
+        uid = current_user.get('user_id', 'Unknown')
         user_id = current_user.get('id', 'Unknown')
         
         logger.info(f"API POST: current_user keys: {list(current_user.keys())}")
@@ -736,7 +736,7 @@ def create_subsidy():
         service = SubsidyService(firebase_service.get_db())
         
         # Firebase UIDを優先的に使用（取得時と一貫性を保つため）
-        user_id_for_save = current_user['uid']
+        user_id_for_save = current_user['user_id']
         memo = service.create_subsidy_memo(user_id_for_save, data)
         
         logger.info(f"API: Successfully created memo with ID: {memo.id}")
@@ -760,7 +760,7 @@ def update_subsidy(subsidy_id):
         from subsidy_service import SubsidyService
         service = SubsidyService(firebase_service.get_db())
         
-        success = service.update_subsidy_memo(current_user['uid'], subsidy_id, data)
+        success = service.update_subsidy_memo(current_user['user_id'], subsidy_id, data)
         
         if success:
             return jsonify({'status': 'success'})
@@ -786,7 +786,7 @@ def add_chat_history(subsidy_id):
         from subsidy_service import SubsidyService
         service = SubsidyService(firebase_service.get_db())
         
-        success = service.add_chat_history(current_user['uid'], subsidy_id, content)
+        success = service.add_chat_history(current_user['user_id'], subsidy_id, content)
         
         if success:
             return jsonify({'status': 'success'})
@@ -807,7 +807,7 @@ def delete_subsidy(subsidy_id):
         from subsidy_service import SubsidyService
         service = SubsidyService(firebase_service.get_db())
         
-        success = service.delete_subsidy_memo(current_user['uid'], subsidy_id)
+        success = service.delete_subsidy_memo(current_user['user_id'], subsidy_id)
         
         if success:
             return jsonify({'status': 'success'})
@@ -830,7 +830,7 @@ def get_deadlines():
         service = SubsidyService(firebase_service.get_db())
         
         # Firebase UIDを使用（他のAPIと一貫性を保つため）
-        deadlines = service.get_upcoming_deadlines(current_user['uid'], days)
+        deadlines = service.get_upcoming_deadlines(current_user['user_id'], days)
         
         return jsonify(deadlines)
         
@@ -865,7 +865,7 @@ def convert_diagnosis(session_id):
         from subsidy_service import SubsidyService
         service = SubsidyService(firebase_service.get_db())
         
-        memo = service.convert_temp_to_memo(session_id, current_user['uid'])
+        memo = service.convert_temp_to_memo(session_id, current_user['user_id'])
         
         if memo:
             return jsonify(memo.to_dict())

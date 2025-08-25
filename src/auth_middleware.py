@@ -49,6 +49,9 @@ def require_auth(f):
                 logger.info(f"New user created with id: {user_id}")
             
             # グローバル変数に設定
+            # user_idフィールドを確実に設定
+            if user and 'user_id' not in user:
+                user['user_id'] = uid
             g.current_user = user
             g.uid = uid
             
