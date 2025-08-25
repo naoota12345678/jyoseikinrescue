@@ -664,14 +664,19 @@ def get_subsidies():
     """ユーザーの助成金メモ一覧を取得"""
     try:
         current_user = get_current_user()
-        logger.info(f"API: Fetching subsidies for user: {current_user.get('uid', 'Unknown')}")
+        uid = current_user.get('uid', 'Unknown')
+        user_id = current_user.get('id', 'Unknown')
+        logger.info(f"API GET: current_user keys: {list(current_user.keys())}")
+        logger.info(f"API GET: Firebase UID: {uid}")
+        logger.info(f"API GET: Database User ID: {user_id}")
+        logger.info(f"API GET: Email: {current_user.get('email', 'Unknown')}")
         
         from subsidy_service import SubsidyService
         
         service = SubsidyService(firebase_service.get_db())
         subsidies = service.get_user_subsidies(current_user['uid'])
         
-        logger.info(f"API: Found {len(subsidies)} subsidies for user")
+        logger.info(f"API GET: Found {len(subsidies)} subsidies for user")
         
         result = [s.to_dict() for s in subsidies]
         return jsonify(result)
@@ -688,9 +693,14 @@ def create_subsidy():
     try:
         current_user = get_current_user()
         data = request.json
+        uid = current_user.get('uid', 'Unknown')
+        user_id = current_user.get('id', 'Unknown')
         
-        logger.info(f"API: Creating subsidy for user: {current_user.get('uid', 'Unknown')}")
-        logger.info(f"API: Received data keys: {list(data.keys()) if data else 'None'}")
+        logger.info(f"API POST: current_user keys: {list(current_user.keys())}")
+        logger.info(f"API POST: Firebase UID: {uid}")
+        logger.info(f"API POST: Database User ID: {user_id}")
+        logger.info(f"API POST: Email: {current_user.get('email', 'Unknown')}")
+        logger.info(f"API POST: Received data keys: {list(data.keys()) if data else 'None'}")
         
         from subsidy_service import SubsidyService
         service = SubsidyService(firebase_service.get_db())
