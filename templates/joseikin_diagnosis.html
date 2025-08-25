@@ -371,6 +371,10 @@
         }
 
         async function diagnose() {
+            // 診断実行前に会社情報を保存
+            savedCompanyInfo = getCurrentCompanyInfo();
+            console.log('診断開始時の会社情報を保存:', savedCompanyInfo);
+            
             const formData = new FormData(document.getElementById('diagnosisForm'));
             const data = {};
             
@@ -545,6 +549,7 @@
         
         let currentDiagnosisResults = null;
         let isUserLoggedIn = false;
+        let savedCompanyInfo = null; // 診断実行時の会社情報を保存
         
         // 認証状態をチェック（Firebase設定）
         const firebaseConfig = {
@@ -683,7 +688,13 @@ ${result.description}`
                 console.log('診断保存: ユーザーEmail =', user.email);
                 
                 const token = await user.getIdToken();
-                const companyInfo = getCurrentCompanyInfo();
+                // 診断実行時に保存した会社情報を使用
+                const companyInfo = savedCompanyInfo || getCurrentCompanyInfo();
+                
+                // 会社情報デバッグ
+                console.log('使用する会社情報:', companyInfo);
+                console.log('保存された会社情報:', savedCompanyInfo);
+                console.log('現在のフォーム情報:', getCurrentCompanyInfo());
                 
                 // 各診断結果をメモとして保存
                 for (const result of currentDiagnosisResults) {
