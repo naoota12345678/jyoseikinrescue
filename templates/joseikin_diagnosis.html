@@ -463,8 +463,8 @@
                         <h3 style="color: #333; margin: 1.5rem 0;">次のステップをお選びください</h3>
                         
                         <div style="margin-bottom: 1.5rem;">
-                            <button onclick="saveDiagnosisAndRegister()" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%); color: white; padding: 1rem 2rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);">
-                                📝 診断結果を保存してAI相談を始める（月額3,000円）
+                            <button onclick="saveDiagnosisAndRegister()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 1rem 2rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);">
+                                📝 無料お試し専門AI相談を始める（5回無料）
                             </button>
                             <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">※ 診断結果がメモに保存され、申請準備を管理できます</p>
                         </div>
@@ -526,14 +526,26 @@
         
         let currentDiagnosisResults = null;
         
-        function saveDiagnosisAndRegister() {
+        async function saveDiagnosisAndRegister() {
             // 診断結果が存在する場合は保存
             if (currentDiagnosisResults) {
-                saveDiagnosisResults(currentDiagnosisResults);
+                await saveDiagnosisResults(currentDiagnosisResults);
             }
             
-            // 登録画面へリダイレクト
-            window.location.href = '/';
+            // 認証状態をチェック
+            try {
+                const response = await fetch('/api/auth/user');
+                if (response.ok) {
+                    // 認証済みの場合はメモ管理画面へ
+                    window.location.href = '/subsidy-memo';
+                } else {
+                    // 未認証の場合は登録画面へ
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                // エラーの場合は登録画面へ
+                window.location.href = '/';
+            }
         }
         
         async function saveDiagnosisResults(results) {

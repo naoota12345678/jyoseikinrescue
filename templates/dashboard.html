@@ -774,6 +774,13 @@
                         // メモ管理画面へのリンクを表示
                         showMemoManagementLink();
                         
+                        // 3秒後に自動でメモ管理画面へ遷移
+                        setTimeout(() => {
+                            if (confirm('メモ管理画面で申請準備を始めますか？')) {
+                                window.location.href = '/subsidy-memo';
+                            }
+                        }, 3000);
+                        
                     }
                 } catch (error) {
                     console.error('診断結果変換エラー:', error);
