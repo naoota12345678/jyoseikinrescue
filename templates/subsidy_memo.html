@@ -501,6 +501,9 @@
             console.log('トークン取得開始', currentUser ? 'ユーザー存在' : 'ユーザー不在');
             if (!currentUser) return null;
             
+            console.log('現在のユーザーID:', currentUser.uid);
+            console.log('現在のユーザーEmail:', currentUser.email);
+            
             try {
                 const token = await currentUser.getIdToken();
                 console.log('トークン取得成功', token ? '取得済み' : 'トークンなし');

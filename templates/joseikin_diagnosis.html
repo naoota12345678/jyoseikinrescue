@@ -679,6 +679,9 @@ ${result.description}`
                     return;
                 }
                 
+                console.log('診断保存: ユーザーID =', user.uid);
+                console.log('診断保存: ユーザーEmail =', user.email);
+                
                 const token = await user.getIdToken();
                 const companyInfo = getCurrentCompanyInfo();
                 

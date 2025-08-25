@@ -25,7 +25,9 @@
       "Read(/C:\\Users\\naoot\\Pictures\\Screenshots/**)",
       "Read(/C:\\Users\\naoot\\Pictures\\Screenshots/**)",
       "Read(/C:\\Users\\naoot\\Pictures\\Screenshots/**)",
-      "Bash(copy:*)"
+      "Bash(copy:*)",
+      "Bash(gcloud logging read:*)",
+      "Bash(gcloud run deploy:*)"
     ],
     "deny": [],
     "ask": [],
