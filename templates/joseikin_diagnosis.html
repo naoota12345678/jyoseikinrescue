@@ -470,19 +470,19 @@
                         </div>
                         
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; max-width: 600px; margin: 0 auto;">
-                            <div style="text-align: left; padding: 1rem; background: white; border-radius: 8px; border: 2px solid #e9ecef;">
-                                <h4 style="color: #667eea; margin-bottom: 0.5rem;">🤖 無料AI相談のみ</h4>
-                                <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">診断結果の保存なし<br>基本的な質問のみ対応</p>
-                                <button onclick="goToAIConsultation()" style="background: #6c757d; color: white; padding: 0.8rem 1.5rem; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; width: 100%;">
-                                    無料版を試す
+                            <div style="text-align: left; padding: 1rem; background: white; border-radius: 8px;">
+                                <h4 style="color: #667eea; margin-bottom: 0.5rem;">🤖 24時間対応 AIエージェント</h4>
+                                <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">予約不要・いつでも相談可能<br>上記の各助成金専門のAIエージェントが詳しく回答</p>
+                                <button onclick="goToAIConsultation()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.8rem 1.5rem; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; width: 100%;">
+                                    無料でAI相談を始める
                                 </button>
                             </div>
                             
-                            <div style="text-align: left; padding: 1rem; background: white; border-radius: 8px; border: 2px solid #e9ecef;">
-                                <h4 style="color: #28a745; margin-bottom: 0.5rem;">👨‍💼 専門家サポート</h4>
+                            <div style="text-align: left; padding: 1rem; background: white; border-radius: 8px;">
+                                <h4 style="color: #28a745; margin-bottom: 0.5rem;">👨‍💼 専門家サポート（30分相談）</h4>
                                 <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">複数助成金の組み合わせ申請<br>複雑な案件の個別相談</p>
                                 <button onclick="goToExpertConsultation()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 0.8rem 1.5rem; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; width: 100%;">
-                                    専門家相談を予約
+                                    専門家相談を予約する
                                 </button>
                             </div>
                         </div>
@@ -499,18 +499,26 @@
             resultsDiv.scrollIntoView({ behavior: 'smooth' });
         }
 
-        function goToAIConsultation() {
-            // AI相談の場合（無料登録へ）
-            fetch('/api/auth/user')
-                .then(response => {
-                    if (response.ok) {
-                        // 認証済みの場合はダッシュボードに
-                        window.location.href = '/dashboard';
-                    } else {
-                        // 未認証の場合は登録ページへ
-                        window.location.href = '/';
-                    }
-                });
+        async function goToAIConsultation() {
+            // 診断結果が存在する場合は保存
+            if (currentDiagnosisResults) {
+                await saveDiagnosisResults(currentDiagnosisResults);
+            }
+            
+            // 認証状態をチェック
+            try {
+                const response = await fetch('/api/auth/user');
+                if (response.ok) {
+                    // 認証済みの場合はダッシュボードに
+                    window.location.href = '/dashboard';
+                } else {
+                    // 未認証の場合は登録ページへ
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                // エラーの場合は登録ページへ
+                window.location.href = '/';
+            }
         }
         
         function goToExpertConsultation() {
