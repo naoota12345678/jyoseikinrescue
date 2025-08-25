@@ -796,7 +796,10 @@
         function displaySubsidies(subsidies) {
             const listElement = document.getElementById('subsidiesList');
             
-            if (subsidies.length === 0) {
+            // 「AI診断結果」という名前のメモは表示しない（旧形式のデータ）
+            const filteredSubsidies = subsidies.filter(s => s.name !== 'AI診断結果');
+            
+            if (filteredSubsidies.length === 0) {
                 listElement.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">📋</div>
@@ -809,7 +812,7 @@
                 return;
             }
             
-            listElement.innerHTML = subsidies.map(subsidy => `
+            listElement.innerHTML = filteredSubsidies.map(subsidy => `
                 <div class="subsidy-card ${subsidy.id === currentSubsidyId ? 'active' : ''}" 
                      onclick="selectSubsidy('${subsidy.id}')">
                     <div class="subsidy-name">${subsidy.name}</div>
