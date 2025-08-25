@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ユーザーデータ：自分のデータのみアクセス可能
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // ユーザーの助成金メモ：本人のみアクセス可能
+      match /subsidies/{subsidyId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+    
+    // 一時診断結果：認証不要だが制限時間あり
+    match /temp_diagnosis/{sessionId} {
+      allow read, write: if true;
+      // TTL（Time To Live）は24時間後に自動削除されるようにアプリケーション側で設定
+    }
+    
+    // サブスクリプション情報：本人のみアクセス可能
+    match /subscriptions/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 利用統計：本人のみアクセス可能
+    match /usage_stats/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 支払い情報：本人のみアクセス可能
+    match /payments/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // その他のドキュメントは全てアクセス拒否
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

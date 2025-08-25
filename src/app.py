@@ -651,6 +651,176 @@ def stripe_webhook():
         logger.error(f"Error processing webhook: {str(e)}")
         return jsonify({'error': 'Webhook処理エラー'}), 500
 
+# ===== 助成金メモ・スケジュール管理API =====
+
+@app.route('/subsidy-memo')
+@require_auth
+def subsidy_memo_page():
+    """助成金メモ・スケジュール管理ページ"""
+    return render_template('subsidy_memo.html')
+
+@app.route('/api/subsidies', methods=['GET'])
+@require_auth
+def get_subsidies():
+    """ユーザーの助成金メモ一覧を取得"""
+    try:
+        current_user = get_current_user()
+        from subsidy_service import SubsidyService
+        
+        service = SubsidyService(firebase_service.get_db())
+        subsidies = service.get_user_subsidies(current_user['uid'])
+        
+        return jsonify([s.to_dict() for s in subsidies])
+        
+    except Exception as e:
+        logger.error(f"Error fetching subsidies: {str(e)}")
+        return jsonify({'error': '助成金メモの取得に失敗しました'}), 500
+
+@app.route('/api/subsidies', methods=['POST'])
+@require_auth
+def create_subsidy():
+    """新規助成金メモを作成"""
+    try:
+        current_user = get_current_user()
+        data = request.json
+        
+        from subsidy_service import SubsidyService
+        service = SubsidyService(firebase_service.get_db())
+        
+        memo = service.create_subsidy_memo(current_user['uid'], data)
+        
+        return jsonify(memo.to_dict()), 201
+        
+    except Exception as e:
+        logger.error(f"Error creating subsidy: {str(e)}")
+        return jsonify({'error': '助成金メモの作成に失敗しました'}), 500
+
+@app.route('/api/subsidies/<subsidy_id>', methods=['PUT'])
+@require_auth
+def update_subsidy(subsidy_id):
+    """助成金メモを更新"""
+    try:
+        current_user = get_current_user()
+        data = request.json
+        
+        from subsidy_service import SubsidyService
+        service = SubsidyService(firebase_service.get_db())
+        
+        success = service.update_subsidy_memo(current_user['uid'], subsidy_id, data)
+        
+        if success:
+            return jsonify({'status': 'success'})
+        else:
+            return jsonify({'error': '更新に失敗しました'}), 400
+            
+    except Exception as e:
+        logger.error(f"Error updating subsidy: {str(e)}")
+        return jsonify({'error': '助成金メモの更新に失敗しました'}), 500
+
+@app.route('/api/subsidies/<subsidy_id>/memo', methods=['POST'])
+@require_auth
+def add_chat_history(subsidy_id):
+    """チャット履歴・メモを追加"""
+    try:
+        current_user = get_current_user()
+        data = request.json
+        content = data.get('content', '')
+        
+        if not content:
+            return jsonify({'error': 'メモ内容が必要です'}), 400
+        
+        from subsidy_service import SubsidyService
+        service = SubsidyService(firebase_service.get_db())
+        
+        success = service.add_chat_history(current_user['uid'], subsidy_id, content)
+        
+        if success:
+            return jsonify({'status': 'success'})
+        else:
+            return jsonify({'error': 'メモの追加に失敗しました'}), 400
+            
+    except Exception as e:
+        logger.error(f"Error adding chat history: {str(e)}")
+        return jsonify({'error': 'メモの追加に失敗しました'}), 500
+
+@app.route('/api/subsidies/<subsidy_id>', methods=['DELETE'])
+@require_auth
+def delete_subsidy(subsidy_id):
+    """助成金メモを削除"""
+    try:
+        current_user = get_current_user()
+        
+        from subsidy_service import SubsidyService
+        service = SubsidyService(firebase_service.get_db())
+        
+        success = service.delete_subsidy_memo(current_user['uid'], subsidy_id)
+        
+        if success:
+            return jsonify({'status': 'success'})
+        else:
+            return jsonify({'error': '削除に失敗しました'}), 400
+            
+    except Exception as e:
+        logger.error(f"Error deleting subsidy: {str(e)}")
+        return jsonify({'error': '助成金メモの削除に失敗しました'}), 500
+
+@app.route('/api/subsidies/deadlines', methods=['GET'])
+@require_auth
+def get_deadlines():
+    """期限が近い助成金を取得"""
+    try:
+        current_user = get_current_user()
+        days = request.args.get('days', 30, type=int)
+        
+        from subsidy_service import SubsidyService
+        service = SubsidyService(firebase_service.get_db())
+        
+        deadlines = service.get_upcoming_deadlines(current_user['uid'], days)
+        
+        return jsonify(deadlines)
+        
+    except Exception as e:
+        logger.error(f"Error fetching deadlines: {str(e)}")
+        return jsonify({'error': '期限情報の取得に失敗しました'}), 500
+
+@app.route('/api/diagnosis/save-temp', methods=['POST'])
+def save_temp_diagnosis():
+    """無料診断結果を一時保存"""
+    try:
+        data = request.json
+        
+        from subsidy_service import SubsidyService
+        service = SubsidyService(firebase_service.get_db())
+        
+        session_id = service.save_temp_diagnosis(data)
+        
+        return jsonify({'session_id': session_id})
+        
+    except Exception as e:
+        logger.error(f"Error saving temp diagnosis: {str(e)}")
+        return jsonify({'error': '診断結果の保存に失敗しました'}), 500
+
+@app.route('/api/diagnosis/convert/<session_id>', methods=['POST'])
+@require_auth
+def convert_diagnosis(session_id):
+    """一時診断結果を正式なメモに変換"""
+    try:
+        current_user = get_current_user()
+        
+        from subsidy_service import SubsidyService
+        service = SubsidyService(firebase_service.get_db())
+        
+        memo = service.convert_temp_to_memo(session_id, current_user['uid'])
+        
+        if memo:
+            return jsonify(memo.to_dict())
+        else:
+            return jsonify({'error': '診断結果が見つかりません'}), 404
+            
+    except Exception as e:
+        logger.error(f"Error converting diagnosis: {str(e)}")
+        return jsonify({'error': '診断結果の変換に失敗しました'}), 500
+
 @app.route('/health')
 def health():
     return jsonify({'status': 'healthy'})

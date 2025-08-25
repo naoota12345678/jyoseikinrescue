@@ -443,6 +443,9 @@
             const resultsDiv = document.getElementById('results');
             const resultsList = document.getElementById('resultsList');
             
+            // 診断結果をグローバル変数に保存
+            currentDiagnosisResults = results;
+            
             if (results.length === 0) {
                 resultsList.innerHTML = '<p>申し訳ございません。現在の条件では該当する助成金が見つかりませんでした。条件を見直すか、個別相談をご利用ください。</p>';
             } else {
@@ -459,20 +462,27 @@
                         
                         <h3 style="color: #333; margin: 1.5rem 0;">次のステップをお選びください</h3>
                         
+                        <div style="margin-bottom: 1.5rem;">
+                            <button onclick="saveDiagnosisAndRegister()" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%); color: white; padding: 1rem 2rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);">
+                                📝 診断結果を保存してAI相談を始める（月額3,000円）
+                            </button>
+                            <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">※ 診断結果がメモに保存され、申請準備を管理できます</p>
+                        </div>
+                        
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; max-width: 600px; margin: 0 auto;">
-                            <div style="text-align: left; padding: 1rem; background: white; border-radius: 8px;">
-                                <h4 style="color: #667eea; margin-bottom: 0.5rem;">🤖 24時間対応 AIエージェント</h4>
-                                <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">予約不要・いつでも相談可能<br>上記の各助成金専門のAIエージェントが詳しく回答</p>
-                                <button onclick="goToAIConsultation()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.8rem 1.5rem; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; width: 100%;">
-                                    無料でAI相談を始める
+                            <div style="text-align: left; padding: 1rem; background: white; border-radius: 8px; border: 2px solid #e9ecef;">
+                                <h4 style="color: #667eea; margin-bottom: 0.5rem;">🤖 無料AI相談のみ</h4>
+                                <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">診断結果の保存なし<br>基本的な質問のみ対応</p>
+                                <button onclick="goToAIConsultation()" style="background: #6c757d; color: white; padding: 0.8rem 1.5rem; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; width: 100%;">
+                                    無料版を試す
                                 </button>
                             </div>
                             
-                            <div style="text-align: left; padding: 1rem; background: white; border-radius: 8px;">
-                                <h4 style="color: #28a745; margin-bottom: 0.5rem;">👨‍💼 専門家サポート（30分相談）</h4>
+                            <div style="text-align: left; padding: 1rem; background: white; border-radius: 8px; border: 2px solid #e9ecef;">
+                                <h4 style="color: #28a745; margin-bottom: 0.5rem;">👨‍💼 専門家サポート</h4>
                                 <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">複数助成金の組み合わせ申請<br>複雑な案件の個別相談</p>
                                 <button onclick="goToExpertConsultation()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 0.8rem 1.5rem; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; width: 100%;">
-                                    専門家相談を予約する
+                                    専門家相談を予約
                                 </button>
                             </div>
                         </div>
@@ -512,6 +522,68 @@
         function goToConsultation() {
             // 後方互換性のため残す
             goToAIConsultation();
+        }
+        
+        let currentDiagnosisResults = null;
+        
+        function saveDiagnosisAndRegister() {
+            // 診断結果が存在する場合は保存
+            if (currentDiagnosisResults) {
+                saveDiagnosisResults(currentDiagnosisResults);
+            }
+            
+            // 登録画面へリダイレクト
+            window.location.href = '/';
+        }
+        
+        async function saveDiagnosisResults(results) {
+            try {
+                const diagnosisData = {
+                    subsidies: results.map(result => ({
+                        subsidy_name: result.name,
+                        target: result.eligibility,
+                        amount: result.amount,
+                        description: result.description,
+                        plan_required: result.plan_required || false,
+                        plan_deadline: result.plan_deadline || null,
+                        plan_documents: result.plan_documents || [],
+                        payment_deadline: result.payment_deadline || null,
+                        payment_documents: result.payment_documents || ['実績報告書', '領収書'],
+                        diagnosis_summary: `${result.name}が適用可能です。支給額: ${result.amount}`
+                    })),
+                    timestamp: new Date().toISOString(),
+                    company_info: getCurrentCompanyInfo()
+                };
+                
+                const response = await fetch('/api/diagnosis/save-temp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(diagnosisData)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    // セッションIDをローカルストレージに保存
+                    localStorage.setItem('pendingDiagnosisSession', result.session_id);
+                    console.log('診断結果を保存しました:', result.session_id);
+                } else {
+                    console.error('診断結果の保存に失敗しました');
+                }
+            } catch (error) {
+                console.error('診断結果保存エラー:', error);
+            }
+        }
+        
+        function getCurrentCompanyInfo() {
+            // フォームから現在の企業情報を取得
+            return {
+                industry: document.getElementById('industry')?.value || '',
+                employees: document.getElementById('employees')?.value || '',
+                situation: document.getElementById('situation')?.value || '',
+                goals: Array.from(document.querySelectorAll('input[name="goals"]:checked')).map(cb => cb.value)
+            };
         }
     </script>
 </body>

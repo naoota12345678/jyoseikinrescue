@@ -750,6 +750,96 @@
                 sendQuestion();
             }
         });
+        
+        // 保存された診断結果をチェックして自動変換
+        async function checkPendingDiagnosis() {
+            const sessionId = localStorage.getItem('pendingDiagnosisSession');
+            if (sessionId) {
+                try {
+                    const idToken = await auth.currentUser.getIdToken();
+                    const response = await fetch(`/api/diagnosis/convert/${sessionId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + idToken
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const memo = await response.json();
+                        localStorage.removeItem('pendingDiagnosisSession');
+                        
+                        // 成功通知を表示
+                        showNotification('診断結果をメモに保存しました！メモ管理画面で確認できます。', 'success');
+                        
+                        // メモ管理画面へのリンクを表示
+                        showMemoManagementLink();
+                        
+                    }
+                } catch (error) {
+                    console.error('診断結果変換エラー:', error);
+                }
+            }
+        }
+        
+        // 通知を表示する関数
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#28a745' : '#007bff'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                z-index: 1000;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                max-width: 400px;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+        
+        // メモ管理画面へのリンクを表示
+        function showMemoManagementLink() {
+            const agentSelection = document.querySelector('.agent-selection');
+            if (agentSelection) {
+                const memoLink = document.createElement('div');
+                memoLink.style.cssText = `
+                    background: linear-gradient(135deg, #17a2b8, #138496);
+                    border-radius: 12px;
+                    padding: 20px;
+                    text-align: center;
+                    margin-bottom: 20px;
+                    color: white;
+                `;
+                memoLink.innerHTML = `
+                    <h3 style="margin-bottom: 10px;">📝 メモ・スケジュール管理</h3>
+                    <p style="margin-bottom: 15px;">診断結果が保存されました。申請準備を管理しましょう！</p>
+                    <button onclick="window.location.href='/subsidy-memo'" 
+                            style="background: white; color: #17a2b8; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                        メモ管理画面を開く
+                    </button>
+                `;
+                agentSelection.insertBefore(memoLink, agentSelection.firstChild);
+            }
+        }
+        
+        // 認証完了後に診断結果をチェック
+        auth.onAuthStateChanged(function(user) {
+            if (user) {
+                currentUser = user;
+                initializeApp();
+                // 診断結果の変換チェック
+                setTimeout(checkPendingDiagnosis, 1000);
+            } else {
+                window.location.href = '/';
+            }
+        });
     </script>
 </body>
 </html>
