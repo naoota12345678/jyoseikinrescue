@@ -102,15 +102,14 @@ class User:
                 logger.info(f"Active subscription already exists for user {user_id}, skipping creation")
                 return
             
-            # 現在の日付から1ヶ月後をリセット日に設定
-            reset_date = datetime.now() + timedelta(days=30)
+            # トライアルプランはリセットなし
             
             subscription_data = {
                 'user_id': user_id,
                 'plan_type': 'trial',         # trial, basic, additional_pack
-                'questions_limit': 5,         # トライアル：5質問
+                'questions_limit': 5,         # トライアル：生涯5質問
                 'questions_used': 0,
-                'reset_date': reset_date,
+                'reset_date': None,           # トライアルはリセットなし
                 'stripe_subscription_id': None,
                 'status': 'active',
                 'created_at': SERVER_TIMESTAMP,
