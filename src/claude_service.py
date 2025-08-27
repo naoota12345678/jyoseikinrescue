@@ -300,43 +300,18 @@ class ClaudeService:
         try:
             company_context = self._format_company_info(company_info)
             
-            prompt = f"""
-以下の企業情報を分析して、利用可能な助成金を判定してください：
-
-{company_context}
-
-以下の形式でJSON形式で回答してください：
-{{
-  "業務改善助成金": {{
-    "適用可能性": "高い/中程度/低い",
-    "理由": "理由の説明",
-    "必要条件": ["条件1", "条件2"],
-    "推定助成額": "金額範囲"
-  }}
-}}
-"""
+            # 基本的な助成金チェック結果を生成
+            results = []
             
-            message = self.client.messages.create(
-                model=self.model,
-                max_tokens=2000,
-                temperature=0.2,
-                system=self.general_prompt,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ]
-            )
+            # 業務改善助成金の詳細判定
+            business_improvement_result = self._check_business_improvement(company_info)
+            results.append(business_improvement_result)
             
-            # 簡単な解析結果を返す（本来はJSONパースが必要）
-            response_text = message.content[0].text
+            # キャリアアップ助成金の可能性チェック
+            career_up_result = self._check_career_up_possibility(company_info)
+            results.append(career_up_result)
             
-            return [{
-                "name": "業務改善助成金",
-                "description": response_text,
-                "status": "分析完了"
-            }]
+            return results
             
         except Exception as e:
             logger.error(f"Grant check error: {str(e)}")
@@ -345,6 +320,59 @@ class ClaudeService:
                 "description": "助成金の分析中にエラーが発生しました。",
                 "status": "エラー"
             }]
+    
+    def _check_business_improvement(self, company_info: Dict) -> Dict:
+        """業務改善助成金の詳細判定"""
+        # 従業員数チェック
+        employee_count = company_info.get('employee_count', 0)
+        industry = company_info.get('industry', '')
+        
+        # 中小企業要件チェック（簡易版）
+        is_sme = employee_count <= 300  # 簡易判定
+        
+        if is_sme:
+            return {
+                "name": "業務改善助成金",
+                "description": "✅ 適用可能性: 高い\n・中小企業要件を満たしています\n・設備投資と最低賃金引上げで最大600万円\n→ 業務改善助成金専門エージェントで詳細相談",
+                "status": "適用可能",
+                "agent_recommendation": "gyoumukaizen"
+            }
+        else:
+            return {
+                "name": "業務改善助成金",
+                "description": "❌ 適用可能性: 低い\n・中小企業要件（従業員数）を超えている可能性があります",
+                "status": "要件不適合"
+            }
+    
+    def _check_career_up_possibility(self, company_info: Dict) -> Dict:
+        """キャリアアップ助成金の可能性チェック"""
+        employee_count = company_info.get('employee_count', 0)
+        
+        # 従業員がいる企業なら可能性あり
+        if employee_count > 0:
+            description = """🔍 可能性あり（要件によっては適用可能）
+以下に該当する場合、各コースが利用できる可能性があります：
+
+【主要コース】
+✓ 正社員化コース: 非正規雇用者を正社員に転換する場合
+✓ 賃金規定等改定コース: 賃金制度を見直し・改善する場合  
+✓ 賞与・退職金制度導入コース: 福利厚生制度を新設する場合
+✓ 社会保険適用時処遇改善コース: 社保適用拡大への対応が必要な場合
+
+💡 詳細な要件や支給額については、キャリアアップ助成金専門エージェントにご相談ください"""
+            
+            return {
+                "name": "キャリアアップ助成金",
+                "description": description,
+                "status": "可能性あり",
+                "agent_recommendation": "career-up"
+            }
+        else:
+            return {
+                "name": "キャリアアップ助成金",
+                "description": "ℹ️ 従業員情報が不明のため判定できません",
+                "status": "情報不足"
+            }
     
     def _format_company_info(self, company_info: Dict) -> str:
         """

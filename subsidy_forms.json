@@ -78,7 +78,7 @@
     "career-up": {
       "name": "キャリアアップ助成金",
       "description": "非正規雇用労働者の正社員化・処遇改善を支援",
-      "active": false,
+      "active": true,
       "data_files": [],
       "urls": {
         "main_page": {
@@ -86,11 +86,45 @@
           "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/part_haken/jigyounushi/career.html",
           "description": "制度概要・コース一覧"
         },
-        "forms": {},
-        "guides": {}
+        "forms": {
+          "様式第1号": {
+            "name": "キャリアアップ計画書",
+            "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000118801_00016.html",
+            "description": "キャリアアップ取組実施前に提出",
+            "phase": "計画申請"
+          },
+          "様式第2号": {
+            "name": "キャリアアップ計画変更届",
+            "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000118801_00016.html",
+            "description": "計画内容を変更する場合に提出",
+            "phase": "計画変更"
+          },
+          "様式第3号": {
+            "name": "支給申請書",
+            "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000118801_00016.html",
+            "description": "助成金の支給申請（コース別補助様式も必要）",
+            "phase": "支給申請"
+          },
+          "様式第4号": {
+            "name": "事業所確認票",
+            "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000118801_00016.html",
+            "description": "事業所の状況確認用",
+            "phase": "支給申請"
+          }
+        },
+        "guides": {
+          "申請様式一覧": {
+            "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000118801_00016.html",
+            "description": "令和7年7月1日以降対応の最新様式"
+          },
+          "制度パンフレット": {
+            "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/part_haken/jigyounushi/career.html",
+            "description": "制度概要・各コース詳細"
+          }
+        }
       },
       "last_checked": "2025-01-27",
-      "notes": "今後実装予定"
+      "notes": "令和7年7月1日以降適用版・7コース対応"
     }
   },
   "metadata": {
