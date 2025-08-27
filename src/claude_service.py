@@ -2,6 +2,7 @@ import os
 import anthropic
 from typing import Dict, List
 import logging
+from forms_manager import FormsManager
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,9 @@ class ClaudeService:
                 raise
         
         self.model = "claude-3-5-sonnet-20241022"
+        
+        # Forms Manager初期化
+        self.forms_manager = FormsManager()
         
         # 業務改善助成金専門外の質問への対応プロンプト
         self.general_prompt = """
@@ -108,6 +112,12 @@ class ClaudeService:
 ・必要書類と手続きの流れ
 
 必ず交付要綱に基づいて正確な情報を提供し、企業の状況に応じた具体的なアドバイスを行ってください。
+
+【申請様式について】
+申請様式が必要な場合は、以下のように案内してください：
+- 必ず厚生労働省の公式サイトから最新様式をダウンロードするよう案内
+- 様式番号と用途を明確に説明
+- 記入方法や注意点を詳しく解説
 """
             else:
                 # ファイルが読み込めない場合のフォールバック
@@ -192,6 +202,26 @@ class ClaudeService:
 質問者の企業情報を踏まえ、{course_name}について専門的で実用的なアドバイスを提供してください。
 """
     
+    def _include_form_urls(self, agent_type: str, response: str) -> str:
+        """
+        回答に様式URLの案内を追加
+        Args:
+            agent_type: エージェントタイプ
+            response: 元の回答
+        Returns:
+            URL情報を追加した回答
+        """
+        # 様式関連のキーワードをチェック
+        form_keywords = ['様式', '申請書', '交付申請', '実績報告', '支給申請', 'ダウンロード']
+        
+        if any(keyword in response for keyword in form_keywords):
+            # 様式URL情報を追加
+            form_message = self.forms_manager.format_url_message(agent_type)
+            if "該当する助成金の情報が見つかりません" not in form_message:
+                response += "\n\n" + form_message
+        
+        return response
+    
     def get_grant_consultation(self, company_info: Dict, question: str, agent_type: str = 'gyoumukaizen') -> str:
         """
         企業情報と質問を基に、助成金相談の回答を生成
@@ -252,7 +282,12 @@ class ClaudeService:
                 ]
             )
             
-            return message.content[0].text
+            response = message.content[0].text
+            
+            # 様式URL情報を追加（必要に応じて）
+            response = self._include_form_urls(agent_type, response)
+            
+            return response
             
         except Exception as e:
             logger.error(f"Claude API error: {str(e)}")

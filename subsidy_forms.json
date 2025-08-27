@@ -1,0 +1,108 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2025-01-27",
+  "agents": {
+    "gyoumukaizen": {
+      "name": "業務改善助成金",
+      "description": "中小企業の生産性向上と最低賃金引上げを支援",
+      "active": true,
+      "data_files": [
+        "gyoumukaizen07.txt",
+        "gyoumukaizenmanyual.txt",
+        "業務改善助成金Ｑ＆Ａ.txt",
+        "業務改善助成金 交付申請書等の書き方と留意事項 について.txt"
+      ],
+      "urls": {
+        "main_page": {
+          "name": "業務改善助成金トップページ",
+          "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/zigyonushi/shienjigyou/03.html",
+          "description": "制度概要・お知らせ"
+        },
+        "forms": {
+          "様式第1号": {
+            "name": "交付申請書",
+            "url": "https://www.mhlw.go.jp/content/11200000/001234567.docx",
+            "description": "交付申請時に提出する申請書",
+            "phase": "交付申請"
+          },
+          "様式第3号": {
+            "name": "計画変更申請書",
+            "url": "https://www.mhlw.go.jp/content/11200000/001234568.docx",
+            "description": "計画変更時に提出",
+            "phase": "計画変更"
+          },
+          "様式第9号": {
+            "name": "実績報告書",
+            "url": "https://www.mhlw.go.jp/content/11200000/001234569.docx",
+            "description": "事業完了後の実績報告",
+            "phase": "実績報告"
+          },
+          "様式第10号": {
+            "name": "支給申請書",
+            "url": "https://www.mhlw.go.jp/content/11200000/001234570.docx",
+            "description": "助成金の支給申請",
+            "phase": "支給申請"
+          }
+        },
+        "guides": {
+          "申請マニュアル": {
+            "url": "https://www.mhlw.go.jp/content/11200000/gyoumukaizen_manual.pdf",
+            "description": "申請手続きの詳細マニュアル"
+          },
+          "Q&A": {
+            "url": "https://www.mhlw.go.jp/content/11200000/gyoumukaizen_qa.pdf",
+            "description": "よくある質問と回答"
+          }
+        }
+      },
+      "last_checked": "2025-01-27",
+      "notes": "令和7年度版（2025年4月14日適用）"
+    },
+    "jinzai-kaihatsu": {
+      "name": "人材開発支援助成金",
+      "description": "職業訓練・人材育成を支援",
+      "active": false,
+      "data_files": [],
+      "urls": {
+        "main_page": {
+          "name": "人材開発支援助成金トップページ",
+          "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/koyou/kyufukin/d01-1.html",
+          "description": "制度概要・各コース案内"
+        },
+        "forms": {},
+        "guides": {}
+      },
+      "last_checked": "2025-01-27",
+      "notes": "今後実装予定"
+    },
+    "career-up": {
+      "name": "キャリアアップ助成金",
+      "description": "非正規雇用労働者の正社員化・処遇改善を支援",
+      "active": false,
+      "data_files": [],
+      "urls": {
+        "main_page": {
+          "name": "キャリアアップ助成金トップページ",
+          "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/part_haken/jigyounushi/career.html",
+          "description": "制度概要・コース一覧"
+        },
+        "forms": {},
+        "guides": {}
+      },
+      "last_checked": "2025-01-27",
+      "notes": "今後実装予定"
+    }
+  },
+  "metadata": {
+    "update_frequency": "monthly",
+    "maintainer": "助成金レスキュー運営チーム",
+    "notification_email": "",
+    "changelog": [
+      {
+        "date": "2025-01-27",
+        "version": "1.0.0",
+        "changes": "初版作成 - 業務改善助成金エージェント対応"
+      }
+    ]
+  }
+}
