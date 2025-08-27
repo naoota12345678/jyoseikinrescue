@@ -27,7 +27,9 @@
       "Read(/C:\\Users\\naoot\\Pictures\\Screenshots/**)",
       "Bash(copy:*)",
       "Bash(gcloud logging read:*)",
-      "Bash(gcloud run deploy:*)"
+      "Bash(gcloud run deploy:*)",
+      "Bash(gcloud run domain-mappings list:*)",
+      "Bash(firebase deploy:*)"
     ],
     "deny": [],
     "ask": [],
