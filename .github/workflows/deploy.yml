@@ -6,7 +6,7 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  SERVICE_NAME: jyoseikinrescue-claude
+  SERVICE_NAME: jyoseikinrescue
   REGION: asia-northeast1
 
 jobs:

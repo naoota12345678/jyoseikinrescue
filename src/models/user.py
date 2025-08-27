@@ -89,6 +89,26 @@ class User:
             'stripe_customer_id': stripe_customer_id
         })
     
+    def is_admin_user(self, user_id: str) -> bool:
+        """管理者ユーザーかどうかを判定"""
+        # 管理者のUIDまたはメールアドレスのリスト
+        admin_uids = [
+            # あなたのFirebase UIDをここに追加
+        ]
+        admin_emails = [
+            'naoota12345678@gmail.com',  # あなたの管理者メールアドレス
+        ]
+        
+        try:
+            user = self.get_user_by_uid(user_id)
+            if user and user.get('email') in admin_emails:
+                return True
+            if user_id in admin_uids:
+                return True
+            return False
+        except:
+            return False
+    
     def create_initial_subscription(self, user_id: str):
         """初回サブスクリプションを作成"""
         try:
@@ -102,19 +122,33 @@ class User:
                 logger.info(f"Active subscription already exists for user {user_id}, skipping creation")
                 return
             
-            # トライアルプランはリセットなし
-            
-            subscription_data = {
-                'user_id': user_id,
-                'plan_type': 'trial',         # trial, basic, additional_pack
-                'questions_limit': 5,         # トライアル：生涯5質問
-                'questions_used': 0,
-                'reset_date': None,           # トライアルはリセットなし
-                'stripe_subscription_id': None,
-                'status': 'active',
-                'created_at': SERVER_TIMESTAMP,
-                'updated_at': SERVER_TIMESTAMP
-            }
+            # 管理者の場合は無制限プランを作成
+            if self.is_admin_user(user_id):
+                subscription_data = {
+                    'user_id': user_id,
+                    'plan_type': 'admin',         # 管理者専用プラン
+                    'questions_limit': 999999,    # 実質無制限
+                    'questions_used': 0,
+                    'reset_date': None,
+                    'stripe_subscription_id': None,
+                    'status': 'active',
+                    'created_at': SERVER_TIMESTAMP,
+                    'updated_at': SERVER_TIMESTAMP
+                }
+                logger.info(f"Admin subscription created for user {user_id}")
+            else:
+                # 通常のトライアルプラン
+                subscription_data = {
+                    'user_id': user_id,
+                    'plan_type': 'trial',         # trial, basic, additional_pack
+                    'questions_limit': 5,         # トライアル：生涯5質問
+                    'questions_used': 0,
+                    'reset_date': None,           # トライアルはリセットなし
+                    'stripe_subscription_id': None,
+                    'status': 'active',
+                    'created_at': SERVER_TIMESTAMP,
+                    'updated_at': SERVER_TIMESTAMP
+                }
             
             self.db.collection('subscriptions').add(subscription_data)
             logger.info(f"Initial subscription created for user {user_id}")
