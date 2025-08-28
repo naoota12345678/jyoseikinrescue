@@ -332,19 +332,33 @@
                         <option value="judokien-boshi">受動喫煙防止対策助成金専門エージェント</option>
                         <option value="other">その他の助成金エージェント</option>
                     </select>
-                    
-                    <!-- 2段階目のドロップダウン（人材開発支援助成金選択時に表示） -->
-                    <div id="courseSelection" style="display: none; margin-top: 1rem;">
-                        <select id="courseSelect">
-                            <option value="">コースを選択してください</option>
-                            <option value="jinzai-ikusei">人材育成支援コース</option>
-                            <option value="kyoiku-kunren-kyuka">教育訓練休暇等付与コース</option>
-                            <option value="hito-toshi">人への投資促進コース</option>
-                            <option value="reskilling">事業展開等リスキリング支援コース</option>
-                            <option value="sonota">その他のコース</option>
-                        </select>
-                    </div>
                     <button class="go-btn" onclick="selectAgent()">エージェント開始</button>
+                </div>
+                
+                <!-- 2段階目のドロップダウン（人材開発支援助成金選択時に表示） -->
+                <div id="courseSelection" style="display: none; margin-top: 1rem;">
+                    <select id="courseSelect" style="width: 100%; padding: 1rem; border: 2px solid #e9ecef; border-radius: 8px; font-size: 1rem; background: white;">
+                        <option value="">コースを選択してください</option>
+                        <option value="jinzai-ikusei">人材育成支援コース</option>
+                        <option value="kyoiku-kunren-kyuka">教育訓練休暇等付与コース</option>
+                        <option value="hito-toshi">人への投資促進コース</option>
+                        <option value="reskilling">事業展開等リスキリング支援コース</option>
+                        <option value="sonota">その他のコース</option>
+                    </select>
+                </div>
+                
+                <!-- キャリアアップ助成金のコース選択 -->
+                <div id="careerUpCourseSelection" style="display: none; margin-top: 1rem;">
+                    <select id="careerUpCourseSelect" style="width: 100%; padding: 1rem; border: 2px solid #e9ecef; border-radius: 8px; font-size: 1rem; background: white;">
+                        <option value="">コースを選択してください</option>
+                        <option value="seishain">正社員化コース</option>
+                        <option value="shogaisha">障害者正社員化コース</option>
+                        <option value="chingin">賃金規定等改定コース</option>
+                        <option value="kyotsu">賃金規定等共通化コース</option>
+                        <option value="shoyo">賞与・退職金制度導入コース</option>
+                        <option value="shahoken">社会保険適用時処遇改善コース</option>
+                        <option value="tanshuku">短時間労働者労働時間延長支援コース</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -400,6 +414,8 @@
                     // URLパラメータを削除
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
+                // 診断結果の変換チェック
+                setTimeout(checkPendingDiagnosis, 1000);
             } else {
                 // 未認証の場合はログインページにリダイレクト
                 // パス名が '/' でない場合のみリダイレクト
@@ -614,19 +630,38 @@
             const agentSelect = document.getElementById('agentSelect');
             const courseSelection = document.getElementById('courseSelection');
             const courseSelect = document.getElementById('courseSelect');
+            const careerUpCourseSelection = document.getElementById('careerUpCourseSelection');
+            const careerUpCourseSelect = document.getElementById('careerUpCourseSelect');
+            
+            // 全てのコース選択をリセット
+            if (courseSelection) {
+                courseSelection.style.display = 'none';
+            }
+            if (careerUpCourseSelection) {
+                careerUpCourseSelection.style.display = 'none';
+            }
+            if (courseSelect) {
+                courseSelect.value = '';
+            }
+            if (careerUpCourseSelect) {
+                careerUpCourseSelect.value = '';
+            }
             
             if (agentSelect.value === 'jinzai-kaihatsu') {
-                courseSelection.style.display = 'block';
-                courseSelect.value = ''; // リセット
-            } else {
-                courseSelection.style.display = 'none';
-                courseSelect.value = '';
+                if (courseSelection) {
+                    courseSelection.style.display = 'block';
+                }
+            } else if (agentSelect.value === 'career-up') {
+                if (careerUpCourseSelection) {
+                    careerUpCourseSelection.style.display = 'block';
+                }
             }
         }
 
         function selectAgent() {
             const agentSelect = document.getElementById('agentSelect');
             const courseSelect = document.getElementById('courseSelect');
+            const careerUpCourseSelect = document.getElementById('careerUpCourseSelect');
             const selectedAgent = agentSelect.value;
             
             if (!selectedAgent) {
@@ -643,6 +678,15 @@
                 }
             }
             
+            // キャリアアップ助成金の場合、コース選択が必要
+            if (selectedAgent === 'career-up') {
+                const selectedCourse = careerUpCourseSelect.value;
+                if (!selectedCourse) {
+                    alert('コースを選択してください');
+                    return;
+                }
+            }
+            
             // 残り回数チェック
             const remainingText = document.getElementById('remainingQuestions').textContent;
             const remaining = parseInt(remainingText) || 0;
@@ -653,12 +697,15 @@
                 // エージェント選択をリセット
                 agentSelect.value = '';
                 document.getElementById('courseSelection').style.display = 'none';
+                document.getElementById('careerUpCourseSelection').style.display = 'none';
                 return;
             }
             
-            // 人材開発支援助成金の場合、コースも含めて設定
+            // コース別のエージェント設定
             if (selectedAgent === 'jinzai-kaihatsu') {
                 currentAgent = selectedAgent + '_' + courseSelect.value;
+            } else if (selectedAgent === 'career-up') {
+                currentAgent = 'career-up_' + careerUpCourseSelect.value;
             } else {
                 currentAgent = selectedAgent;
             }
@@ -676,9 +723,17 @@
                     title: '💼 業務改善助成金専門エージェント',
                     welcome: 'こんにちは！業務改善助成金の専門エージェントです。\n設備投資による生産性向上と最低賃金引上げに関するご相談をお受けします。'
                 },
-                'career-up': {
-                    title: '📈 キャリアアップ助成金専門エージェント', 
-                    welcome: 'こんにちは！キャリアアップ助成金の専門エージェントです。\n非正規社員の正社員化や処遇改善に関するご相談をお受けします。'
+                'career-up_seishain': {
+                    title: '📈 キャリアアップ助成金（正社員化コース）専門エージェント',
+                    welcome: 'こんにちは！キャリアアップ助成金正社員化コースの専門エージェントです。\n有期雇用労働者等の正規雇用労働者等への転換支援に関するご相談をお受けします。'
+                },
+                'career-up_shogaisha': {
+                    title: '📈 キャリアアップ助成金（障害者正社員化コース）専門エージェント',
+                    welcome: 'こんにちは！キャリアアップ助成金障害者正社員化コースの専門エージェントです。'
+                },
+                'career-up_chingin': {
+                    title: '📈 キャリアアップ助成金（賃金規定等改定コース）専門エージェント',
+                    welcome: 'こんにちは！キャリアアップ助成金賃金規定等改定コースの専門エージェントです。'
                 },
                 'jinzai-kaihatsu': {
                     title: '🎓 人材開発支援助成金専門エージェント',
@@ -817,11 +872,23 @@
                 'other': 'その他の助成金'
             };
             
-            // エージェント名を取得（人材開発支援助成金のコース対応）
+            // エージェント名を取得（コース対応）
             let agentName = agentNames[agentType.split('_')[0]] || 'AI相談';
             if (agentType.includes('jinzai-kaihatsu_')) {
                 const courseName = agentType.split('_')[1];
                 agentName += ` (${courseName})`;
+            } else if (agentType.includes('career-up_')) {
+                const courseName = agentType.split('_')[1];
+                const courseNames = {
+                    'seishain': '正社員化コース',
+                    'shogaisha': '障害者正社員化コース',
+                    'chingin': '賃金規定等改定コース',
+                    'kyotsu': '賃金規定等共通化コース',
+                    'shoyo': '賞与・退職金制度導入コース',
+                    'shahoken': '社会保険適用時処遇改善コース',
+                    'tanshuku': '短時間労働者労働時間延長支援コース'
+                };
+                agentName += ` (${courseNames[courseName] || courseName})`;
             }
             
             // AI診断結果と同じ形式で保存
@@ -960,17 +1027,7 @@
         }
         
         
-        // 認証完了後に診断結果をチェック
-        auth.onAuthStateChanged(function(user) {
-            if (user) {
-                currentUser = user;
-                loadUserData();
-                // 診断結果の変換チェック
-                setTimeout(checkPendingDiagnosis, 1000);
-            } else {
-                window.location.href = '/';
-            }
-        });
+        // 認証完了後に診断結果をチェック（既存のauth.onAuthStateChangedハンドラーに統合済み）
     </script>
 </body>
 </html>

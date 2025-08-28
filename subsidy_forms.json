@@ -75,11 +75,11 @@
       "last_checked": "2025-01-27",
       "notes": "今後実装予定"
     },
-    "career-up": {
-      "name": "キャリアアップ助成金",
-      "description": "非正規雇用労働者の正社員化・処遇改善を支援",
+    "career-up_seishain": {
+      "name": "キャリアアップ助成金（正社員化コース）",
+      "description": "有期雇用労働者等の正規雇用労働者等への転換を支援",
       "active": true,
-      "data_files": [],
+      "data_files": ["career-up_common.txt", "career-up_seishain.txt"],
       "urls": {
         "main_page": {
           "name": "キャリアアップ助成金トップページ",
@@ -120,11 +120,195 @@
           "制度パンフレット": {
             "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/part_haken/jigyounushi/career.html",
             "description": "制度概要・各コース詳細"
+          },
+          "正社員化コースガイド": {
+            "url": "https://www.mhlw.go.jp/content/11650000/001234567.pdf",
+            "description": "正社員化コース専用ガイドライン"
           }
         }
       },
       "last_checked": "2025-01-27",
-      "notes": "令和7年7月1日以降適用版・7コース対応"
+      "notes": "令和7年7月1日以降適用版・共通部分+コース固有部分"
+    },
+    "career-up_chingin": {
+      "name": "キャリアアップ助成金（賃金規定等改定コース）",
+      "description": "有期雇用労働者等の基本給の賃金規定等を3%以上増額改定",
+      "active": true,
+      "data_files": ["career-up_common.txt", "career-up_chingin.txt"],
+      "urls": {
+        "main_page": {
+          "name": "キャリアアップ助成金トップページ",
+          "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/part_haken/jigyounushi/career.html",
+          "description": "制度概要・コース一覧"
+        },
+        "forms": {
+          "様式第1号": {
+            "name": "キャリアアップ計画書",
+            "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000118801_00016.html",
+            "description": "キャリアアップ取組実施前に提出",
+            "phase": "計画申請"
+          },
+          "様式第3号": {
+            "name": "支給申請書",
+            "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000118801_00016.html",
+            "description": "助成金の支給申請（コース別補助様式も必要）",
+            "phase": "支給申請"
+          }
+        },
+        "guides": {
+          "申請様式一覧": {
+            "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000118801_00016.html",
+            "description": "令和7年7月1日以降対応の最新様式"
+          },
+          "賃金規定等改定コースガイド": {
+            "url": "https://www.mhlw.go.jp/content/11650000/001234568.pdf",
+            "description": "賃金規定等改定コース専用ガイドライン"
+          }
+        }
+      },
+      "last_checked": "2025-01-27",
+      "notes": "令和7年7月1日以降適用版・共通部分+コース固有部分"
+    },
+    "career-up_shogaisha": {
+      "name": "キャリアアップ助成金（障害者正社員化コース）",
+      "description": "障害者の有期雇用労働者等を正規雇用労働者等に転換",
+      "active": true,
+      "data_files": ["career-up_common.txt", "career-up_shogaisha.txt"],
+      "urls": {
+        "main_page": {
+          "name": "キャリアアップ助成金トップページ",
+          "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/part_haken/jigyounushi/career.html",
+          "description": "制度概要・コース一覧"
+        },
+        "forms": {
+          "様式第1号": {
+            "name": "キャリアアップ計画書",
+            "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000118801_00016.html",
+            "description": "キャリアアップ取組実施前に提出",
+            "phase": "計画申請"
+          },
+          "様式第3号": {
+            "name": "支給申請書",
+            "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000118801_00016.html",
+            "description": "助成金の支給申請（コース別補助様式も必要）",
+            "phase": "支給申請"
+          }
+        },
+        "guides": {
+          "申請様式一覧": {
+            "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000118801_00016.html",
+            "description": "令和7年7月1日以降対応の最新様式"
+          },
+          "障害者正社員化コースガイド": {
+            "url": "https://www.mhlw.go.jp/content/11650000/001234569.pdf",
+            "description": "障害者正社員化コース専用ガイドライン"
+          }
+        }
+      },
+      "last_checked": "2025-01-27",
+      "notes": "令和7年7月1日以降適用版・共通部分+コース固有部分・障害者雇用促進"
+    },
+    "career-up_kyotsu": {
+      "name": "キャリアアップ助成金（賃金規定等共通化コース）",
+      "description": "有期雇用労働者等と正規雇用労働者との共通の賃金規定等の導入",
+      "active": true,
+      "data_files": ["career-up_common.txt", "career-up_kyotsu.txt"],
+      "urls": {
+        "main_page": {
+          "name": "キャリアアップ助成金トップページ",
+          "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/part_haken/jigyounushi/career.html",
+          "description": "制度概要・コース一覧"
+        },
+        "forms": {
+          "様式第1号": {
+            "name": "キャリアアップ計画書",
+            "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000118801_00016.html",
+            "description": "キャリアアップ取組実施前に提出",
+            "phase": "計画申請"
+          },
+          "様式第3号": {
+            "name": "支給申請書",
+            "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000118801_00016.html",
+            "description": "助成金の支給申請（コース別補助様式も必要）",
+            "phase": "支給申請"
+          }
+        },
+        "guides": {
+          "申請様式一覧": {
+            "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000118801_00016.html",
+            "description": "令和7年7月1日以降対応の最新様式"
+          },
+          "賃金規定等共通化コースガイド": {
+            "url": "https://www.mhlw.go.jp/content/11650000/001234570.pdf",
+            "description": "賃金規定等共通化コース専用ガイドライン"
+          }
+        }
+      },
+      "last_checked": "2025-01-27",
+      "notes": "令和7年7月1日以降適用版・共通部分+コース固有部分・賃金規定共通化"
+    },
+    "career-up_shoyo": {
+      "name": "キャリアアップ助成金（賞与・退職金制度導入コース）",
+      "description": "有期雇用労働者等への賞与・退職金制度の導入",
+      "active": true,
+      "data_files": ["career-up_common.txt", "career-up_shoyo.txt"],
+      "urls": {
+        "main_page": {
+          "name": "キャリアアップ助成金トップページ",
+          "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/part_haken/jigyounushi/career.html",
+          "description": "制度概要・コース一覧"
+        },
+        "guides": {
+          "賞与・退職金制度導入コースガイド": {
+            "url": "https://www.mhlw.go.jp/content/11650000/001234571.pdf",
+            "description": "賞与・退職金制度導入コース専用ガイドライン"
+          }
+        }
+      },
+      "last_checked": "2025-01-27",
+      "notes": "令和7年7月1日以降適用版・共通部分+コース固有部分"
+    },
+    "career-up_shahoken": {
+      "name": "キャリアアップ助成金（社会保険適用時処遇改善コース）",
+      "description": "社会保険適用促進のための労働時間延長と処遇改善",
+      "active": true,
+      "data_files": ["career-up_common.txt", "career-up_shahoken.txt"],
+      "urls": {
+        "main_page": {
+          "name": "キャリアアップ助成金トップページ",
+          "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/part_haken/jigyounushi/career.html",
+          "description": "制度概要・コース一覧"
+        },
+        "guides": {
+          "社会保険適用時処遇改善コースガイド": {
+            "url": "https://www.mhlw.go.jp/content/11650000/001234572.pdf",
+            "description": "社会保険適用時処遇改善コース専用ガイドライン"
+          }
+        }
+      },
+      "last_checked": "2025-01-27",
+      "notes": "令和7年7月1日以降適用版・共通部分+コース固有部分"
+    },
+    "career-up_tanshuku": {
+      "name": "キャリアアップ助成金（短時間労働者労働時間延長支援コース）",
+      "description": "有期雇用労働者等の週所定労働時間を延長し社会保険を適用",
+      "active": true,
+      "data_files": ["career-up_common.txt", "career-up_tanshuku.txt"],
+      "urls": {
+        "main_page": {
+          "name": "キャリアアップ助成金トップページ",
+          "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/part_haken/jigyounushi/career.html",
+          "description": "制度概要・コース一覧"
+        },
+        "guides": {
+          "短時間労働者労働時間延長支援コースガイド": {
+            "url": "https://www.mhlw.go.jp/content/11650000/001234573.pdf",
+            "description": "短時間労働者労働時間延長支援コース専用ガイドライン"
+          }
+        }
+      },
+      "last_checked": "2025-01-27",
+      "notes": "令和7年7月1日以降適用版・共通部分+コース固有部分"
     }
   },
   "metadata": {

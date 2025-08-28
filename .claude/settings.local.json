@@ -29,12 +29,17 @@
       "Bash(gcloud logging read:*)",
       "Bash(gcloud run deploy:*)",
       "Bash(gcloud run domain-mappings list:*)",
-      "Bash(firebase deploy:*)"
+      "Bash(firebase deploy:*)",
+      "WebFetch(domain:www.mhlw.go.jp)",
+      "Bash(for file in \"C:\\Users\\naoot\\Desktop\\jyoseikinrescue-claude\\file\\キャリアアップ助成金\"/*.txt)",
+      "Bash(del test_dropdown.html debug_dashboard.html)",
+      "Bash(git log:*)"
     ],
     "deny": [],
     "ask": [],
     "additionalDirectories": [
-      "C:\\Users\\naoot\\Pictures\\Screenshots"
+      "C:\\Users\\naoot\\Pictures\\Screenshots",
+      "C:\\d C:\\Users\\naoot\\Desktop"
     ]
   }
 }
