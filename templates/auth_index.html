@@ -295,8 +295,21 @@
                     ログイン
                 </button>
                 
-                <button onclick="registerWithEmail()" class="login-button" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); margin-top: 0.5rem;">
-                    新規登録（無料5回お試し付き）
+                <!-- 利用規約・プライバシーポリシー同意チェックボックス -->
+                <div style="margin: 1rem 0; padding: 0.75rem; background: #f8f9fa; border-radius: 8px; font-size: 14px;">
+                    <label style="display: flex; align-items: flex-start; cursor: pointer; line-height: 1.5;">
+                        <input type="checkbox" id="termsAgreement" style="margin-right: 8px; margin-top: 2px; transform: scale(1.2);" required>
+                        <span>
+                            <a href="/terms" target="_blank" style="color: #667eea; text-decoration: underline;">利用規約</a>
+                            と
+                            <a href="https://jyoseikin.jp/privacy/" target="_blank" style="color: #667eea; text-decoration: underline;">プライバシーポリシー</a>
+                            に同意する
+                        </span>
+                    </label>
+                </div>
+                
+                <button onclick="registerWithEmail()" class="login-button" id="registerButton" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); margin-top: 0.5rem; opacity: 0.5; cursor: not-allowed;" disabled>
+                    同意して会員登録する
                 </button>
                 
                 <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
@@ -483,9 +496,15 @@
         async function registerWithEmail() {
             const email = document.getElementById('emailInput').value;
             const password = document.getElementById('passwordInput').value;
+            const termsAgreed = document.getElementById('termsAgreement').checked;
             
             if (!email || !password) {
                 alert('メールアドレスとパスワードを入力してください');
+                return;
+            }
+            
+            if (!termsAgreed) {
+                alert('利用規約とプライバシーポリシーに同意してください');
                 return;
             }
             
@@ -844,6 +863,31 @@
                 planned_investment: document.getElementById('plannedInvestment').value
             };
         }
+
+        // チェックボックスの状態に応じてボタンを有効化/無効化
+        function toggleRegisterButton() {
+            const termsAgreed = document.getElementById('termsAgreement').checked;
+            const registerButton = document.getElementById('registerButton');
+            
+            if (termsAgreed) {
+                registerButton.disabled = false;
+                registerButton.style.opacity = '1';
+                registerButton.style.cursor = 'pointer';
+            } else {
+                registerButton.disabled = true;
+                registerButton.style.opacity = '0.5';
+                registerButton.style.cursor = 'not-allowed';
+            }
+        }
+        
+        // ページ読み込み後にイベントリスナーを設定
+        window.addEventListener('load', function() {
+            const termsCheckbox = document.getElementById('termsAgreement');
+            if (termsCheckbox) {
+                termsCheckbox.addEventListener('change', toggleRegisterButton);
+                toggleRegisterButton(); // 初期状態を設定
+            }
+        });
 
         // Enterキーで送信
         document.getElementById('userQuestion').addEventListener('keypress', function(e) {

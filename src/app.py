@@ -876,6 +876,37 @@ def convert_diagnosis(session_id):
         logger.error(f"Error converting diagnosis: {str(e)}")
         return jsonify({'error': '診断結果の変換に失敗しました'}), 500
 
+@app.route('/api/ai-results', methods=['GET', 'POST'])
+@require_auth
+def ai_results():
+    """AI診断結果の取得・保存"""
+    try:
+        current_user = get_current_user()
+        user_id = current_user['user_id']
+        
+        from subsidy_service import SubsidyService
+        service = SubsidyService(firebase_service.get_db())
+        
+        if request.method == 'GET':
+            # AI診断結果を取得
+            results = service.get_ai_results(user_id)
+            return jsonify(results)
+            
+        elif request.method == 'POST':
+            # 新しいAI診断結果を保存
+            data = request.json
+            result_id = service.save_ai_result(user_id, data)
+            return jsonify({'id': result_id, 'message': '診断結果を保存しました'})
+            
+    except Exception as e:
+        logger.error(f"Error handling AI results: {str(e)}")
+        return jsonify({'error': 'AI診断結果の処理に失敗しました'}), 500
+
+@app.route('/terms')
+def terms():
+    """利用規約ページ"""
+    return render_template('terms.html')
+
 @app.route('/health')
 def health():
     return jsonify({'status': 'healthy'})

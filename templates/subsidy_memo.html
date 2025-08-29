@@ -1277,28 +1277,94 @@
         // AI診断結果の管理
         let aiResults = []; // 診断結果データを格納
         
-        function loadAIResults() {
-            // TODO: 将来的にはサーバーからAI診断結果を取得
-            // 現在は診断結果保存時にlocalStorageに保存されたデータを使用
-            const savedResults = localStorage.getItem('aiDiagnosisResults');
-            if (savedResults) {
-                aiResults = JSON.parse(savedResults);
-                displayAIResults();
+        async function loadAIResults() {
+            try {
+                const token = await getAuthToken();
+                if (!token) return;
+                
+                // FirestoreからAI診断結果を取得
+                const response = await fetch('/api/ai-results', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+                
+                if (response.ok) {
+                    aiResults = await response.json();
+                    displayAIResults();
+                    
+                    // localStorageに保存された古いデータがあれば移行
+                    await migrateLocalStorageData();
+                }
+            } catch (error) {
+                console.error('Error loading AI results:', error);
             }
         }
         
-        function addAIResult(result) {
-            const newResult = {
-                id: Date.now().toString(),
-                timestamp: new Date().toISOString(),
-                type: 'diagnosis', // 'diagnosis' or 'consultation'
-                content: result,
-                title: result.name || 'AI診断結果'
-            };
-            
-            aiResults.unshift(newResult); // 最新を先頭に
-            localStorage.setItem('aiDiagnosisResults', JSON.stringify(aiResults));
-            displayAIResults();
+        async function migrateLocalStorageData() {
+            // localStorageから古いデータを移行
+            const savedResults = localStorage.getItem('aiDiagnosisResults');
+            if (savedResults) {
+                try {
+                    const localResults = JSON.parse(savedResults);
+                    const token = await getAuthToken();
+                    if (!token) return;
+                    
+                    // 古いデータをFirestoreに保存
+                    for (const result of localResults) {
+                        await fetch('/api/ai-results', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer ' + token
+                            },
+                            body: JSON.stringify(result)
+                        });
+                    }
+                    
+                    // 移行完了後、localStorageをクリア
+                    localStorage.removeItem('aiDiagnosisResults');
+                    console.log('Successfully migrated AI results to Firestore');
+                    
+                    // 再読み込み
+                    await loadAIResults();
+                } catch (error) {
+                    console.error('Error migrating localStorage data:', error);
+                }
+            }
+        }
+        
+        async function addAIResult(result) {
+            try {
+                const token = await getAuthToken();
+                if (!token) return;
+                
+                const newResult = {
+                    timestamp: new Date().toISOString(),
+                    type: result.type || 'diagnosis',
+                    content: result.content || result,
+                    title: result.title || result.name || 'AI診断結果',
+                    agentName: result.agentName,
+                    summary: result.summary
+                };
+                
+                // Firestoreに保存
+                const response = await fetch('/api/ai-results', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(newResult)
+                });
+                
+                if (response.ok) {
+                    // リストを再読み込み
+                    await loadAIResults();
+                }
+            } catch (error) {
+                console.error('Error saving AI result:', error);
+            }
         }
         
         function displayAIResults() {

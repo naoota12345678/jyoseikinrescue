@@ -393,3 +393,53 @@ class SubsidyService:
         except Exception as e:
             logger.error(f"Error getting upcoming deadlines: {str(e)}")
             return []
+    
+    # === AI診断結果関連 ===
+    
+    def save_ai_result(self, user_id: str, result_data: Dict) -> str:
+        """AI診断結果をFirestoreに保存"""
+        try:
+            result_id = str(uuid.uuid4())
+            
+            doc_data = {
+                'id': result_id,
+                'user_id': user_id,
+                'timestamp': datetime.now().isoformat(),
+                'type': result_data.get('type', 'diagnosis'),
+                'content': result_data.get('content'),
+                'title': result_data.get('title', 'AI診断結果'),
+                'agent_name': result_data.get('agentName'),
+                'summary': result_data.get('summary')
+            }
+            
+            # Firestoreに保存
+            doc_ref = self.db.collection('users').document(user_id).collection('ai_results').document(result_id)
+            doc_ref.set(doc_data)
+            
+            logger.info(f"Saved AI result: {result_id} for user: {user_id}")
+            return result_id
+            
+        except Exception as e:
+            logger.error(f"Error saving AI result: {str(e)}")
+            raise
+    
+    def get_ai_results(self, user_id: str, limit: int = 50) -> List[Dict]:
+        """AI診断結果を取得"""
+        try:
+            results = []
+            
+            # Firestoreから取得
+            collection_ref = self.db.collection('users').document(user_id).collection('ai_results')
+            docs = collection_ref.order_by('timestamp', direction=firestore.Query.DESCENDING).limit(limit).stream()
+            
+            for doc in docs:
+                data = doc.to_dict()
+                data['id'] = doc.id
+                results.append(data)
+            
+            logger.info(f"Retrieved {len(results)} AI results for user: {user_id}")
+            return results
+            
+        except Exception as e:
+            logger.error(f"Error fetching AI results: {str(e)}")
+            return []
