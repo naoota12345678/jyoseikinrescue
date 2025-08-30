@@ -16,6 +16,8 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
         }
         
         .container {
@@ -364,19 +366,34 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         let currentUser = null;
+        let authInitialized = false;
 
         // 認証状態の監視
         auth.onAuthStateChanged((user) => {
+            authInitialized = true;
             if (user) {
                 currentUser = user;
                 console.log('User authenticated:', user.email);
+                // ユーザーが認証されている場合、UIを表示
+                document.body.style.opacity = '1';
             } else {
                 console.log('User not authenticated, redirecting to login');
-                window.location.href = '/';
+                // 少し遅延させてからリダイレクト（認証の初期化を待つため）
+                setTimeout(() => {
+                    if (!currentUser) {
+                        window.location.href = '/';
+                    }
+                }, 1000);
             }
         });
 
         async function selectPlan(planType) {
+            // 認証状態が初期化されていない場合は待機
+            if (!authInitialized) {
+                alert('認証を確認中です。少々お待ちください。');
+                return;
+            }
+            
             if (!currentUser) {
                 alert('ログインが必要です');
                 window.location.href = '/';
