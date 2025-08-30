@@ -471,23 +471,47 @@
             
             document.getElementById('userEmail').textContent = user.email;
             
-            // シンプル: statusが"active"でなければ無料（5回制限）
-            const isActive = usage.status === 'active' && usage.plan_type === 'basic';
-            const limit = isActive ? 50 : 5;
+            // 新しいプラン判定：questions_limitを優先的に使用
+            const isActive = usage.status === 'active';
+            const activePlans = ['light', 'regular', 'heavy', 'basic'];
+            const hasPaidPlan = activePlans.includes(usage.plan_type);
+            
+            // questions_limitがあればそれを使用、なければデフォルト値
+            let limit;
+            if (usage.questions_limit && usage.questions_limit > 0) {
+                limit = usage.questions_limit;
+            } else if (isActive && hasPaidPlan) {
+                // フォールバック：プランタイプから推定
+                const planLimits = { light: 20, regular: 50, heavy: 90, basic: 50 };
+                limit = planLimits[usage.plan_type] || 50;
+            } else {
+                limit = 5; // 無料プラン
+            }
+            
             const used = usage.questions_used || 0;
             const remaining = Math.max(0, limit - used);
             
-            console.log('計算結果 - remaining:', remaining);
-            console.log('questions_limit:', usage.questions_limit);
-            console.log('questions_used:', usage.questions_used);
-            console.log('plan_type:', usage.plan_type);
+            // プラン名の表示
+            const planNames = { 
+                light: 'ライト', 
+                regular: 'レギュラー', 
+                heavy: 'ヘビー', 
+                basic: 'ベーシック',
+                free: '無料',
+                none: '無料'
+            };
+            const planDisplayName = planNames[usage.plan_type] || '無料';
+            
+            console.log('=== UI更新情報 ===');
+            console.log('isActive:', isActive, 'hasPaidPlan:', hasPaidPlan);
+            console.log('limit:', limit, 'used:', used, 'remaining:', remaining);
+            console.log('plan_type:', usage.plan_type, 'display:', planDisplayName);
             
             document.getElementById('remainingQuestions').textContent = remaining;
-            document.getElementById('planType').textContent = 
-                isActive ? 'ベーシック' : '無料';
+            document.getElementById('planType').textContent = planDisplayName;
             
-            // 使用上限に達した場合のアップグレード表示（ページロード時に1回だけ）
-            if (remaining === 0 && !window.upgradePromptShown) {
+            // 使用上限に達した場合のアップグレード表示（有料プランでない場合のみ）
+            if (remaining === 0 && !hasPaidPlan && !window.upgradePromptShown) {
                 window.upgradePromptShown = true;
                 setTimeout(() => showUpgradePrompt(usage.plan_type || 'free'), 500);
             }
