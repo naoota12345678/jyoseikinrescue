@@ -1270,12 +1270,18 @@
         }
         
         function goToAIConsultation() {
-            // ダッシュボード（エージェント選択画面）に遷移
-            window.location.href = '/dashboard';
+            // 現在選択されている診断結果があれば、そのagent_typeを渡す
+            if (currentlySelectedResult && currentlySelectedResult.content && currentlySelectedResult.content.agentType) {
+                window.location.href = `/dashboard?agent_type=${currentlySelectedResult.content.agentType}`;
+            } else {
+                // デフォルトはダッシュボードのエージェント選択画面に遷移
+                window.location.href = '/dashboard';
+            }
         }
         
         // AI診断結果の管理
         let aiResults = []; // 診断結果データを格納
+        let currentlySelectedResult = null; // 現在選択されている診断結果
         
         async function loadAIResults() {
             try {
@@ -1413,6 +1419,9 @@
             // AI診断結果の詳細を右側のチャット履歴エリアに表示
             const result = aiResults.find(r => (r.id || r.timestamp) === resultId);
             if (!result) return;
+            
+            // 現在選択されている結果を更新
+            currentlySelectedResult = result;
             
             const chatMessages = document.getElementById('chatMessages');
             const chatHeader = document.querySelector('.chat-header');

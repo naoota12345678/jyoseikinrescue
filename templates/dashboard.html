@@ -407,20 +407,59 @@
             if (user) {
                 currentUser = user;
                 await loadUserData();
-                // URLパラメータをチェック（Stripe決済後の処理）
+                
+                // URLパラメータをチェック
                 const urlParams = new URLSearchParams(window.location.search);
+                
+                // agent_typeパラメータからエージェントを自動選択
+                const agentType = urlParams.get('agent_type');
+                if (agentType) {
+                    console.log('Auto-selecting agent from URL:', agentType);
+                    currentAgent = agentType;
+                    showAgentChat(agentType);
+                    // URLパラメータを削除
+                    window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+                }
+                
+                // Stripe決済後の処理
                 if (urlParams.get('payment') === 'success') {
                     const planType = urlParams.get('plan');
                     if (planType) {
+                        console.log('Processing payment success for plan:', planType);
                         // webhook失敗に備えて手動でプラン更新を試行
                         await attemptManualPlanUpdate(planType);
+                        
+                        // URLパラメータを削除
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        
+                        // 追加パックか通常プランかで処理を変える
+                        if (planType.startsWith('pack_')) {
+                            // 追加パックの場合：即座に複数回リロード
+                            setTimeout(async () => {
+                                console.log('First pack data reload');
+                                await loadUserData();
+                            }, 1000);
+                            
+                            setTimeout(async () => {
+                                console.log('Final pack data reload');
+                                await loadUserData();
+                            }, 2500);
+                        } else {
+                            // 通常プランの場合
+                            setTimeout(async () => {
+                                console.log('Final data reload after payment processing');
+                                await loadUserData();
+                            }, 2000);
+                        }
                     } else {
                         alert('決済が完了しました。プランがアップグレードされました。');
+                        // URLパラメータを削除
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        // データを再読み込み
+                        setTimeout(async () => {
+                            await loadUserData();
+                        }, 1000);
                     }
-                    // URLパラメータを削除
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                    // データを再読み込み
-                    await loadUserData();
                 }
                 // 診断結果の変換チェック
                 setTimeout(checkPendingDiagnosis, 1000);
@@ -460,11 +499,6 @@
         }
 
         function updateUserInterface(user, usage) {
-            // デバッグ用ログ
-            console.log('=== updateUserInterface実行 ===');
-            console.log('user:', user);
-            console.log('usage:', usage);
-            
             // デフォルト値を設定
             if (!user) user = { email: 'ユーザー' };
             if (!usage) usage = { plan_type: 'free', questions_used: 0 };
@@ -502,13 +536,22 @@
             };
             const planDisplayName = planNames[usage.plan_type] || '無料';
             
-            console.log('=== UI更新情報 ===');
-            console.log('isActive:', isActive, 'hasPaidPlan:', hasPaidPlan);
-            console.log('limit:', limit, 'used:', used, 'remaining:', remaining);
-            console.log('plan_type:', usage.plan_type, 'display:', planDisplayName);
+            // UI要素を強制的に更新
+            const remainingElement = document.getElementById('remainingQuestions');
+            const planElement = document.getElementById('planType');
             
-            document.getElementById('remainingQuestions').textContent = remaining;
-            document.getElementById('planType').textContent = planDisplayName;
+            if (remainingElement) {
+                remainingElement.textContent = remaining;
+                // 確実に更新されるよう、一度空にしてから設定
+                remainingElement.innerHTML = '';
+                remainingElement.textContent = remaining;
+            }
+            
+            if (planElement) {
+                planElement.textContent = planDisplayName;
+                planElement.innerHTML = '';
+                planElement.textContent = planDisplayName;
+            }
             
             // 使用上限に達した場合のアップグレード表示
             if (remaining === 0 && !window.upgradePromptShown) {
@@ -1070,6 +1113,27 @@
                 
                 if (data.status === 'success') {
                     console.log('Manual plan update successful:', data);
+                    
+                    // 追加パックの場合は即座に質問数を更新
+                    if (planType.startsWith('pack_')) {
+                        setTimeout(async () => {
+                            await loadUserData();
+                            console.log('Pack purchase data reloaded');
+                            
+                            // 追加で確実に更新
+                            setTimeout(async () => {
+                                await loadUserData();
+                                console.log('Secondary data reload for pack purchase');
+                            }, 1500);
+                        }, 500);
+                    } else {
+                        // 通常プランの場合
+                        setTimeout(async () => {
+                            await loadUserData();
+                            console.log('Data reloaded after manual plan update');
+                        }, 1000);
+                    }
+                    
                     // 成功通知
                     const successMsg = document.createElement('div');
                     successMsg.style.cssText = `
