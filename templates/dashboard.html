@@ -410,9 +410,17 @@
                 // URLパラメータをチェック（Stripe決済後の処理）
                 const urlParams = new URLSearchParams(window.location.search);
                 if (urlParams.get('payment') === 'success') {
-                    alert('決済が完了しました。プランがアップグレードされました。');
+                    const planType = urlParams.get('plan');
+                    if (planType) {
+                        // webhook失敗に備えて手動でプラン更新を試行
+                        await attemptManualPlanUpdate(planType);
+                    } else {
+                        alert('決済が完了しました。プランがアップグレードされました。');
+                    }
                     // URLパラメータを削除
                     window.history.replaceState({}, document.title, window.location.pathname);
+                    // データを再読み込み
+                    await loadUserData();
                 }
                 // 診断結果の変換チェック
                 setTimeout(checkPendingDiagnosis, 1000);
@@ -998,6 +1006,68 @@
             }
         }
         
+        
+        // Webhook失敗時の手動プラン更新
+        async function attemptManualPlanUpdate(planType) {
+            try {
+                console.log(`Attempting manual plan update: ${planType}`);
+                
+                const token = await currentUser.getIdToken();
+                const response = await fetch('/api/force-plan-update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        plan_type: planType
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    console.log('Manual plan update successful:', data);
+                    // 成功通知
+                    const successMsg = document.createElement('div');
+                    successMsg.style.cssText = `
+                        position: fixed; top: 20px; right: 20px; 
+                        background: #d4edda; color: #155724; padding: 1rem; 
+                        border-radius: 8px; z-index: 2000; max-width: 300px;
+                        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+                    `;
+                    successMsg.textContent = `決済完了：${data.message}`;
+                    document.body.appendChild(successMsg);
+                    setTimeout(() => successMsg.remove(), 5000);
+                } else {
+                    console.error('Manual plan update failed:', data);
+                    // Webhookの自動処理を期待する旨の通知
+                    const infoMsg = document.createElement('div');
+                    infoMsg.style.cssText = `
+                        position: fixed; top: 20px; right: 20px; 
+                        background: #cce5ff; color: #004085; padding: 1rem; 
+                        border-radius: 8px; z-index: 2000; max-width: 300px;
+                        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+                    `;
+                    infoMsg.textContent = '決済が完了しました。プランの更新には少し時間がかかる場合があります。';
+                    document.body.appendChild(infoMsg);
+                    setTimeout(() => infoMsg.remove(), 8000);
+                }
+            } catch (error) {
+                console.error('Manual plan update error:', error);
+                // エラーでも決済完了の旨を通知
+                const fallbackMsg = document.createElement('div');
+                fallbackMsg.style.cssText = `
+                    position: fixed; top: 20px; right: 20px; 
+                    background: #fff3cd; color: #856404; padding: 1rem; 
+                    border-radius: 8px; z-index: 2000; max-width: 300px;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+                `;
+                fallbackMsg.textContent = '決済が完了しました。プランの反映には少し時間がかかる場合があります。';
+                document.body.appendChild(fallbackMsg);
+                setTimeout(() => fallbackMsg.remove(), 8000);
+            }
+        }
         
         // 認証完了後に診断結果をチェック（既存のauth.onAuthStateChangedハンドラーに統合済み）
     </script>

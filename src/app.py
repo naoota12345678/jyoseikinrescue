@@ -849,6 +849,66 @@ def stripe_webhook():
         logger.error(f"Error processing webhook: {str(e)}")
         return jsonify({'error': 'Webhook処理エラー'}), 500
 
+@app.route('/api/force-plan-update', methods=['POST'])
+@require_auth
+def force_plan_update():
+    """Webhook失敗時の代替手段として手動でプラン更新を実行"""
+    try:
+        current_user = get_current_user()
+        data = request.json
+        
+        user_id = current_user.get('user_id') or current_user['id']
+        plan_type = data.get('plan_type')
+        session_id = data.get('session_id', 'manual_update')
+        
+        logger.info(f"Manual plan update requested - User: {user_id}, Plan: {plan_type}, Session: {session_id}")
+        
+        if not plan_type:
+            return jsonify({'error': 'プランタイプが必要です'}), 400
+            
+        subscription_service = get_subscription_service()
+        
+        # サブスクリプションプラン
+        if plan_type in ['light', 'regular', 'heavy', 'basic']:
+            success = subscription_service.upgrade_to_subscription_plan(user_id, plan_type, session_id)
+            if success:
+                logger.info(f"Manual subscription plan update successful: {user_id} -> {plan_type}")
+                return jsonify({
+                    'status': 'success',
+                    'message': f'{plan_type}プランにアップグレードしました',
+                    'plan_type': plan_type
+                })
+            else:
+                logger.error(f"Manual subscription plan update failed: {user_id} -> {plan_type}")
+                return jsonify({'error': 'プランアップグレードに失敗しました'}), 500
+        
+        # 追加パック
+        elif plan_type == 'pack_20':
+            success = subscription_service.add_pack_20(user_id, session_id)
+        elif plan_type == 'pack_40':
+            success = subscription_service.add_pack_40(user_id, session_id)
+        elif plan_type == 'pack_90':
+            success = subscription_service.add_pack_90(user_id, session_id)
+        elif plan_type == 'additional_pack':
+            success = subscription_service.add_additional_pack(user_id, session_id)
+        else:
+            return jsonify({'error': '無効なプランタイプです'}), 400
+            
+        if success:
+            logger.info(f"Manual pack update successful: {user_id} -> {plan_type}")
+            return jsonify({
+                'status': 'success',
+                'message': f'{plan_type}を追加しました',
+                'plan_type': plan_type
+            })
+        else:
+            logger.error(f"Manual pack update failed: {user_id} -> {plan_type}")
+            return jsonify({'error': 'パック追加に失敗しました'}), 500
+            
+    except Exception as e:
+        logger.error(f"Error in manual plan update: {str(e)}")
+        return jsonify({'error': '手動プラン更新エラー'}), 500
+
 # ===== 助成金メモ・スケジュール管理API =====
 
 @app.route('/subsidy-memo')
