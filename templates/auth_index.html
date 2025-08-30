@@ -22,10 +22,14 @@
         }
         
         body {
-            font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
             color: #333;
-            background-color: #f8f9fa;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            opacity: 0;
+            transition: opacity 0.5s ease;
         }
         
         .container {
@@ -35,27 +39,37 @@
         }
         
         header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: transparent;
             color: white;
-            padding: 1rem 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 2rem 0;
+            text-align: center;
         }
         
         .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
         
         h1 {
-            font-size: 2rem;
-            font-weight: bold;
+            font-size: 4rem;
+            font-weight: 900;
+            margin: 2rem 0 1rem 0;
+            text-shadow: 2px 4px 8px rgba(0,0,0,0.3);
+            letter-spacing: -1px;
         }
         
         .subtitle {
-            font-size: 1.1rem;
-            margin-top: 0.5rem;
-            opacity: 0.9;
+            font-size: 1.5rem;
+            font-weight: 300;
+            opacity: 0.95;
+            margin-bottom: 3rem;
+        }
+        
+        .hero-section {
+            text-align: center;
+            padding: 4rem 0;
+            color: white;
         }
         
         .main-content {
@@ -63,14 +77,17 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
         }
         
         .card {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            border: 1px solid #e9ecef;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
         }
         
         .card h2 {
@@ -259,19 +276,15 @@
         <div class="container">
             <div class="header-content">
                 <div>
-                    <h1>
-                        <svg width="60" height="36" viewBox="0 0 75 40" style="margin-right: 12px; vertical-align: middle;" xmlns="http://www.w3.org/2000/svg">
-                            <g stroke="currentColor" stroke-width="2" fill="none">
-                                <line x1="5" y1="20" x2="10" y2="20" />
-                                <path d="M10 20 L13 17 L16 23 L19 20" />
-                                <path d="M19 20 L22 10 L25 30 L28 20" />
-                                <path d="M28 20 L31 15 L34 25 L37 20" />
-                                <line x1="37" y1="20" x2="42" y2="20" />
-                            </g>
-                        </svg>
-                        助成金レスキュー
-                    </h1>
-                    <p class="subtitle">AI専門相談で最大1,200万円の助成金を確実獲得</p>
+                    <svg width="60" height="36" viewBox="0 0 75 40" style="display: block; margin: 0 auto;" xmlns="http://www.w3.org/2000/svg">
+                        <g stroke="currentColor" stroke-width="2" fill="none">
+                            <line x1="5" y1="20" x2="10" y2="20" />
+                            <path d="M10 20 L13 17 L16 23 L19 20" />
+                            <path d="M19 20 L22 10 L25 30 L28 20" />
+                            <path d="M28 20 L31 15 L34 25 L37 20" />
+                            <line x1="37" y1="20" x2="42" y2="20" />
+                        </g>
+                    </svg>
                 </div>
                 <div style="display: flex; align-items: center; gap: 1rem;">
                     <a href="/diagnosis" style="background: rgba(255,255,255,0.2); color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-weight: 600;">
@@ -287,6 +300,16 @@
         </div>
     </header>
 
+    <div class="hero-section">
+        <div class="container">
+            <h1>🎯 助成金レスキュー</h1>
+            <p class="subtitle">
+                AI助成金相談サービス<br>
+                100種類超の助成金から、あなたの会社に最適な提案をします
+            </p>
+        </div>
+    </div>
+    
     <main class="container">
         <!-- 認証状態表示 -->
         <div id="loginSection" class="auth-section">
@@ -892,7 +915,9 @@
         }
         
         // ページ読み込み後にイベントリスナーを設定
+        // ページ読み込み完了時のフェードイン
         window.addEventListener('load', function() {
+            document.body.style.opacity = '1';
             const termsCheckbox = document.getElementById('termsAgreement');
             if (termsCheckbox) {
                 termsCheckbox.addEventListener('change', toggleRegisterButton);

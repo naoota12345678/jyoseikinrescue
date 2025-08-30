@@ -13,10 +13,14 @@
         }
         
         body {
-            font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
             color: #333;
-            background-color: #f8f9fa;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            opacity: 0;
+            transition: opacity 0.5s ease;
         }
         
         .container {
@@ -26,27 +30,60 @@
         }
         
         header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: transparent;
             color: white;
             padding: 2rem 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
         }
         
         .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
         
         h1 {
-            font-size: 2rem;
-            font-weight: bold;
+            font-size: 4rem;
+            font-weight: 900;
+            margin: 2rem 0 1rem 0;
+            text-shadow: 2px 4px 8px rgba(0,0,0,0.3);
+            letter-spacing: -1px;
         }
         
         .subtitle {
-            font-size: 1.1rem;
-            margin-top: 0.5rem;
-            opacity: 0.9;
+            font-size: 1.5rem;
+            font-weight: 300;
+            opacity: 0.95;
+            margin-bottom: 3rem;
+        }
+        
+        .hero-section {
+            text-align: center;
+            padding: 4rem 0;
+            color: white;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 1.5rem 3rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.3rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+            margin: 2rem 1rem;
+            cursor: pointer;
+        }
+        
+        .cta-button:hover {
+            background: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         
         .main-content {
@@ -54,14 +91,17 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
         }
         
         .card {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            border: 1px solid #e9ecef;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
         }
         
         .card h2 {
@@ -204,12 +244,30 @@
     <header>
         <div class="container">
             <div class="header-content">
-                <div style="display: flex; justify-content: flex-start; align-items: center;">
-                    <img src="/static/logo.svg" style="height: 6rem;" alt="助成金レスキュー">
+                <div style="text-align: center;">
+                    <img src="/static/logo.svg" style="height: 4rem; margin-bottom: 1rem;" alt="助成金レスキュー">
                 </div>
             </div>
         </div>
     </header>
+
+    <div class="hero-section">
+        <div class="container">
+            <h1>🎯 助成金レスキュー</h1>
+            <p class="subtitle">
+                令和7年度 100種類超の助成金を完全網羅<br>
+                最大1,200万円の助成金を見つけます
+            </p>
+            <div style="margin-top: 3rem;">
+                <button type="button" onclick="startDiagnosis()" class="cta-button">
+                    🚀 無料診断を開始する（3分）
+                </button>
+                <button type="button" onclick="goToConsultation()" class="cta-button" style="background: rgba(255,255,255,0.1);">
+                    💬 AI専門相談を始める
+                </button>
+            </div>
+        </div>
+    </div>
 
     <main class="container">
         <div class="main-content">
@@ -448,6 +506,11 @@
                 e.preventDefault();
                 sendQuestion();
             }
+        });
+        
+        // ページ読み込み完了時のフェードイン
+        window.addEventListener('load', function() {
+            document.body.style.opacity = '1';
         });
     </script>
 </body>

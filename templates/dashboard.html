@@ -201,6 +201,15 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
         
+        /* エージェント直接リンク時のローディング状態 */
+        body.loading-agent #agentSelector {
+            display: none !important;
+        }
+        
+        body.loading-agent #agentChatArea {
+            display: block !important;
+        }
+        
         .agent-title {
             color: #667eea;
             margin-bottom: 2rem;
@@ -402,23 +411,29 @@
 
         const auth = firebase.auth();
 
+        // ページ読み込み時にagent_typeをチェック
+        const urlParams = new URLSearchParams(window.location.search);
+        const agentType = urlParams.get('agent_type');
+        if (agentType) {
+            // エージェント直接リンクの場合、bodyにクラスを追加
+            document.body.classList.add('loading-agent');
+        }
+        
         // 認証状態の監視
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 currentUser = user;
                 await loadUserData();
                 
-                // URLパラメータをチェック
-                const urlParams = new URLSearchParams(window.location.search);
-                
                 // agent_typeパラメータからエージェントを自動選択
-                const agentType = urlParams.get('agent_type');
                 if (agentType) {
                     console.log('Auto-selecting agent from URL:', agentType);
                     currentAgent = agentType;
                     showAgentChat(agentType);
                     // URLパラメータを削除
                     window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+                    // ローディング状態を解除
+                    document.body.classList.remove('loading-agent');
                 }
                 
                 // Stripe決済後の処理
