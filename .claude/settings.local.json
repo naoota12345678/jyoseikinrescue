@@ -5,6 +5,9 @@
       "Bash(git push:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
+      "Read(C:\\Users\\naoot\\Pictures\\Screenshots/**)",
+      "Read(C:\\Users\\naoot\\Pictures\\Screenshots/**)",
+      "Read(C:\\Users\\naoot\\Pictures\\Screenshots/**)",
       "Read(C:\\Users\\naoot\\Pictures\\Screenshots/**)"
     ],
     "deny": [],

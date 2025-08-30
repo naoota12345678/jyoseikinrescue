@@ -255,13 +255,33 @@
             display: none;
         }
         
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .cta-button:hover {
+            transform: scale(1.1) !important;
+            box-shadow: 0 20px 50px rgba(255, 193, 7, 0.6) !important;
+        }
+        
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
             }
             
             h1 {
-                font-size: 1.5rem;
+                font-size: 3rem;
+            }
+            
+            .subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .cta-button {
+                padding: 1.5rem 2rem;
+                font-size: 1.2rem;
             }
             
             .header-content {
@@ -307,12 +327,144 @@
                 AI助成金相談サービス<br>
                 100種類超の助成金から、あなたの会社に最適な提案をします
             </p>
+            
+            <!-- メインCTA -->
+            <div style="margin-top: 3rem;">
+                <button onclick="startDiagnosis()" class="cta-button" style="font-size: 1.4rem; padding: 2rem 4rem; margin: 1rem;">
+                    🚀 今すぐ無料診断をスタート（3分）
+                </button>
+            </div>
+            
+            <!-- サブCTA -->
+            <div style="margin-top: 2rem;">
+                <p style="opacity: 0.9; font-size: 1.1rem; margin-bottom: 1rem;">
+                    既にアカウントをお持ちの方は
+                </p>
+                <button onclick="showLogin()" style="background: rgba(255,255,255,0.1); color: white; border: 2px solid rgba(255,255,255,0.3); padding: 1rem 2rem; border-radius: 50px; font-size: 1rem; cursor: pointer; backdrop-filter: blur(10px);">
+                    💬 ログインしてAI相談を始める
+                </button>
+            </div>
         </div>
     </div>
     
-    <main class="container">
-        <!-- 認証状態表示 -->
-        <div id="loginSection" class="auth-section">
+    <!-- サービス特徴セクション -->
+    <div class="container" style="margin: 4rem auto; max-width: 1000px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+            <div class="card" style="text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🤖</div>
+                <h3 style="color: #667eea; margin-bottom: 1rem;">100種類超 完全網羅</h3>
+                <p style="line-height: 1.7;">29カテゴリー・100種類超の助成金からAIが最適なものを選定。見逃しがちな助成金も確実に発見します。</p>
+            </div>
+            
+            <div class="card" style="text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">⚡</div>
+                <h3 style="color: #667eea; margin-bottom: 1rem;">即座に診断結果</h3>
+                <p style="line-height: 1.7;">わずか3分の質問に答えるだけで、最大1,200万円の助成金を瞬時に診断。申請要件も詳しく表示します。</p>
+            </div>
+            
+            <div class="card" style="text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">💰</div>
+                <h3 style="color: #667eea; margin-bottom: 1rem;">最大1,200万円</h3>
+                <p style="line-height: 1.7;">業務改善・人材開発・働き方改革など様々な分野で、あなたの会社が受給可能な助成金を発見します。</p>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 3rem;">
+            <button onclick="startDiagnosis()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none; padding: 2rem 4rem; border-radius: 50px; font-size: 1.4rem; font-weight: 700; cursor: pointer; box-shadow: 0 15px 40px rgba(40, 167, 69, 0.4); transform: scale(1.05); border: 3px solid rgba(255,255,255,0.3);">
+                🎯 今すぐ無料診断をスタート（完全無料）
+            </button>
+        </div>
+    </div>
+    
+    <!-- プランセクション -->
+    <div class="container" style="margin: 4rem auto; max-width: 1200px;">
+        <div style="text-align: center; margin-bottom: 3rem;">
+            <h2 style="color: white; font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem;">💎 料金プラン</h2>
+            <p style="color: rgba(255,255,255,0.9); font-size: 1.2rem;">診断後、詳細な相談が必要な場合にご利用ください</p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
+            <!-- ライトプラン -->
+            <div class="card" style="text-align: center; position: relative; border: 2px solid #17a2b8;">
+                <div style="background: #17a2b8; color: white; padding: 0.5rem; margin: -2.5rem -2.5rem 1.5rem -2.5rem; border-radius: 20px 20px 0 0;">
+                    <h3 style="margin: 0; font-size: 1.3rem;">💡 ライトプラン</h3>
+                </div>
+                <div style="font-size: 2.5rem; color: #17a2b8; font-weight: bold; margin-bottom: 0.5rem;">¥1,480</div>
+                <p style="color: #666; margin-bottom: 1.5rem;">月額（税込）</p>
+                <div style="margin-bottom: 2rem;">
+                    <div style="font-size: 1.8rem; color: #17a2b8; font-weight: bold;">20回/月</div>
+                    <p style="color: #666;">AI専門相談</p>
+                </div>
+                <ul style="text-align: left; margin-bottom: 2rem; padding-left: 0; list-style: none;">
+                    <li style="margin-bottom: 0.5rem;">✅ 全助成金対応</li>
+                    <li style="margin-bottom: 0.5rem;">✅ 24時間対応</li>
+                    <li style="margin-bottom: 0.5rem;">✅ 申請書類案内</li>
+                </ul>
+                <button onclick="window.location.href='/pricing'" style="background: #17a2b8; color: white; border: none; padding: 1rem 2rem; border-radius: 25px; width: 100%; font-weight: 600; cursor: pointer;">
+                    このプランを選択
+                </button>
+            </div>
+            
+            <!-- レギュラープラン -->
+            <div class="card" style="text-align: center; position: relative; border: 2px solid #28a745; transform: scale(1.05); box-shadow: 0 20px 60px rgba(40, 167, 69, 0.3);">
+                <div style="background: #28a745; color: white; padding: 0.5rem; margin: -2.5rem -2.5rem 1.5rem -2.5rem; border-radius: 20px 20px 0 0; position: relative;">
+                    <div style="background: #ffc107; color: #333; padding: 0.3rem 1rem; border-radius: 15px; position: absolute; top: -10px; right: 1rem; font-size: 0.8rem; font-weight: bold;">おすすめ</div>
+                    <h3 style="margin: 0; font-size: 1.3rem;">⭐ レギュラープラン</h3>
+                </div>
+                <div style="font-size: 2.5rem; color: #28a745; font-weight: bold; margin-bottom: 0.5rem;">¥3,300</div>
+                <p style="color: #666; margin-bottom: 1.5rem;">月額（税込）</p>
+                <div style="margin-bottom: 2rem;">
+                    <div style="font-size: 1.8rem; color: #28a745; font-weight: bold;">50回/月</div>
+                    <p style="color: #666;">AI専門相談</p>
+                </div>
+                <ul style="text-align: left; margin-bottom: 2rem; padding-left: 0; list-style: none;">
+                    <li style="margin-bottom: 0.5rem;">✅ 全助成金対応</li>
+                    <li style="margin-bottom: 0.5rem;">✅ 24時間対応</li>
+                    <li style="margin-bottom: 0.5rem;">✅ 申請書類案内</li>
+                    <li style="margin-bottom: 0.5rem;">🎯 優先サポート</li>
+                </ul>
+                <button onclick="window.location.href='/pricing'" style="background: #28a745; color: white; border: none; padding: 1rem 2rem; border-radius: 25px; width: 100%; font-weight: 600; cursor: pointer;">
+                    このプランを選択
+                </button>
+            </div>
+            
+            <!-- ヘビープラン -->
+            <div class="card" style="text-align: center; position: relative; border: 2px solid #dc3545;">
+                <div style="background: #dc3545; color: white; padding: 0.5rem; margin: -2.5rem -2.5rem 1.5rem -2.5rem; border-radius: 20px 20px 0 0;">
+                    <h3 style="margin: 0; font-size: 1.3rem;">🔥 ヘビープラン</h3>
+                </div>
+                <div style="font-size: 2.5rem; color: #dc3545; font-weight: bold; margin-bottom: 0.5rem;">¥5,500</div>
+                <p style="color: #666; margin-bottom: 1.5rem;">月額（税込）</p>
+                <div style="margin-bottom: 2rem;">
+                    <div style="font-size: 1.8rem; color: #dc3545; font-weight: bold;">90回/月</div>
+                    <p style="color: #666;">AI専門相談</p>
+                </div>
+                <ul style="text-align: left; margin-bottom: 2rem; padding-left: 0; list-style: none;">
+                    <li style="margin-bottom: 0.5rem;">✅ 全助成金対応</li>
+                    <li style="margin-bottom: 0.5rem;">✅ 24時間対応</li>
+                    <li style="margin-bottom: 0.5rem;">✅ 申請書類案内</li>
+                    <li style="margin-bottom: 0.5rem;">🎯 優先サポート</li>
+                    <li style="margin-bottom: 0.5rem;">💎 専門家相談</li>
+                </ul>
+                <button onclick="window.location.href='/pricing'" style="background: #dc3545; color: white; border: none; padding: 1rem 2rem; border-radius: 25px; width: 100%; font-weight: 600; cursor: pointer;">
+                    このプランを選択
+                </button>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 3rem;">
+            <p style="color: rgba(255,255,255,0.8); font-size: 1rem; margin-bottom: 2rem;">
+                まずは無料診断で、あなたの会社に最適な助成金を確認してください
+            </p>
+            <button onclick="startDiagnosis()" style="background: linear-gradient(135deg, #ffc107 0%, #ff8c00 100%); color: #333; border: none; padding: 2rem 4rem; border-radius: 50px; font-size: 1.5rem; font-weight: 800; cursor: pointer; box-shadow: 0 15px 40px rgba(255, 193, 7, 0.4); border: 3px solid rgba(255,255,255,0.5); animation: pulse 2s infinite;">
+                🎯 完全無料診断を今すぐ開始する
+            </button>
+        </div>
+    </div>
+    
+    <!-- ログインセクション（初期は非表示） -->
+    <main class="container" id="loginContainer" style="display: none;">
+        <div class="card" style="max-width: 500px; margin: 2rem auto;">
             <h2>🔐 ログイン / 新規登録</h2>
             <div class="login-form">
                 <p>100種類超の助成金AI相談サービスをご利用ください。</p>
@@ -915,6 +1067,16 @@
         }
         
         // ページ読み込み後にイベントリスナーを設定
+        // ランディングページ用関数
+        function startDiagnosis() {
+            window.location.href = '/diagnosis';
+        }
+        
+        function showLogin() {
+            document.getElementById('loginContainer').style.display = 'block';
+            document.getElementById('loginContainer').scrollIntoView({ behavior: 'smooth' });
+        }
+        
         // ページ読み込み完了時のフェードイン
         window.addEventListener('load', function() {
             document.body.style.opacity = '1';
