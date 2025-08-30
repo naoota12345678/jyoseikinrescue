@@ -1394,7 +1394,7 @@
                 let icon = '🤖';
                 
                 if (result.type === 'consultation') {
-                    preview = `${result.agentName}専門エージェント相談`;
+                    preview = `${result.agentName || 'AI専門'}エージェント相談`;
                     icon = '💼';
                 } else if (result.type === 'diagnosis') {
                     preview = '助成金診断結果';
@@ -1436,7 +1436,7 @@
             // タイプに応じて表示内容を変更
             if (result.type === 'consultation') {
                 // エージェント会話の場合
-                chatHeader.innerHTML = `🤖 ${result.agentName}専門エージェント`;
+                chatHeader.innerHTML = `🤖 ${result.agentName || 'AI専門'}エージェント`;
                 
                 detailHTML += `
                     <div class="consultation-detail">

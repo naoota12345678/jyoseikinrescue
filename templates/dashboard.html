@@ -927,6 +927,13 @@
             const agentNames = {
                 'gyoumukaizen': '業務改善助成金',
                 'career-up': 'キャリアアップ助成金',
+                'career-up_seishain': 'キャリアアップ助成金（正社員化コース）',
+                'career-up_chingin': 'キャリアアップ助成金（賃金規定改定コース）',
+                'career-up_shogaisha': 'キャリアアップ助成金（障害者正社員化コース）',
+                'career-up_kyotsu': 'キャリアアップ助成金（賃金規定共通化コース）',
+                'career-up_shoyo': 'キャリアアップ助成金（賞与・退職金制度導入コース）',
+                'career-up_shahoken': 'キャリアアップ助成金（社会保険適用時処遇改善コース）',
+                'career-up_tanshuku': 'キャリアアップ助成金（短時間労働者労働時間延長支援コース）',
                 'jinzai-kaihatsu': '人材開発支援助成金',
                 '65sai-koyo': '65歳超雇用推進助成金',
                 'hataraki-kaikaku': '働き方改革推進支援助成金',
@@ -937,24 +944,8 @@
                 'other': 'その他の助成金'
             };
             
-            // エージェント名を取得（コース対応）
-            let agentName = agentNames[agentType.split('_')[0]] || 'AI相談';
-            if (agentType.includes('jinzai-kaihatsu_')) {
-                const courseName = agentType.split('_')[1];
-                agentName += ` (${courseName})`;
-            } else if (agentType.includes('career-up_')) {
-                const courseName = agentType.split('_')[1];
-                const courseNames = {
-                    'seishain': '正社員化コース',
-                    'shogaisha': '障害者正社員化コース',
-                    'chingin': '賃金規定等改定コース',
-                    'kyotsu': '賃金規定等共通化コース',
-                    'shoyo': '賞与・退職金制度導入コース',
-                    'shahoken': '社会保険適用時処遇改善コース',
-                    'tanshuku': '短時間労働者労働時間延長支援コース'
-                };
-                agentName += ` (${courseNames[courseName] || courseName})`;
-            }
+            // エージェント名を取得（完全一致を優先、なければ前部分一致、それでもなければデフォルト）
+            let agentName = agentNames[agentType] || agentNames[agentType.split('_')[0]] || 'AI専門相談';
             
             // AI診断結果と同じ形式で保存
             const conversationData = {

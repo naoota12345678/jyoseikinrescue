@@ -16,26 +16,70 @@
         }
         
         body {
-            font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
             color: #333;
-            background-color: #f8f9fa;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            opacity: 0;
+            transition: opacity 0.5s ease;
         }
         
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: transparent;
             color: white;
             padding: 2rem 0;
-            margin-bottom: 2rem;
+            text-align: center;
         }
         
         .header-content {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
             padding: 0 20px;
+        }
+        
+        .main-title {
+            font-size: 4rem;
+            font-weight: 900;
+            margin: 2rem 0 1rem 0;
+            text-shadow: 2px 4px 8px rgba(0,0,0,0.3);
+            letter-spacing: -1px;
+        }
+        
+        .main-subtitle {
+            font-size: 1.5rem;
+            font-weight: 300;
+            opacity: 0.95;
+            margin-bottom: 3rem;
+        }
+        
+        .hero-section {
+            text-align: center;
+            padding: 4rem 0;
+            color: white;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 1.2rem 3rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.2rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+        
+        .cta-button:hover {
+            background: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         
         .logo {
@@ -69,24 +113,35 @@
         }
         
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 0 20px;
         }
         
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
+        .content-wrapper {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 2rem auto 4rem auto;
+            max-width: 900px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
         }
         
         .page-title {
             text-align: center;
-            color: #667eea;
+            color: #333;
             margin-bottom: 2rem;
-            font-size: 1.8rem;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .page-description {
+            text-align: center;
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+            line-height: 1.8;
         }
         
         .question {
@@ -186,10 +241,23 @@
         </div>
     </div>
     
+    <div class="hero-section">
+        <div class="container">
+            <h1 class="main-title">🎯 無料診断システム</h1>
+            <p class="main-subtitle">
+                9つの質問に答えるだけで、あなたの会社に最適な助成金を瞬時に診断<br>
+                100種類以上の助成金から最大3つまで表示されます
+            </p>
+        </div>
+    </div>
+    
     <div class="container">
-        <h1 class="page-title">助成金適用診断システム</h1>
-        
-        <div class="card">
+        <div class="content-wrapper">
+            <h2 class="page-title">助成金適用診断</h2>
+            <p class="page-description">
+                以下の質問にお答えください。診断は完全無料で、約3分で完了します。<br>
+                診断結果には具体的な支給額や申請要件も表示されます。
+            </p>
             <form id="diagnosisForm">
                 <!-- 基本情報 -->
                 <div class="question">
@@ -345,8 +413,8 @@
             </form>
         </div>
 
-        <div class="card results" id="results">
-            <h2>🎯 診断結果</h2>
+        <div class="content-wrapper results" id="results">
+            <h2 style="text-align: center; color: #333; font-size: 2.2rem; font-weight: 700; margin-bottom: 2rem;">🎯 診断結果</h2>
             <div id="resultsList"></div>
         </div>
     </div>
@@ -550,6 +618,11 @@
         let currentDiagnosisResults = null;
         let isUserLoggedIn = false;
         let savedCompanyInfo = null; // 診断実行時の会社情報を保存
+        
+        // ページ読み込み完了時のフェードイン
+        window.addEventListener('load', function() {
+            document.body.style.opacity = '1';
+        });
         
         // 認証状態をチェック（Firebase設定）
         const firebaseConfig = {
