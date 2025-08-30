@@ -85,6 +85,11 @@ def dashboard():
     # 認証はクライアント側のFirebaseで行う
     return render_template('dashboard.html')
 
+@app.route('/pricing')
+def pricing():
+    """料金プラン選択ページ"""
+    return render_template('pricing.html')
+
 @app.route('/api/chat', methods=['POST'])
 @require_auth
 @check_usage_limit
@@ -640,6 +645,166 @@ def create_additional_pack_checkout():
         logger.error(f"Error creating additional pack checkout: {str(e)}")
         return jsonify({'error': '決済セッションの作成に失敗しました'}), 500
 
+# ===== 新料金プラン決済エンドポイント =====
+
+@app.route('/api/payment/light-plan', methods=['POST'])
+@require_auth
+def create_light_plan_checkout():
+    """ライトプラン（1,480円/月）の決済セッションを作成"""
+    return _create_subscription_checkout('light')
+
+@app.route('/api/payment/regular-plan', methods=['POST'])
+@require_auth 
+def create_regular_plan_checkout():
+    """レギュラープラン（3,300円/月）の決済セッションを作成"""
+    return _create_subscription_checkout('regular')
+
+@app.route('/api/payment/heavy-plan', methods=['POST'])
+@require_auth
+def create_heavy_plan_checkout():
+    """ヘビープラン（5,500円/月）の決済セッションを作成"""
+    return _create_subscription_checkout('heavy')
+
+def _create_subscription_checkout(plan_type: str):
+    """サブスクリプション決済セッション作成の共通処理"""
+    try:
+        current_user = get_current_user()
+        
+        # Stripe顧客IDがない場合は自動作成
+        stripe_customer_id = current_user.get('stripe_customer_id')
+        if not stripe_customer_id:
+            try:
+                stripe_customer_id = get_stripe_service().create_customer(
+                    email=current_user['email'],
+                    name=current_user.get('display_name', ''),
+                    metadata={'firebase_uid': current_user['user_id']}
+                )
+                get_auth_service().update_stripe_customer_id(current_user.get('user_id') or current_user['id'], stripe_customer_id)
+                logger.info(f"Created Stripe customer for {plan_type} plan: {stripe_customer_id}")
+            except Exception as e:
+                logger.error(f"Failed to create Stripe customer: {str(e)}")
+                return jsonify({'error': f'Stripe顧客作成エラー: {str(e)}'}), 500
+        
+        data = request.json
+        success_url = data.get('success_url', 'https://your-domain.com/success')
+        cancel_url = data.get('cancel_url', 'https://your-domain.com/cancel')
+        
+        # プランごとに適切なcheckout methodを呼び出し
+        stripe_service = get_stripe_service()
+        if plan_type == 'light':
+            checkout_session = stripe_service.create_light_plan_checkout(
+                customer_id=stripe_customer_id,
+                user_id=current_user.get('user_id') or current_user['id'],
+                success_url=success_url,
+                cancel_url=cancel_url
+            )
+        elif plan_type == 'regular':
+            checkout_session = stripe_service.create_regular_plan_checkout(
+                customer_id=stripe_customer_id,
+                user_id=current_user.get('user_id') or current_user['id'],
+                success_url=success_url,
+                cancel_url=cancel_url
+            )
+        elif plan_type == 'heavy':
+            checkout_session = stripe_service.create_heavy_plan_checkout(
+                customer_id=stripe_customer_id,
+                user_id=current_user.get('user_id') or current_user['id'],
+                success_url=success_url,
+                cancel_url=cancel_url
+            )
+        else:
+            return jsonify({'error': 'Invalid plan type'}), 400
+        
+        return jsonify({
+            'checkout_url': checkout_session['url'],
+            'session_id': checkout_session['id'],
+            'status': 'success'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error creating {plan_type} plan checkout: {str(e)}")
+        return jsonify({'error': '決済セッションの作成に失敗しました'}), 500
+
+# ===== 追加パック決済エンドポイント =====
+
+@app.route('/api/payment/pack-20', methods=['POST'])
+@require_auth
+def create_pack_20_checkout():
+    """20回追加パック（1,480円）の決済セッションを作成"""
+    return _create_pack_checkout('pack_20', 20)
+
+@app.route('/api/payment/pack-40', methods=['POST'])
+@require_auth
+def create_pack_40_checkout():
+    """40回追加パック（2,680円）の決済セッションを作成"""
+    return _create_pack_checkout('pack_40', 40)
+
+@app.route('/api/payment/pack-90', methods=['POST'])
+@require_auth
+def create_pack_90_checkout():
+    """90回追加パック（5,500円）の決済セッションを作成"""
+    return _create_pack_checkout('pack_90', 90)
+
+def _create_pack_checkout(pack_type: str, questions_count: int):
+    """追加パック決済セッション作成の共通処理"""
+    try:
+        current_user = get_current_user()
+        
+        # Stripe顧客IDがない場合は自動作成
+        stripe_customer_id = current_user.get('stripe_customer_id')
+        if not stripe_customer_id:
+            try:
+                stripe_customer_id = get_stripe_service().create_customer(
+                    email=current_user['email'],
+                    name=current_user.get('display_name', ''),
+                    metadata={'firebase_uid': current_user['user_id']}
+                )
+                get_auth_service().update_stripe_customer_id(current_user.get('user_id') or current_user['id'], stripe_customer_id)
+                logger.info(f"Created Stripe customer for {pack_type}: {stripe_customer_id}")
+            except Exception as e:
+                logger.error(f"Failed to create Stripe customer: {str(e)}")
+                return jsonify({'error': f'Stripe顧客作成エラー: {str(e)}'}), 500
+        
+        data = request.json
+        success_url = data.get('success_url', 'https://your-domain.com/success')
+        cancel_url = data.get('cancel_url', 'https://your-domain.com/cancel')
+        
+        # パックごとに適切なcheckout methodを呼び出し
+        stripe_service = get_stripe_service()
+        if pack_type == 'pack_20':
+            checkout_session = stripe_service.create_pack_20_checkout(
+                customer_id=stripe_customer_id,
+                user_id=current_user.get('user_id') or current_user['id'],
+                success_url=success_url,
+                cancel_url=cancel_url
+            )
+        elif pack_type == 'pack_40':
+            checkout_session = stripe_service.create_pack_40_checkout(
+                customer_id=stripe_customer_id,
+                user_id=current_user.get('user_id') or current_user['id'],
+                success_url=success_url,
+                cancel_url=cancel_url
+            )
+        elif pack_type == 'pack_90':
+            checkout_session = stripe_service.create_pack_90_checkout(
+                customer_id=stripe_customer_id,
+                user_id=current_user.get('user_id') or current_user['id'],
+                success_url=success_url,
+                cancel_url=cancel_url
+            )
+        else:
+            return jsonify({'error': 'Invalid pack type'}), 400
+        
+        return jsonify({
+            'checkout_url': checkout_session['url'],
+            'session_id': checkout_session['id'],
+            'status': 'success'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error creating {pack_type} checkout: {str(e)}")
+        return jsonify({'error': '決済セッションの作成に失敗しました'}), 500
+
 @app.route('/api/stripe/webhook', methods=['POST'])
 def stripe_webhook():
     """Stripe webhookを処理"""
@@ -661,15 +826,22 @@ def stripe_webhook():
             if result['action'] == 'checkout_completed':
                 user_id = result.get('user_id')
                 plan_type = result.get('plan_type')
+                session_id = result.get('session_id')
                 
-                if plan_type == 'basic':
-                    # 基本プランにアップグレード
-                    session_id = result.get('session_id')
-                    get_subscription_service().upgrade_to_basic_plan(user_id, session_id)
+                # サブスクリプションプラン
+                if plan_type in ['light', 'regular', 'heavy', 'basic']:
+                    get_subscription_service().upgrade_to_subscription_plan(user_id, plan_type, session_id)
+                
+                # 追加パック
+                elif plan_type == 'pack_20':
+                    get_subscription_service().add_pack_20(user_id, session_id)
+                elif plan_type == 'pack_40':
+                    get_subscription_service().add_pack_40(user_id, session_id)
+                elif plan_type == 'pack_90':
+                    get_subscription_service().add_pack_90(user_id, session_id)
                 elif plan_type == 'additional_pack':
-                    # 追加パックを追加
-                    payment_id = result.get('session_id')
-                    get_subscription_service().add_additional_pack(user_id, payment_id)
+                    # 既存コードとの互換性のため
+                    get_subscription_service().add_additional_pack(user_id, session_id)
         
         return jsonify({'received': True})
         

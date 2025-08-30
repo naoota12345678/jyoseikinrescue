@@ -11,17 +11,31 @@ class StripeService:
         self.webhook_secret = os.getenv('STRIPE_WEBHOOK_SECRET')
         
         # 料金設定
-        self.BASIC_PLAN_PRICE = 3000  # 3,000円
-        self.ADDITIONAL_PACK_PRICE = 3000  # 3,000円
         self.CURRENCY = 'jpy'
         
-        # Stripe商品ID
-        self.BASIC_PLAN_PRODUCT_ID = 'prod_SujKOCieVMHURs'
-        self.ADDITIONAL_PACK_PRODUCT_ID = 'prod_SujMCgf719WkIX'
+        # サブスクリプションプラン料金
+        self.LIGHT_PLAN_PRICE = 1480  # ライト: 1,480円/月
+        self.REGULAR_PLAN_PRICE = 3300  # レギュラー: 3,300円/月
+        self.HEAVY_PLAN_PRICE = 5500  # ヘビー: 5,500円/月
         
-        # Stripe価格ID
-        self.BASIC_PLAN_PRICE_ID = 'price_1Ryts6JcdIKryf6lsvgm1q98'
-        self.ADDITIONAL_PACK_PRICE_ID = 'price_1RyttOJcdIKryf6l8GuUjVJC'
+        # 追加パック料金
+        self.PACK_20_PRICE = 1480  # 20回パック: 1,480円
+        self.PACK_40_PRICE = 2680  # 40回パック: 2,680円
+        self.PACK_90_PRICE = 5500  # 90回パック: 5,500円
+        
+        # サブスクリプションプラン商品ID
+        self.LIGHT_PLAN_PRODUCT_ID = 'prod_SxZi2RoMUuSYPx'
+        self.REGULAR_PLAN_PRODUCT_ID = 'prod_SujKOCieVMHURs'
+        self.HEAVY_PLAN_PRODUCT_ID = 'prod_SxZnP56JdS3sAO'
+        
+        # 追加パック商品ID
+        self.PACK_20_PRODUCT_ID = 'prod_SxabdJImg6JtmO'
+        self.PACK_40_PRODUCT_ID = 'prod_SxachRVt6fDEBe'
+        self.PACK_90_PRODUCT_ID = 'prod_SxadRgOEp2KQEh'
+        
+        # 後方互換性のため（既存コードで使用されている可能性）
+        self.BASIC_PLAN_PRODUCT_ID = self.REGULAR_PLAN_PRODUCT_ID
+        self.ADDITIONAL_PACK_PRODUCT_ID = self.PACK_90_PRODUCT_ID
     
     def create_customer(self, email: str, name: str = '', metadata: Dict[str, str] = None) -> str:
         """Stripe顧客を作成"""
@@ -91,7 +105,7 @@ class StripeService:
                 customer=customer_id,
                 payment_method_types=['card'],
                 line_items=line_items,
-                mode='subscription' if any(item.get('price') == self.BASIC_PLAN_PRICE_ID for item in line_items) else 'payment',
+                mode='subscription' if any('recurring' in item.get('price_data', {}) for item in line_items) else 'payment',
                 success_url=success_url,
                 cancel_url=cancel_url,
                 metadata=metadata or {}
@@ -107,35 +121,135 @@ class StripeService:
             logger.error(f"Checkout session creation error: {str(e)}")
             raise
     
-    def create_basic_plan_checkout(self, customer_id: str, user_id: str, success_url: str, cancel_url: str) -> Dict[str, Any]:
-        """基本プラン（月額3,000円）のチェックアウトを作成"""
-        line_items = [{
-            'price': self.BASIC_PLAN_PRICE_ID,
-            'quantity': 1
-        }]
-        
-        return self.create_checkout_session(
-            customer_id=customer_id,
-            success_url=success_url,
-            cancel_url=cancel_url,
-            line_items=line_items,
-            metadata={'user_id': user_id, 'plan_type': 'basic'}
+    # ===== サブスクリプションプランチェックアウト =====
+    
+    def create_light_plan_checkout(self, customer_id: str, user_id: str, success_url: str, cancel_url: str) -> Dict[str, Any]:
+        """ライトプラン（1,480円/月 20回）のチェックアウトを作成"""
+        return self._create_subscription_checkout(
+            customer_id, user_id, success_url, cancel_url,
+            self.LIGHT_PLAN_PRODUCT_ID, 'light'
         )
     
-    def create_additional_pack_checkout(self, customer_id: str, user_id: str, success_url: str, cancel_url: str) -> Dict[str, Any]:
-        """追加パック（3,000円）のチェックアウトを作成"""
-        line_items = [{
-            'price': self.ADDITIONAL_PACK_PRICE_ID,
-            'quantity': 1
-        }]
-        
-        return self.create_checkout_session(
-            customer_id=customer_id,
-            success_url=success_url,
-            cancel_url=cancel_url,
-            line_items=line_items,
-            metadata={'user_id': user_id, 'plan_type': 'additional_pack'}
+    def create_regular_plan_checkout(self, customer_id: str, user_id: str, success_url: str, cancel_url: str) -> Dict[str, Any]:
+        """レギュラープラン（3,300円/月 50回）のチェックアウトを作成"""
+        return self._create_subscription_checkout(
+            customer_id, user_id, success_url, cancel_url,
+            self.REGULAR_PLAN_PRODUCT_ID, 'regular'
         )
+    
+    def create_heavy_plan_checkout(self, customer_id: str, user_id: str, success_url: str, cancel_url: str) -> Dict[str, Any]:
+        """ヘビープラン（5,500円/月 90回）のチェックアウトを作成"""
+        return self._create_subscription_checkout(
+            customer_id, user_id, success_url, cancel_url,
+            self.HEAVY_PLAN_PRODUCT_ID, 'heavy'
+        )
+    
+    def _create_subscription_checkout(self, customer_id: str, user_id: str, success_url: str, cancel_url: str, product_id: str, plan_type: str) -> Dict[str, Any]:
+        """サブスクリプションチェックアウトの共通処理"""
+        try:
+            session = stripe.checkout.Session.create(
+                customer=customer_id,
+                payment_method_types=['card'],
+                line_items=[{
+                    'price_data': {
+                        'currency': self.CURRENCY,
+                        'product': product_id,
+                        'unit_amount': self._get_plan_price(plan_type),
+                        'recurring': {'interval': 'month'}
+                    },
+                    'quantity': 1
+                }],
+                mode='subscription',
+                success_url=success_url,
+                cancel_url=cancel_url,
+                metadata={'user_id': user_id, 'plan_type': plan_type}
+            )
+            
+            logger.info(f"{plan_type.capitalize()} plan checkout session created: {session.id}")
+            return {
+                'id': session.id,
+                'url': session.url
+            }
+            
+        except stripe.error.StripeError as e:
+            logger.error(f"{plan_type.capitalize()} plan checkout creation error: {str(e)}")
+            raise
+    
+    # ===== 追加パックチェックアウト =====
+    
+    def create_pack_20_checkout(self, customer_id: str, user_id: str, success_url: str, cancel_url: str) -> Dict[str, Any]:
+        """20回追加パック（1,480円）のチェックアウトを作成"""
+        return self._create_pack_checkout(
+            customer_id, user_id, success_url, cancel_url,
+            self.PACK_20_PRODUCT_ID, self.PACK_20_PRICE, 'pack_20', 20
+        )
+    
+    def create_pack_40_checkout(self, customer_id: str, user_id: str, success_url: str, cancel_url: str) -> Dict[str, Any]:
+        """40回追加パック（2,680円）のチェックアウトを作成"""
+        return self._create_pack_checkout(
+            customer_id, user_id, success_url, cancel_url,
+            self.PACK_40_PRODUCT_ID, self.PACK_40_PRICE, 'pack_40', 40
+        )
+    
+    def create_pack_90_checkout(self, customer_id: str, user_id: str, success_url: str, cancel_url: str) -> Dict[str, Any]:
+        """90回追加パック（5,500円）のチェックアウトを作成"""
+        return self._create_pack_checkout(
+            customer_id, user_id, success_url, cancel_url,
+            self.PACK_90_PRODUCT_ID, self.PACK_90_PRICE, 'pack_90', 90
+        )
+    
+    def _create_pack_checkout(self, customer_id: str, user_id: str, success_url: str, cancel_url: str, product_id: str, price: int, pack_type: str, questions_count: int) -> Dict[str, Any]:
+        """追加パックチェックアウトの共通処理"""
+        try:
+            session = stripe.checkout.Session.create(
+                customer=customer_id,
+                payment_method_types=['card'],
+                line_items=[{
+                    'price_data': {
+                        'currency': self.CURRENCY,
+                        'product': product_id,
+                        'unit_amount': price
+                    },
+                    'quantity': 1
+                }],
+                mode='payment',
+                success_url=success_url,
+                cancel_url=cancel_url,
+                metadata={
+                    'user_id': user_id, 
+                    'plan_type': pack_type,
+                    'questions_count': str(questions_count)
+                }
+            )
+            
+            logger.info(f"{pack_type} checkout session created: {session.id}")
+            return {
+                'id': session.id,
+                'url': session.url
+            }
+            
+        except stripe.error.StripeError as e:
+            logger.error(f"{pack_type} checkout creation error: {str(e)}")
+            raise
+    
+    def _get_plan_price(self, plan_type: str) -> int:
+        """プランタイプから料金を取得"""
+        price_map = {
+            'light': self.LIGHT_PLAN_PRICE,
+            'regular': self.REGULAR_PLAN_PRICE,
+            'heavy': self.HEAVY_PLAN_PRICE
+        }
+        return price_map.get(plan_type, self.REGULAR_PLAN_PRICE)
+    
+    # ===== 後方互換性のためのメソッド =====
+    
+    def create_basic_plan_checkout(self, customer_id: str, user_id: str, success_url: str, cancel_url: str) -> Dict[str, Any]:
+        """既存コードとの互換性のため - レギュラープランにリダイレクト"""
+        return self.create_regular_plan_checkout(customer_id, user_id, success_url, cancel_url)
+    
+    def create_additional_pack_checkout(self, customer_id: str, user_id: str, success_url: str, cancel_url: str) -> Dict[str, Any]:
+        """既存コードとの互換性のため - 90回パックにリダイレクト"""
+        return self.create_pack_90_checkout(customer_id, user_id, success_url, cancel_url)
     
     def cancel_subscription(self, subscription_id: str) -> bool:
         """サブスクリプションをキャンセル"""

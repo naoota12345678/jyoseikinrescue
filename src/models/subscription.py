@@ -53,19 +53,27 @@ class SubscriptionService:
             logger.error(f"Subscription creation error: {str(e)}")
             raise
     
-    def upgrade_to_basic_plan(self, user_id: str, stripe_subscription_id: str) -> bool:
-        """基本プランにアップグレード"""
+    # ===== サブスクリプションプランアップグレード =====
+    
+    def upgrade_to_subscription_plan(self, user_id: str, plan_type: str, stripe_subscription_id: str) -> bool:
+        """サブスクリプションプランにアップグレード"""
         try:
             # 既存のサブスクリプションを無効化
             self.cancel_user_subscriptions(user_id)
             
-            # 新しい基本プランを作成
+            # プラン設定を取得
+            plan_config = self._get_plan_config(plan_type)
+            if not plan_config:
+                logger.error(f"Invalid plan type: {plan_type}")
+                return False
+            
+            # 新しいサブスクリプションを作成
             reset_date = datetime.now() + timedelta(days=30)
             
             subscription_data = {
                 'user_id': user_id,
-                'plan_type': 'basic',
-                'questions_limit': 50,
+                'plan_type': plan_type,
+                'questions_limit': plan_config['questions_limit'],
                 'questions_used': 0,
                 'reset_date': reset_date,
                 'stripe_subscription_id': stripe_subscription_id,
@@ -73,14 +81,53 @@ class SubscriptionService:
             }
             
             self.create_subscription(subscription_data)
+            logger.info(f"Upgraded user {user_id} to {plan_type} plan")
             return True
             
         except Exception as e:
-            logger.error(f"Upgrade to basic plan error: {str(e)}")
+            logger.error(f"Upgrade to {plan_type} plan error: {str(e)}")
             return False
     
-    def add_additional_pack(self, user_id: str, stripe_payment_id: str) -> bool:
-        """追加パック（50質問）を追加"""
+    def _get_plan_config(self, plan_type: str) -> Dict[str, Any]:
+        """プラン設定を取得"""
+        plan_configs = {
+            'light': {
+                'questions_limit': 20,
+                'price': 1480,
+                'name': 'ライト'
+            },
+            'regular': {
+                'questions_limit': 50,
+                'price': 3300,
+                'name': 'レギュラー'
+            },
+            'heavy': {
+                'questions_limit': 90,
+                'price': 5500,
+                'name': 'ヘビー'
+            },
+            # 後方互換性
+            'basic': {
+                'questions_limit': 50,
+                'price': 3300,
+                'name': 'ベーシック'
+            }
+        }
+        return plan_configs.get(plan_type)
+    
+    # 後方互換性のためのメソッド
+    def upgrade_to_basic_plan(self, user_id: str, stripe_subscription_id: str) -> bool:
+        """既存コードとの互換性のため - レギュラープランにリダイレクト"""
+        return self.upgrade_to_subscription_plan(user_id, 'regular', stripe_subscription_id)
+    
+    # ===== 追加パック機能 =====
+    
+    def add_additional_pack(self, user_id: str, stripe_payment_id: str, questions_count: int = 50) -> bool:
+        """追加パック（既存コードとの互換性のため50回デフォルト）"""
+        return self.add_pack(user_id, stripe_payment_id, questions_count)
+    
+    def add_pack(self, user_id: str, stripe_payment_id: str, questions_count: int) -> bool:
+        """指定した回数の追加パックを追加"""
         try:
             # 現在のサブスクリプションを取得
             current_sub = self.get_user_subscription(user_id)
@@ -89,8 +136,8 @@ class SubscriptionService:
                 logger.error(f"No active subscription found for user: {user_id}")
                 return False
             
-            # 質問数を50問追加
-            new_limit = current_sub['questions_limit'] + 50
+            # 質問数を指定回数分追加
+            new_limit = current_sub['questions_limit'] + questions_count
             
             self.db.collection('subscriptions').document(current_sub['id']).update({
                 'questions_limit': new_limit,
@@ -98,14 +145,26 @@ class SubscriptionService:
             })
             
             # 追加パックの記録を保存
-            self.record_additional_pack_purchase(user_id, stripe_payment_id, 50)
+            self.record_additional_pack_purchase(user_id, stripe_payment_id, questions_count)
             
-            logger.info(f"Additional pack added for user: {user_id}")
+            logger.info(f"Added {questions_count} questions pack for user: {user_id}")
             return True
             
         except Exception as e:
-            logger.error(f"Add additional pack error: {str(e)}")
+            logger.error(f"Add pack error: {str(e)}")
             return False
+    
+    def add_pack_20(self, user_id: str, stripe_payment_id: str) -> bool:
+        """２０回追加パックを追加"""
+        return self.add_pack(user_id, stripe_payment_id, 20)
+    
+    def add_pack_40(self, user_id: str, stripe_payment_id: str) -> bool:
+        """４０回追加パックを追加"""
+        return self.add_pack(user_id, stripe_payment_id, 40)
+    
+    def add_pack_90(self, user_id: str, stripe_payment_id: str) -> bool:
+        """９０回追加パックを追加"""
+        return self.add_pack(user_id, stripe_payment_id, 90)
     
     def use_question(self, user_id: str) -> Dict[str, Any]:
         """質問を1つ消費"""
@@ -117,6 +176,9 @@ class SubscriptionService:
                     'success': False,
                     'error': 'アクティブなサブスクリプションが見つかりません'
                 }
+            
+            # 月次リセットチェック（サブスクリプションプランのみ）
+            subscription = self._check_and_reset_if_needed(subscription)
             
             current_used = subscription.get('questions_used', 0)
             limit = subscription.get('questions_limit', 0)
@@ -220,3 +282,63 @@ class SubscriptionService:
             
         except Exception as e:
             logger.error(f"Record additional pack purchase error: {str(e)}")
+    
+    # ===== 月次リセット機能 =====
+    
+    def _check_and_reset_if_needed(self, subscription: Dict[str, Any]) -> Dict[str, Any]:
+        """月次リセットが必要かチェックし、必要であればリセット実行"""
+        try:
+            reset_date = subscription.get('reset_date')
+            plan_type = subscription.get('plan_type', '')
+            
+            # リセット日が設定されていない場合はリセット不要
+            if not reset_date:
+                return subscription
+            
+            # サブスクリプションプラン以外はリセット不要
+            if not self._is_subscription_plan(plan_type):
+                return subscription
+            
+            # リセット日が来ているかチェック
+            if isinstance(reset_date, str):
+                from datetime import datetime
+                reset_date = datetime.fromisoformat(reset_date.replace('Z', '+00:00'))
+            
+            if datetime.now() >= reset_date:
+                # リセット実行
+                self._reset_monthly_usage(subscription['id'])
+                
+                # ローカルのサブスクリプション情報も更新
+                subscription['questions_used'] = 0
+                subscription['reset_date'] = datetime.now() + timedelta(days=30)
+                
+                logger.info(f"Monthly reset performed for subscription: {subscription['id']}")
+            
+            return subscription
+            
+        except Exception as e:
+            logger.error(f"Monthly reset check error: {str(e)}")
+            return subscription
+    
+    def _is_subscription_plan(self, plan_type: str) -> bool:
+        """サブスクリプションプラン（月次リセット対象）かどうか判定"""
+        subscription_plans = ['light', 'regular', 'heavy', 'basic']
+        return plan_type in subscription_plans
+    
+    def _reset_monthly_usage(self, subscription_id: str) -> bool:
+        """月次使用量をリセット"""
+        try:
+            next_reset_date = datetime.now() + timedelta(days=30)
+            
+            self.db.collection('subscriptions').document(subscription_id).update({
+                'questions_used': 0,
+                'reset_date': next_reset_date,
+                'updated_at': SERVER_TIMESTAMP
+            })
+            
+            logger.info(f"Monthly usage reset for subscription: {subscription_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Monthly usage reset error: {str(e)}")
+            return False

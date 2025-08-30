@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プラン選択 | 助成金レスキュー</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .header h1 {
+            color: white;
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+        
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 18px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .heart-icon {
+            color: #ff6b9d;
+            font-size: 32px;
+            margin-right: 10px;
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .plan-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 3px solid transparent;
+        }
+        
+        .plan-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
+        }
+        
+        .plan-card.recommended {
+            border-color: #ff6b35;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .plan-card.recommended:hover {
+            transform: scale(1.05) translateY(-10px);
+        }
+        
+        .recommended-badge {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff6b35;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .plan-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .plan-price {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .price-amount {
+            font-size: 48px;
+            font-weight: 800;
+            line-height: 1;
+        }
+        
+        .price-currency {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .price-period {
+            font-size: 16px;
+            opacity: 0.7;
+            display: block;
+            margin-top: 5px;
+        }
+        
+        .plan-questions {
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+        }
+        
+        .plan-card.recommended .plan-questions {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .plan-features {
+            list-style: none;
+            margin-bottom: 40px;
+        }
+        
+        .plan-features li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .plan-features li::before {
+            content: '✓';
+            color: #4caf50;
+            font-weight: bold;
+            font-size: 18px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        
+        .plan-card.recommended .plan-features li::before {
+            color: white;
+        }
+        
+        .plan-button {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .plan-card:not(.recommended) .plan-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .plan-card:not(.recommended) .plan-button:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            transform: translateY(-2px);
+        }
+        
+        .plan-card.recommended .plan-button {
+            background: white;
+            color: #ff6b35;
+        }
+        
+        .plan-card.recommended .plan-button:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            margin-bottom: 30px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-5px);
+        }
+        
+        .back-link::before {
+            content: '←';
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        @media (max-width: 768px) {
+            .pricing-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .plan-card.recommended {
+                transform: none;
+            }
+            
+            .header h1 {
+                font-size: 36px;
+            }
+            
+            .price-amount {
+                font-size: 36px;
+            }
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            color: white;
+            margin-top: 20px;
+        }
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/dashboard" class="back-link">ダッシュボードに戻る</a>
+        
+        <div class="header">
+            <h1><span class="heart-icon">💗</span>Pricing</h1>
+            <p>あなたのビジネスに最適なプランをお選びください。いつでもプラン変更可能です。</p>
+        </div>
+        
+        <div class="pricing-grid">
+            <!-- ライトプラン -->
+            <div class="plan-card" data-plan="light">
+                <div class="plan-name">ライト</div>
+                <div class="plan-price">
+                    <span class="price-amount">¥1,480</span>
+                    <span class="price-period">/月</span>
+                </div>
+                <div class="plan-questions">月20回の質問</div>
+                <ul class="plan-features">
+                    <li>AI助成金診断・相談</li>
+                    <li>基本的な助成金情報</li>
+                    <li>メール サポート</li>
+                    <li>月次利用状況レポート</li>
+                    <li>スマートフォン対応</li>
+                </ul>
+                <button class="plan-button" onclick="selectPlan('light')">
+                    ライトプランを選択
+                </button>
+            </div>
+            
+            <!-- レギュラープラン（推奨） -->
+            <div class="plan-card recommended" data-plan="regular">
+                <div class="recommended-badge">Recommended</div>
+                <div class="plan-name">レギュラー</div>
+                <div class="plan-price">
+                    <span class="price-amount">¥3,300</span>
+                    <span class="price-period">/月</span>
+                </div>
+                <div class="plan-questions">月50回の質問</div>
+                <ul class="plan-features">
+                    <li>AI助成金診断・相談</li>
+                    <li>高度な助成金マッチング</li>
+                    <li>優先メール サポート</li>
+                    <li>詳細レポートと分析</li>
+                    <li>助成金申請書テンプレート</li>
+                </ul>
+                <button class="plan-button" onclick="selectPlan('regular')">
+                    レギュラープランを選択
+                </button>
+            </div>
+            
+            <!-- ヘビープラン -->
+            <div class="plan-card" data-plan="heavy">
+                <div class="plan-name">ヘビー</div>
+                <div class="plan-price">
+                    <span class="price-amount">¥5,500</span>
+                    <span class="price-period">/月</span>
+                </div>
+                <div class="plan-questions">月90回の質問</div>
+                <ul class="plan-features">
+                    <li>AI助成金診断・相談</li>
+                    <li>プレミアム助成金マッチング</li>
+                    <li>電話・チャット サポート</li>
+                    <li>カスタム分析レポート</li>
+                    <li>専門コンサルタント相談</li>
+                    <li>申請書作成代行サービス</li>
+                </ul>
+                <button class="plan-button" onclick="selectPlan('heavy')">
+                    ヘビープランを選択
+                </button>
+            </div>
+        </div>
+        
+        <div class="loading" id="loadingIndicator">
+            決済ページを準備中...
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    
+    <script>
+        // Firebase設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyCdIb1aU-SyaZGAOc5O2jSO4GxuH3Y1hGI",
+            authDomain: "jyoseikin-rescue.firebaseapp.com",
+            projectId: "jyoseikin-rescue",
+            storageBucket: "jyoseikin-rescue.appspot.com",
+            messagingSenderId: "997720151755",
+            appId: "1:997720151755:web:a123456789abcdef"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        let currentUser = null;
+
+        // 認証状態の監視
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                console.log('User authenticated:', user.email);
+            } else {
+                console.log('User not authenticated, redirecting to login');
+                window.location.href = '/';
+            }
+        });
+
+        async function selectPlan(planType) {
+            if (!currentUser) {
+                alert('ログインが必要です');
+                window.location.href = '/';
+                return;
+            }
+
+            // ローディング表示
+            const button = document.querySelector(`[data-plan="${planType}"] .plan-button`);
+            const originalText = button.textContent;
+            button.disabled = true;
+            button.textContent = '準備中...';
+            document.getElementById('loadingIndicator').style.display = 'block';
+
+            try {
+                const token = await currentUser.getIdToken();
+                const endpoint = `/api/payment/${planType}-plan`;
+                
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        success_url: window.location.origin + '/dashboard?payment=success&plan=' + planType,
+                        cancel_url: window.location.origin + '/pricing?payment=cancelled'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.status === 'success' && data.checkout_url) {
+                    // Stripe決済ページにリダイレクト
+                    window.location.href = data.checkout_url;
+                } else {
+                    throw new Error(data.error || 'サーバーエラー');
+                }
+                
+            } catch (error) {
+                console.error('Payment error:', error);
+                
+                // エラー表示
+                const errorMsg = document.createElement('div');
+                errorMsg.style.cssText = `
+                    position: fixed; 
+                    top: 20px; 
+                    right: 20px; 
+                    background: #f8d7da; 
+                    color: #721c24; 
+                    padding: 1rem; 
+                    border-radius: 8px; 
+                    z-index: 2000; 
+                    max-width: 300px;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+                `;
+                errorMsg.textContent = `決済エラー: ${error.message}`;
+                document.body.appendChild(errorMsg);
+                
+                // エラーメッセージを5秒後に削除
+                setTimeout(() => errorMsg.remove(), 5000);
+                
+                // ボタンを元に戻す
+                button.disabled = false;
+                button.textContent = originalText;
+                document.getElementById('loadingIndicator').style.display = 'none';
+            }
+        }
+
+        // URLパラメーターをチェックして支払い結果を表示
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const paymentStatus = urlParams.get('payment');
+            
+            if (paymentStatus === 'cancelled') {
+                const msg = document.createElement('div');
+                msg.style.cssText = `
+                    position: fixed; 
+                    top: 20px; 
+                    right: 20px; 
+                    background: #fff3cd; 
+                    color: #856404; 
+                    padding: 1rem; 
+                    border-radius: 8px; 
+                    z-index: 2000; 
+                    max-width: 300px;
+                `;
+                msg.textContent = 'お支払いがキャンセルされました';
+                document.body.appendChild(msg);
+                setTimeout(() => msg.remove(), 5000);
+            }
+        });
+    </script>
+</body>
+</html>

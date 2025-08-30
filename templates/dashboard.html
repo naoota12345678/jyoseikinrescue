@@ -504,28 +504,29 @@
                     </p>
                     ${planType === 'free' ? `
                         <div style="background: #f8f9ff; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
-                            <h3 style="color: #667eea; margin-bottom: 1rem;">📊 ベーシックプラン</h3>
-                            <ul style="list-style: none; padding: 0;">
-                                <li>✅ 月50回まで質問可能</li>
-                                <li>✅ 全29カテゴリー・100種類超の助成金対応</li>
-                                <li>✅ 専門AIエージェント無制限切り替え</li>
-                                <li style="font-weight: bold; color: #e74c3c;">💰 月額3,000円</li>
-                            </ul>
+                            <h3 style="color: #667eea; margin-bottom: 1rem;">🚀 プラン選択</h3>
+                            <p style="margin-bottom: 1rem;">あなたに最適なプランをお選びください</p>
+                            <div style="display: grid; gap: 0.5rem; font-size: 0.9rem;">
+                                <div>💡 <strong>ライト</strong>: 1,480円/月 (20回)</div>
+                                <div>⭐ <strong>レギュラー</strong>: 3,300円/月 (50回) 推奨</div>
+                                <div>🔥 <strong>ヘビー</strong>: 5,500円/月 (90回)</div>
+                            </div>
                         </div>
-                        <button onclick="upgradeToBasicPlan()" style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 1rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-bottom: 1rem;">
-                            🚀 ベーシックプランにアップグレード
+                        <button onclick="goToPricing()" style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 1rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-bottom: 1rem;">
+                            💗 プラン選択ページへ
                         </button>
                     ` : `
                         <div style="background: #fff5f5; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
                             <h3 style="color: #e74c3c; margin-bottom: 1rem;">📦 追加パック</h3>
-                            <ul style="list-style: none; padding: 0;">
-                                <li>✅ 追加50回分の質問回数</li>
-                                <li>✅ 即座に利用可能</li>
-                                <li style="font-weight: bold; color: #e74c3c;">💰 2,000円（都度購入）</li>
-                            </ul>
+                            <p style="margin-bottom: 1rem;">今すぐ質問回数を追加できます</p>
+                            <div style="display: grid; gap: 0.5rem; font-size: 0.9rem;">
+                                <div>📦 <strong>20回パック</strong>: 1,480円</div>
+                                <div>📦 <strong>40回パック</strong>: 2,680円</div>
+                                <div>📦 <strong>90回パック</strong>: 5,500円</div>
+                            </div>
                         </div>
-                        <button onclick="purchaseAdditionalPack()" style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 1rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-bottom: 1rem;">
-                            📦 追加パックを購入
+                        <button onclick="goToPricing()" style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 1rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-bottom: 1rem;">
+                            📦 プラン・追加パック選択へ
                         </button>
                     `}
                     <button onclick="closeUpgradePrompt()" style="width: 100%; background: #6c757d; color: white; border: none; padding: 0.8rem; border-radius: 8px; cursor: pointer;">
@@ -588,42 +589,13 @@
             }
         }
 
+        function goToPricing() {
+            window.location.href = '/pricing';
+        }
+
         async function purchaseAdditionalPack() {
-            try {
-                const token = await currentUser.getIdToken();
-                const response = await fetch('/api/payment/additional-pack', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        success_url: window.location.origin + '/dashboard?payment=success',
-                        cancel_url: window.location.origin + '/dashboard?payment=cancelled'
-                    })
-                });
-                
-                const data = await response.json();
-                if (data.status === 'success' && data.checkout_url) {
-                    window.location.href = data.checkout_url;
-                } else {
-                    console.error('決済ページ作成失敗:', data);
-                    // 具体的なエラー内容を表示
-                    const errorMsg = document.createElement('div');
-                    errorMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; z-index: 2000; max-width: 300px;';
-                    errorMsg.textContent = `決済エラー: ${data.error || 'サーバー応答なし'}`;
-                    document.body.appendChild(errorMsg);
-                    setTimeout(() => errorMsg.remove(), 5000);
-                }
-            } catch (error) {
-                console.error('決済エラー:', error);
-                // 詳細なエラー情報を表示
-                const errorMsg = document.createElement('div');
-                errorMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; z-index: 2000; max-width: 300px;';
-                errorMsg.textContent = `接続エラー: ${error.message || error}`;
-                document.body.appendChild(errorMsg);
-                setTimeout(() => errorMsg.remove(), 5000);
-            }
+            // 旧関数 - 料金選択ページにリダイレクト
+            goToPricing();
         }
 
         function handleAgentChange() {
