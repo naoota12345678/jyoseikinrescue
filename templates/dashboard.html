@@ -510,8 +510,8 @@
             document.getElementById('remainingQuestions').textContent = remaining;
             document.getElementById('planType').textContent = planDisplayName;
             
-            // 使用上限に達した場合のアップグレード表示（有料プランでない場合のみ）
-            if (remaining === 0 && !hasPaidPlan && !window.upgradePromptShown) {
+            // 使用上限に達した場合のアップグレード表示
+            if (remaining === 0 && !window.upgradePromptShown) {
                 window.upgradePromptShown = true;
                 setTimeout(() => showUpgradePrompt(usage.plan_type || 'free'), 500);
             }
@@ -531,8 +531,8 @@
                     <p style="margin-bottom: 1.5rem;">
                         ${planType === 'free' 
                             ? '無料プランの5回の質問回数を使い切りました。' 
-                            : '今月の質問回数を使い切りました。'}
-                        継続してご利用いただくには、プランをアップグレードしてください。
+                            : `${planType}プランの今月の質問回数を使い切りました。`}
+                        継続してご利用いただくには、${planType === 'free' ? 'プランをアップグレード' : '追加パックの購入または上位プランへの変更'}してください。
                     </p>
                     ${planType === 'free' ? `
                         <div style="background: #f8f9ff; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
@@ -548,7 +548,7 @@
                             💗 プラン選択ページへ
                         </button>
                     ` : `
-                        <div style="background: #fff5f5; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                        <div style="background: #fff5f5; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
                             <h3 style="color: #e74c3c; margin-bottom: 1rem;">📦 追加パック</h3>
                             <p style="margin-bottom: 1rem;">今すぐ質問回数を追加できます</p>
                             <div style="display: grid; gap: 0.5rem; font-size: 0.9rem;">
@@ -557,8 +557,26 @@
                                 <div>📦 <strong>90回パック</strong>: 5,500円</div>
                             </div>
                         </div>
+                        ${(planType === 'light') ? `
+                        <div style="background: #e8f5e8; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
+                            <h3 style="color: #28a745; margin-bottom: 1rem;">⬆️ 上位プラン</h3>
+                            <p style="margin-bottom: 1rem;">より多くの質問回数が必要ですか？</p>
+                            <div style="display: grid; gap: 0.5rem; font-size: 0.9rem;">
+                                <div>⭐ <strong>レギュラープラン</strong>: 3,300円/月 (50回)</div>
+                                <div>🔥 <strong>ヘビープラン</strong>: 5,500円/月 (90回)</div>
+                            </div>
+                        </div>
+                        ` : (planType === 'regular') ? `
+                        <div style="background: #e8f5e8; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
+                            <h3 style="color: #28a745; margin-bottom: 1rem;">⬆️ 上位プラン</h3>
+                            <p style="margin-bottom: 1rem;">さらに多くの質問回数が必要ですか？</p>
+                            <div style="display: grid; gap: 0.5rem; font-size: 0.9rem;">
+                                <div>🔥 <strong>ヘビープラン</strong>: 5,500円/月 (90回)</div>
+                            </div>
+                        </div>
+                        ` : ''}
                         <button onclick="goToPricing()" style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 1rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-bottom: 1rem;">
-                            📦 プラン・追加パック選択へ
+                            ${planType === 'light' || planType === 'regular' ? '📦 追加パック・上位プラン選択へ' : '📦 追加パック選択へ'}
                         </button>
                     `}
                     <button onclick="closeUpgradePrompt()" style="width: 100%; background: #6c757d; color: white; border: none; padding: 0.8rem; border-radius: 8px; cursor: pointer;">
