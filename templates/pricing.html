@@ -355,16 +355,21 @@
     <script>
         // Firebase設定
         const firebaseConfig = {
-            apiKey: "AIzaSyCdIb1aU-SyaZGAOc5O2jSO4GxuH3Y1hGI",
-            authDomain: "jyoseikin-rescue.firebaseapp.com",
-            projectId: "jyoseikin-rescue",
-            storageBucket: "jyoseikin-rescue.appspot.com",
-            messagingSenderId: "997720151755",
-            appId: "1:997720151755:web:a123456789abcdef"
+            apiKey: "AIzaSyDzRzS-C104mWNloO94GNH7Jv93F5gWVto",
+            authDomain: "jyoseikinrescue.firebaseapp.com",
+            projectId: "jyoseikinrescue",
+            storageBucket: "jyoseikinrescue.firebasestorage.app",
+            messagingSenderId: "453016168690",
+            appId: "1:453016168690:web:6658e01bdd588ea63f886b",
+            measurementId: "G-V8WP53NEH4"
         };
 
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
+        
+        // 認証の持続性を設定
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+        
         let currentUser = null;
         let authInitialized = false;
 
