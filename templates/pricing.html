@@ -463,8 +463,31 @@
             }
         }
 
+        // ページロード時にボタン状態をリセット
+        function resetAllButtons() {
+            document.querySelectorAll('.plan-button').forEach(button => {
+                button.disabled = false;
+                // 元のテキストに戻す
+                if (button.textContent.includes('準備中') || button.textContent.includes('処理中')) {
+                    const planCard = button.closest('.plan-card');
+                    if (planCard.dataset.plan === 'light') {
+                        button.textContent = 'ライトプランを選択';
+                    } else if (planCard.dataset.plan === 'regular') {
+                        button.textContent = 'レギュラープランを選択';
+                    } else if (planCard.dataset.plan === 'heavy') {
+                        button.textContent = 'ヘビープランを選択';
+                    }
+                }
+            });
+            // ローディングインジケーターも非表示にする
+            document.getElementById('loadingIndicator').style.display = 'none';
+        }
+
         // URLパラメーターをチェックして支払い結果を表示
         window.addEventListener('DOMContentLoaded', () => {
+            // まずボタン状態をリセット
+            resetAllButtons();
+            
             const urlParams = new URLSearchParams(window.location.search);
             const paymentStatus = urlParams.get('payment');
             
@@ -484,6 +507,9 @@
                 msg.textContent = 'お支払いがキャンセルされました';
                 document.body.appendChild(msg);
                 setTimeout(() => msg.remove(), 5000);
+                
+                // URLパラメータを削除
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
         });
     </script>
