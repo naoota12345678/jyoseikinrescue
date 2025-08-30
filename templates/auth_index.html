@@ -296,24 +296,36 @@
         <div class="container">
             <div class="header-content">
                 <div>
-                    <svg width="60" height="36" viewBox="0 0 75 40" style="display: block; margin: 0 auto;" xmlns="http://www.w3.org/2000/svg">
-                        <g stroke="currentColor" stroke-width="2" fill="none">
-                            <line x1="5" y1="20" x2="10" y2="20" />
-                            <path d="M10 20 L13 17 L16 23 L19 20" />
-                            <path d="M19 20 L22 10 L25 30 L28 20" />
-                            <path d="M28 20 L31 15 L34 25 L37 20" />
-                            <line x1="37" y1="20" x2="42" y2="20" />
+                    <svg width="80" height="40" viewBox="0 0 80 40" style="display: block; margin: 0 auto;" xmlns="http://www.w3.org/2000/svg">
+                        <!-- 心電図の線 -->
+                        <g stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <!-- 基準線とハートビート -->
+                            <line x1="5" y1="20" x2="12" y2="20" />
+                            <path d="M12 20 L15 14 L18 26 L21 20" />
+                            <line x1="21" y1="20" x2="30" y2="20" />
+                            
+                            <!-- 大きなスパイク -->
+                            <path d="M30 20 L33 8 L36 32 L39 20" />
+                            <line x1="39" y1="20" x2="48" y2="20" />
+                            
+                            <!-- 続きの心電図 -->
+                            <path d="M48 20 L51 16 L54 24 L57 20" />
+                            <line x1="57" y1="20" x2="75" y2="20" />
                         </g>
                     </svg>
                 </div>
                 <div style="display: flex; align-items: center; gap: 1rem;">
-                    <a href="/diagnosis" style="background: rgba(255,255,255,0.2); color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-weight: 600;">
-                        🎯 無料診断（100種類超）
-                    </a>
+                    <button onclick="showLogin()" style="background: rgba(255,255,255,0.1); color: white; padding: 0.75rem 1.5rem; border-radius: 25px; border: 1px solid rgba(255,255,255,0.2); font-weight: 600; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'; this.style.transform='translateY(0)'">
+                        ログイン
+                    </button>
+                    <button onclick="showLogin()" style="background: rgba(40, 167, 69, 0.8); color: white; padding: 0.75rem 1.5rem; border-radius: 25px; border: 1px solid rgba(40, 167, 69, 1); font-weight: 600; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.3s ease;" onmouseover="this.style.background='rgba(40, 167, 69, 1)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(40, 167, 69, 0.8)'; this.style.transform='translateY(0)'">
+                        会員登録
+                    </button>
+                    
                     <div id="authSection" class="hidden">
                     <div class="user-info" id="userInfo">
                         <span id="userEmail"></span>
-                        <button onclick="logout()" style="padding: 0.5rem 1rem; background: #dc3545;">ログアウト</button>
+                        <button onclick="logout()" style="padding: 0.5rem 1rem; background: #dc3545; color: white; border: none; border-radius: 6px;">ログアウト</button>
                     </div>
                 </div>
             </div>
