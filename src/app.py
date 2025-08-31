@@ -1137,6 +1137,14 @@ def ai_results():
 @app.route('/api/forms', methods=['GET'])
 def get_application_forms():
     """全助成金の申請書類情報を取得"""
+    debug_info = {
+        'step': '',
+        'json_path': '',
+        'file_exists': False,
+        'error': None,
+        'data_count': 0
+    }
+    
     try:
         forms_data = []
         
@@ -1144,11 +1152,16 @@ def get_application_forms():
         import json
         import os
         json_path = os.path.join(os.path.dirname(__file__), '..', 'subsidy_forms.json')
+        debug_info['json_path'] = json_path
+        debug_info['step'] = 'checking_file'
         
         if os.path.exists(json_path):
+            debug_info['file_exists'] = True
+            debug_info['step'] = 'reading_file'
             try:
                 with open(json_path, 'r', encoding='utf-8') as f:
                     subsidies = json.load(f)
+                    debug_info['step'] = 'parsing_json'
                     
                 for subsidy_id, subsidy_info in subsidies.items():
                     # アクティブなもののみ追加（active=trueまたはactiveフィールドがない場合は含める）
@@ -1163,10 +1176,15 @@ def get_application_forms():
                             'last_checked': subsidy_info.get('last_checked', '不明'),
                             'notes': subsidy_info.get('notes', '')
                         })
+                debug_info['data_count'] = len(forms_data)
+                debug_info['step'] = 'completed'
                 logger.info(f"Successfully loaded {len(forms_data)} forms from subsidy_forms.json")
             except Exception as json_error:
+                debug_info['error'] = str(json_error)
+                debug_info['step'] = 'json_error'
                 logger.error(f"Error reading subsidy_forms.json: {str(json_error)}")
         else:
+            debug_info['step'] = 'file_not_found'
             logger.warning(f"subsidy_forms.json not found at {json_path}")
             
         # FormsManagerが利用可能な場合は、そちらから追加データを取得
@@ -1199,7 +1217,8 @@ def get_application_forms():
         return jsonify({
             'status': 'success',
             'data': forms_data,
-            'count': len(forms_data)
+            'count': len(forms_data),
+            'debug': debug_info  # デバッグ情報を含める
         })
         
     except Exception as e:
