@@ -231,13 +231,13 @@ class ClaudeService:
     def _get_career_up_prompt(self, agent_type: str) -> str:
         """キャリアアップ助成金のコース別プロンプトを生成"""
         course_map = {
-            'career-up_seishain': ('正社員化コース', 'career-up_seishain.txt'),
-            'career-up_shogaisha': ('障害者正社員化コース', 'career-up_shogaisha.txt'),
-            'career-up_chingin': ('賃金規定等改定コース', 'career-up_chingin.txt'),
-            'career-up_kyotsu': ('賃金規定等共通化コース', 'career-up_kyotsu.txt'),
-            'career-up_shoyo': ('賞与・退職金制度導入コース', 'career-up_shoyo.txt'),
-            'career-up_shahoken': ('社会保険適用時処遇改善コース', 'career-up_shahoken.txt'),
-            'career-up_tanshuku': ('短時間労働者労働時間延長支援コース', 'career-up_tanshuku.txt')
+            'career-up_seishain': ('正社員化コース', 'file/キャリアアップ助成金/1000 正社員化コース.txt'),
+            'career-up_shogaisha': ('障害者正社員化コース', 'file/キャリアアップ助成金/2000 障害者正社員化コース.txt'),
+            'career-up_chingin': ('賃金規定等改定コース', 'file/キャリアアップ助成金/3000 賃金規定等改定コース.txt'),
+            'career-up_kyotsu': ('賃金規定等共通化コース', 'file/キャリアアップ助成金/4000 賃金規定等共通化コース.txt'),
+            'career-up_shoyo': ('賞与・退職金制度導入コース', 'file/キャリアアップ助成金/5000 賞与・退職金制度導入コース.txt'),
+            'career-up_shahoken': ('社会保険適用時処遇改善コース', 'file/キャリアアップ助成金/6000 社会保険適用時処遇改善コース.txt'),
+            'career-up_tanshuku': ('短時間労働者労働時間延長支援コース', 'file/キャリアアップ助成金/7000 短時間労働者労働時間延長支援コース.txt')
         }
         
         if agent_type not in course_map:
@@ -250,7 +250,7 @@ class ClaudeService:
             base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             
             # 共通部分を読み込み
-            common_file_path = os.path.join(base_dir, 'career-up_common.txt')
+            common_file_path = os.path.join(base_dir, 'file/キャリアアップ助成金/共通部分キャリアアップjyoseikin支給要領_共通.txt')
             with open(common_file_path, 'r', encoding='utf-8') as f:
                 common_content = f.read()
             
