@@ -132,11 +132,37 @@
   - 結果：自動ログイン機能、チャット機能、その他多数の機能が破損
   - 原因：「今すぐ無料診断をスタート」ボタンとロゴ変更だけが要求だったのに全面書き換え
 
+- 2025-08-31: AIエージェントシステムを勝手に変更
+  - 結果：専門エージェントが「エラーが発生しました」となり機能停止
+  - 原因：診断システムのハードコード削除要求だったのに、専門エージェントのファイル構造まで勝手に変更
+  - 詳細：claude_service.pyの個別ファイル読み込みシステムを破壊し、診断用データファイルに統一しようとした
+  - 反省：要求されていない部分（専門エージェント）に手を出し、動作中のシステムを破壊
+  - ユーザーからの指摘：「なんで専門エージェントいじらなくてもいいのにいじった？」「勝手にやるなっていうさ指示を守らないでまた勝手にやろうとしてる所」
+
 ## 環境変数・設定
+
+### GitHub Secrets設定済み変数名（絶対に変更しない）
+- `CLAUDE_API_KEY`
+- `FIREBASE_CLIENT_EMAIL`
+- `FIREBASE_CLIENT_ID` 
+- `FIREBASE_PRIVATE_KEY`
+- `FIREBASE_PRIVATE_KEY_ID`
+- `FIREBASE_PROJECT_ID`
+- `GCP_PROJECT_ID`
+- `GCP_SA_KEY`
+- `SECRET_KEY`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+
+### アプリケーション設定
 - ANTHROPIC_API_KEY: Claude APIキー（モックモード対応）
 - SECRET_KEY: Flask セッション用
 - Firebase認証設定済み
 - Stripe決済設定済み
+
+### 重要な注意事項
+**新しい環境変数を追加する際は、上記のGitHub Secrets変数名と完全に一致させること。**
+**新しい変数名を勝手に作成せず、既存の変数名を必ず使用すること。**
 
 ## プロジェクト構造メモ
 - `/templates/index.html`: トップページ（無料診断メイン）

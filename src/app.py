@@ -53,7 +53,7 @@ def debug_auth_status():
         'python_version': sys.version,
         'environment_vars': {
             'SECRET_KEY': 'SET' if os.getenv('SECRET_KEY') else 'NOT_SET',
-            'ANTHROPIC_API_KEY': 'SET' if os.getenv('ANTHROPIC_API_KEY') else 'NOT_SET',
+            'CLAUDE_API_KEY': 'SET' if os.getenv('CLAUDE_API_KEY') else 'NOT_SET',
             'FIREBASE_PROJECT_ID': 'SET' if os.getenv('FIREBASE_PROJECT_ID') else 'NOT_SET',
             'FIREBASE_PRIVATE_KEY': 'SET' if os.getenv('FIREBASE_PRIVATE_KEY') else 'NOT_SET',
             'FIREBASE_CLIENT_EMAIL': 'SET' if os.getenv('FIREBASE_CLIENT_EMAIL') else 'NOT_SET'
