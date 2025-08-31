@@ -563,10 +563,11 @@ ANTHROPIC_API_KEYが設定されていないため、実際のAI診断は行え�
                 model=self.model,
                 max_tokens=4000,
                 temperature=0.3,
+                system=context if context else "",
                 messages=[
                     {
                         "role": "user", 
-                        "content": f"{context}\n\n{prompt}"
+                        "content": prompt
                     }
                 ]
             )

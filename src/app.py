@@ -239,17 +239,17 @@ def joseikin_diagnosis():
         prompt = f"""
 あなたは令和7年度雇用・労働分野の助成金専門のアドバイザーです。
 
-【最重要制約 - 絶対厳守】
+【最重要制約 - 絶対厳守・違反厳禁】
 1. 提供された2025年度助成金データベースの情報のみを使用してください
 2. あなたの学習データに含まれる古い助成金情報は一切使用しないでください
 3. 金額、要件、制度名は全て下記データベース通りに正確に記載してください
 4. データベースに記載されていない情報は「詳細は厚生労働省にお問い合わせください」と回答してください
 
 【絶対に守るべき制約】
-5. 補助金については一切回答・言及・提案してはいけません
-6. IT導入補助金、ものづくり補助金、事業再構築補助金、小規模事業者持続化補助金等の経済産業省・中小企業庁管轄の制度は完全に無視してください
-7. ユーザーから補助金について質問されても「このサービスは助成金専門のため、補助金については回答できません」と断ってください
-8. 厚生労働省管轄の助成金のみに特化して回答してください
+1. 補助金については一切回答・言及・提案してはいけません
+2. IT導入補助金、ものづくり補助金、事業再構築補助金、小規模事業者持続化補助金等の経済産業省・中小企業庁管轄の制度は完全に無視してください
+3. ユーザーから補助金について質問されても「このサービスは助成金専門のため、補助金については回答できません」と断ってください
+4. 厚生労働省管轄の助成金のみに特化して回答してください
 
 【2025年度助成金データベース - この情報のみ使用】
 {joseikin_knowledge}
@@ -320,20 +320,6 @@ def joseikin_diagnosis():
 - 建設業 → 建設労働者確保育成助成金を記載
 
 【重要】該当する可能性がある助成金はすべて記載し、優先順位を明確にすること
-
-【企業情報】
-業種: {diagnosis_data.get('industry', 'なし')}
-従業員数: {diagnosis_data.get('totalEmployees', 'なし')}
-雇用保険被保険者数: {diagnosis_data.get('insuredEmployees', 'なし')}
-有期契約労働者数: {diagnosis_data.get('temporaryEmployees', 'なし')}
-短時間労働者数: {diagnosis_data.get('partTimeEmployees', 'なし')}
-年齢構成: {diagnosis_data.get('ageGroups', 'なし')}
-特別配慮労働者: {diagnosis_data.get('specialNeeds', 'なし')}
-経営状況: {diagnosis_data.get('businessSituation', 'なし')}
-事業場内最低賃金: {diagnosis_data.get('minWage', 'なし')}円/時
-賃金・処遇改善: {diagnosis_data.get('wageImprovement', 'なし')}
-投資・改善予定: {diagnosis_data.get('investments', 'なし')}
-両立支援: {diagnosis_data.get('workLifeBalance', 'なし')}
 
 以下の厚生労働省管轄の助成金カテゴリーから該当するものを判定し、具体的な支給額と適用条件を含めて回答してください：
 
@@ -413,8 +399,25 @@ def joseikin_diagnosis():
 このように各助成金を完全に分離して記載してください。
 """
         
-        # Claude AIに問い合わせ
-        raw_response = get_claude_service().chat(prompt, "")
+        # Claude AIに問い合わせ（promptをsystem promptとして使用）
+        user_question = f"""
+以下の企業情報を基に助成金診断を行ってください：
+
+【企業情報】
+業種: {diagnosis_data.get('industry', 'なし')}
+従業員数: {diagnosis_data.get('totalEmployees', 'なし')}
+雇用保険被保険者数: {diagnosis_data.get('insuredEmployees', 'なし')}
+有期契約労働者数: {diagnosis_data.get('temporaryEmployees', 'なし')}
+短時間労働者数: {diagnosis_data.get('partTimeEmployees', 'なし')}
+年齢構成: {diagnosis_data.get('ageGroups', 'なし')}
+特別配慮労働者: {diagnosis_data.get('specialNeeds', 'なし')}
+経営状況: {diagnosis_data.get('businessSituation', 'なし')}
+事業場内最低賃金: {diagnosis_data.get('minWage', 'なし')}円/時
+賃金・処遇改善: {diagnosis_data.get('wageImprovement', 'なし')}
+投資・改善予定: {diagnosis_data.get('investments', 'なし')}
+両立支援: {diagnosis_data.get('workLifeBalance', 'なし')}
+"""
+        raw_response = get_claude_service().chat(user_question, prompt)
         
         # 強制的に改行を整理
         response = _format_diagnosis_response(raw_response)
