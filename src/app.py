@@ -1151,12 +1151,26 @@ def get_application_forms():
         # まずsubsidy_forms.jsonから直接読み込みを試みる（これがメインの方法）
         import json
         import os
-        json_path = os.path.join(os.path.dirname(__file__), '..', 'subsidy_forms.json')
-        debug_info['json_path'] = json_path
+        
+        # 複数のパスを試す（本番環境と開発環境対応）
+        possible_paths = [
+            os.path.join(os.path.dirname(__file__), '..', 'subsidy_forms.json'),  # 開発環境用
+            os.path.join(os.path.dirname(os.path.dirname(__file__)), 'subsidy_forms.json'),  # 本番環境用1
+            '/app/subsidy_forms.json',  # 本番環境用2（直接ルート）
+            'subsidy_forms.json'  # カレントディレクトリ
+        ]
+        
+        json_path = None
+        for path in possible_paths:
+            debug_info['json_path'] = path
+            if os.path.exists(path):
+                json_path = path
+                debug_info['file_exists'] = True
+                break
+        
         debug_info['step'] = 'checking_file'
         
-        if os.path.exists(json_path):
-            debug_info['file_exists'] = True
+        if json_path and os.path.exists(json_path):
             debug_info['step'] = 'reading_file'
             try:
                 with open(json_path, 'r', encoding='utf-8') as f:
@@ -1185,7 +1199,8 @@ def get_application_forms():
                 logger.error(f"Error reading subsidy_forms.json: {str(json_error)}")
         else:
             debug_info['step'] = 'file_not_found'
-            logger.warning(f"subsidy_forms.json not found at {json_path}")
+            debug_info['tried_paths'] = possible_paths
+            logger.warning(f"subsidy_forms.json not found in any of these paths: {possible_paths}")
             
         # FormsManagerが利用可能な場合は、そちらから追加データを取得
         try:
