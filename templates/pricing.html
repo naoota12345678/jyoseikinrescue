@@ -573,6 +573,12 @@
                         button.textContent = 'レギュラープランを選択';
                     } else if (planCard.dataset.plan === 'heavy') {
                         button.textContent = 'ヘビープランを選択';
+                    } else if (planCard.dataset.plan === 'pack_20') {
+                        button.textContent = '20回パック を購入';
+                    } else if (planCard.dataset.plan === 'pack_40') {
+                        button.textContent = '40回パック を購入';
+                    } else if (planCard.dataset.plan === 'pack_90') {
+                        button.textContent = '90回パック を購入';
                     }
                 }
             });

@@ -931,7 +931,14 @@
                 
                 // Stripe決済後の処理
                 if (urlParams.get('payment') === 'success') {
-                    const planType = urlParams.get('plan');
+                    let planType = urlParams.get('plan');
+                    const packType = urlParams.get('pack');
+                    
+                    // pack パラメータがある場合はpack_XX形式に変換
+                    if (packType) {
+                        planType = `pack_${packType}`;
+                    }
+                    
                     if (planType) {
                         console.log('Processing payment success for plan:', planType);
                         // webhook失敗に備えて手動でプラン更新を試行
