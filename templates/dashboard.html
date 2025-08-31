@@ -1077,59 +1077,75 @@
             
             // アップグレードプロンプトを作成
             const promptHtml = `
-                <div id="upgradePrompt" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 1000; max-width: 500px;">
+                <div id="upgradePrompt" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 1000; max-width: 600px;">
                     <h2 style="color: #667eea; margin-bottom: 1rem;">使用回数の上限に達しました</h2>
                     <p style="margin-bottom: 1.5rem;">
                         ${planType === 'free' 
                             ? '無料プランの5回の質問回数を使い切りました。' 
                             : `${planType}プランの今月の質問回数を使い切りました。`}
-                        継続してご利用いただくには、${planType === 'free' ? 'プランをアップグレード' : '追加パックの購入または上位プランへの変更'}してください。
+                        継続してご利用いただくには、以下の選択肢からお選びください。
                     </p>
+                    
                     ${planType === 'free' ? `
+                        <!-- 月額プラン（初回登録） -->
                         <div style="background: #f8f9ff; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
-                            <h3 style="color: #667eea; margin-bottom: 1rem;">🚀 プラン選択</h3>
-                            <p style="margin-bottom: 1rem;">あなたに最適なプランをお選びください</p>
+                            <h3 style="color: #667eea; margin-bottom: 1rem;">🚀 月額プラン（お得な継続利用）</h3>
+                            <p style="margin-bottom: 1rem; font-size: 0.9rem;">毎月自動で質問回数がリセット</p>
                             <div style="display: grid; gap: 0.5rem; font-size: 0.9rem;">
-                                <div>💡 <strong>ライト</strong>: 1,480円/月 (20回)</div>
-                                <div>⭐ <strong>レギュラー</strong>: 3,300円/月 (50回) 推奨</div>
-                                <div>🔥 <strong>ヘビー</strong>: 5,500円/月 (90回)</div>
+                                <div style="padding: 0.5rem; background: white; border-radius: 4px;">💡 <strong>ライト</strong>: 1,480円/月 (20回)</div>
+                                <div style="padding: 0.5rem; background: white; border-radius: 4px; border: 2px solid #667eea;">⭐ <strong>レギュラー</strong>: 3,300円/月 (50回) <span style="color: #667eea;">推奨</span></div>
+                                <div style="padding: 0.5rem; background: white; border-radius: 4px;">🔥 <strong>ヘビー</strong>: 5,500円/月 (90回)</div>
                             </div>
                         </div>
-                        <button onclick="goToPricing()" style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 1rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-bottom: 1rem;">
-                            💗 プラン選択ページへ
-                        </button>
                     ` : `
+                        <!-- 追加パック（即時利用可能） -->
                         <div style="background: #fff5f5; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
-                            <h3 style="color: #e74c3c; margin-bottom: 1rem;">📦 追加パック</h3>
-                            <p style="margin-bottom: 1rem;">今すぐ質問回数を追加できます</p>
+                            <h3 style="color: #e74c3c; margin-bottom: 1rem;">📦 追加パック（即時利用）</h3>
+                            <p style="margin-bottom: 1rem; font-size: 0.9rem;">今すぐ質問回数を追加できます</p>
                             <div style="display: grid; gap: 0.5rem; font-size: 0.9rem;">
-                                <div>📦 <strong>20回パック</strong>: 1,480円</div>
-                                <div>📦 <strong>40回パック</strong>: 2,680円</div>
-                                <div>📦 <strong>90回パック</strong>: 5,500円</div>
+                                <div style="padding: 0.5rem; background: white; border-radius: 4px;">📦 <strong>20回パック</strong>: 1,480円</div>
+                                <div style="padding: 0.5rem; background: white; border-radius: 4px;">📦 <strong>40回パック</strong>: 2,680円</div>
+                                <div style="padding: 0.5rem; background: white; border-radius: 4px;">📦 <strong>90回パック</strong>: 5,500円</div>
                             </div>
                         </div>
+                        
+                        <!-- 上位プラン変更 -->
                         ${(planType === 'light') ? `
                         <div style="background: #e8f5e8; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
-                            <h3 style="color: #28a745; margin-bottom: 1rem;">⬆️ 上位プラン</h3>
-                            <p style="margin-bottom: 1rem;">より多くの質問回数が必要ですか？</p>
+                            <h3 style="color: #28a745; margin-bottom: 1rem;">⬆️ 上位プラン変更</h3>
+                            <p style="margin-bottom: 1rem; font-size: 0.9rem;">より多くの質問回数で毎月利用</p>
                             <div style="display: grid; gap: 0.5rem; font-size: 0.9rem;">
-                                <div>⭐ <strong>レギュラープラン</strong>: 3,300円/月 (50回)</div>
-                                <div>🔥 <strong>ヘビープラン</strong>: 5,500円/月 (90回)</div>
+                                <div style="padding: 0.5rem; background: white; border-radius: 4px;">⭐ <strong>レギュラープラン</strong>: 3,300円/月 (50回)</div>
+                                <div style="padding: 0.5rem; background: white; border-radius: 4px;">🔥 <strong>ヘビープラン</strong>: 5,500円/月 (90回)</div>
                             </div>
                         </div>
                         ` : (planType === 'regular') ? `
                         <div style="background: #e8f5e8; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
-                            <h3 style="color: #28a745; margin-bottom: 1rem;">⬆️ 上位プラン</h3>
-                            <p style="margin-bottom: 1rem;">さらに多くの質問回数が必要ですか？</p>
+                            <h3 style="color: #28a745; margin-bottom: 1rem;">⬆️ 上位プラン変更</h3>
+                            <p style="margin-bottom: 1rem; font-size: 0.9rem;">さらに多くの質問回数で毎月利用</p>
                             <div style="display: grid; gap: 0.5rem; font-size: 0.9rem;">
-                                <div>🔥 <strong>ヘビープラン</strong>: 5,500円/月 (90回)</div>
+                                <div style="padding: 0.5rem; background: white; border-radius: 4px;">🔥 <strong>ヘビープラン</strong>: 5,500円/月 (90回)</div>
                             </div>
                         </div>
                         ` : ''}
-                        <button onclick="goToPricing()" style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 1rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-bottom: 1rem;">
-                            ${planType === 'light' || planType === 'regular' ? '📦 追加パック・上位プラン選択へ' : '📦 追加パック選択へ'}
-                        </button>
+                        
+                        <!-- 現在プランの情報表示（heavy以外） -->
+                        ${planType !== 'heavy' ? `
+                        <div style="background: #f8f9ff; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
+                            <h3 style="color: #667eea; margin-bottom: 1rem;">📋 その他の月額プラン</h3>
+                            <p style="margin-bottom: 1rem; font-size: 0.9rem;">プラン変更も可能です</p>
+                            <div style="display: grid; gap: 0.5rem; font-size: 0.9rem;">
+                                ${planType !== 'light' ? '<div style="padding: 0.5rem; background: white; border-radius: 4px;">💡 <strong>ライト</strong>: 1,480円/月 (20回)</div>' : ''}
+                                ${planType !== 'regular' ? '<div style="padding: 0.5rem; background: white; border-radius: 4px;">⭐ <strong>レギュラー</strong>: 3,300円/月 (50回)</div>' : ''}
+                                ${planType !== 'heavy' ? '<div style="padding: 0.5rem; background: white; border-radius: 4px;">🔥 <strong>ヘビー</strong>: 5,500円/月 (90回)</div>' : ''}
+                            </div>
+                        </div>
+                        ` : ''}
                     `}
+                    
+                    <button onclick="goToPricing()" style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 1rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-bottom: 1rem;">
+                        💗 プラン・追加パック選択ページへ
+                    </button>
                     <button onclick="closeUpgradePrompt()" style="width: 100%; background: #6c757d; color: white; border: none; padding: 0.8rem; border-radius: 8px; cursor: pointer;">
                         後で検討する
                     </button>
