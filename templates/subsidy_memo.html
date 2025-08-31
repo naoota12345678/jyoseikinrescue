@@ -1970,6 +1970,7 @@
         let currentConversationId = null;
         let conversations = [];
         let diagnosisResults = [];
+        let isLoadingConversations = false;
         
         // 左パネルタブ切り替え
         function switchLeftTab(tabName) {
@@ -2011,12 +2012,14 @@
         }
         
         // AIエージェント選択
-        function selectAgent(agentId) {
+        async function selectAgent(agentId) {
             currentAgent = agentId;
+            currentConversationId = null; // 新しい会話を開始
             
             // ドロップダウンメニューを閉じる
             document.getElementById('agentDropdownMenu').style.display = 'none';
             document.querySelector('.agent-dropdown-btn').classList.remove('active');
+            hideAllCoursesMenus();
             
             // エージェント名を更新
             const agentNames = {
@@ -2044,18 +2047,21 @@
             document.getElementById('chatInputArea').style.display = 'block';
             
             // チャット画面を初期化
-            initializeChatArea(agentId);
+            await initializeChatArea(agentId);
         }
         
         // チャット画面初期化
-        function initializeChatArea(agentId) {
+        async function initializeChatArea(agentId) {
             const chatMessages = document.getElementById('chatMessages');
             const agentNames = {
-                'subsidy_expert': '助成金専門エージェント',
-                'application_expert': '申請書類作成エージェント',
-                'strategy_expert': '戦略・計画エージェント',
                 'gyoumukaizen': '業務改善助成金専門エージェント',
-                'career-up': 'キャリアアップ助成金専門エージェント'
+                'career-up_seishain': 'キャリアアップ助成金専門エージェント（正社員化コース）',
+                'career-up_chingin': 'キャリアアップ助成金専門エージェント（賃金規定等改定コース）',
+                'career-up_shogaisha': 'キャリアアップ助成金専門エージェント（障害者正社員化コース）',
+                'career-up_kyotsu': 'キャリアアップ助成金専門エージェント（賃金規定等共通化コース）',
+                'career-up_shoyo': 'キャリアアップ助成金専門エージェント（諸手当制度共通化コース）',
+                'career-up_shahoken': 'キャリアアップ助成金専門エージェント（社会保険適用時処遇改善コース）',
+                'career-up_tanshuku': 'キャリアアップ助成金専門エージェント（短時間労働者労働時間延長コース）'
             };
             
             chatMessages.innerHTML = `
@@ -2083,6 +2089,14 @@
             sendBtn.disabled = true;
             
             try {
+                // 新しい会話の場合は作成
+                if (!currentConversationId) {
+                    await createNewConversation(message);
+                } else {
+                    // 既存会話にユーザーメッセージを保存
+                    await saveMessageToDatabase('user', message);
+                }
+                
                 // AIエージェントに送信（既存のAPIを使用）
                 const response = await fetch('/api/agent/chat', {
                     method: 'POST',
@@ -2099,7 +2113,12 @@
                 if (response.ok) {
                     const data = await response.json();
                     addMessageToChat('assistant', data.message);
-                    saveConversationToStorage();
+                    
+                    // アシスタントメッセージをデータベースに保存
+                    await saveMessageToDatabase('assistant', data.message);
+                    
+                    // 会話リストを更新
+                    await loadConversationsFromDatabase();
                 } else {
                     addMessageToChat('assistant', 'エラーが発生しました。もう一度お試しください。');
                 }
@@ -2147,31 +2166,93 @@
             });
         }
         
-        // 会話をLocalStorageに保存
-        function saveConversationToStorage() {
-            if (!currentAgent) return;
+        // 新しい会話を作成
+        async function createNewConversation(initialMessage) {
+            try {
+                const agentNames = {
+                    'gyoumukaizen': '業務改善助成金専門エージェント',
+                    'career-up_seishain': 'キャリアアップ助成金専門エージェント（正社員化コース）',
+                    'career-up_chingin': 'キャリアアップ助成金専門エージェント（賃金規定等改定コース）',
+                    'career-up_shogaisha': 'キャリアアップ助成金専門エージェント（障害者正社員化コース）',
+                    'career-up_kyotsu': 'キャリアアップ助成金専門エージェント（賃金規定等共通化コース）',
+                    'career-up_shoyo': 'キャリアアップ助成金専門エージェント（諸手当制度共通化コース）',
+                    'career-up_shahoken': 'キャリアアップ助成金専門エージェント（社会保険適用時処遇改善コース）',
+                    'career-up_tanshuku': 'キャリアアップ助成金専門エージェント（短時間労働者労働時間延長コース）'
+                };
+                
+                const response = await fetch('/api/conversations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        agent_id: currentAgent,
+                        agent_name: agentNames[currentAgent] || currentAgent,
+                        initial_message: initialMessage
+                    })
+                });
+                
+                if (response.ok) {
+                    const conversation = await response.json();
+                    currentConversationId = conversation.id;
+                    console.log('Created new conversation:', currentConversationId);
+                } else {
+                    console.error('Failed to create conversation');
+                }
+            } catch (error) {
+                console.error('Error creating conversation:', error);
+            }
+        }
+        
+        // メッセージをデータベースに保存
+        async function saveMessageToDatabase(sender, content) {
+            if (!currentConversationId) return;
             
-            const conversation = {
-                id: Date.now(),
-                agent: currentAgent,
-                title: `${currentAgent}との会話`,
-                messages: getConversationHistory(),
-                timestamp: new Date().toISOString()
-            };
+            try {
+                const response = await fetch(`/api/conversations/${currentConversationId}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        sender: sender,
+                        content: content
+                    })
+                });
+                
+                if (!response.ok) {
+                    console.error('Failed to save message to database');
+                }
+            } catch (error) {
+                console.error('Error saving message:', error);
+            }
+        }
+        
+        // データベースから会話一覧を読み込み
+        async function loadConversationsFromDatabase() {
+            if (isLoadingConversations) return;
+            isLoadingConversations = true;
             
-            let savedConversations = JSON.parse(localStorage.getItem('aiConversations') || '[]');
-            savedConversations.push(conversation);
-            localStorage.setItem('aiConversations', JSON.stringify(savedConversations));
+            try {
+                const response = await fetch('/api/conversations');
+                if (response.ok) {
+                    const conversations = await response.json();
+                    updateConversationsList(conversations);
+                } else {
+                    console.error('Failed to load conversations');
+                }
+            } catch (error) {
+                console.error('Error loading conversations:', error);
+            }
             
-            updateConversationsList();
+            isLoadingConversations = false;
         }
         
         // 会話リストを更新
-        function updateConversationsList() {
+        function updateConversationsList(conversations) {
             const conversationsList = document.getElementById('conversationsList');
-            const savedConversations = JSON.parse(localStorage.getItem('aiConversations') || '[]');
             
-            if (savedConversations.length === 0) {
+            if (!conversations || conversations.length === 0) {
                 conversationsList.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">💬</div>
@@ -2182,46 +2263,59 @@
                 return;
             }
             
-            conversationsList.innerHTML = savedConversations.map(conv => `
-                <div class="conversation-item" onclick="loadConversation(${conv.id})">
+            conversationsList.innerHTML = conversations.map(conv => `
+                <div class="conversation-item ${conv.id === currentConversationId ? 'active' : ''}" onclick="loadConversationFromDatabase('${conv.id}')">
                     <div class="conversation-title">${conv.title}</div>
-                    <div class="conversation-preview">${conv.messages[0]?.message || ''}</div>
-                    <div class="conversation-time">${new Date(conv.timestamp).toLocaleString()}</div>
+                    <div class="conversation-preview">${conv.preview}</div>
+                    <div class="conversation-time">${new Date(conv.updated_at).toLocaleString()}</div>
                 </div>
             `).join('');
         }
         
-        // 会話を読み込み
-        function loadConversation(conversationId) {
-            const savedConversations = JSON.parse(localStorage.getItem('aiConversations') || '[]');
-            const conversation = savedConversations.find(c => c.id === conversationId);
-            
-            if (conversation) {
-                currentConversationId = conversationId;
-                selectAgent(conversation.agent);
-                
-                // メッセージを復元
-                const chatMessages = document.getElementById('chatMessages');
-                chatMessages.innerHTML = conversation.messages.map(msg => {
-                    if (msg.sender === 'user') {
-                        return `
-                            <div class="message user">
-                                <div class="user-message">
-                                    <div class="message-content">${msg.message}</div>
+        // データベースから会話を読み込み
+        async function loadConversationFromDatabase(conversationId) {
+            try {
+                const response = await fetch(`/api/conversations/${conversationId}`);
+                if (response.ok) {
+                    const conversation = await response.json();
+                    
+                    currentConversationId = conversationId;
+                    currentAgent = conversation.agent_id;
+                    
+                    // エージェント選択を更新
+                    document.getElementById('selectedAgentText').textContent = conversation.agent_name;
+                    document.getElementById('chatInputArea').style.display = 'block';
+                    
+                    // メッセージを復元
+                    const chatMessages = document.getElementById('chatMessages');
+                    chatMessages.innerHTML = conversation.messages.map(msg => {
+                        if (msg.sender === 'user') {
+                            return `
+                                <div class="message user">
+                                    <div class="user-message">
+                                        <div class="message-content">${msg.content}</div>
+                                    </div>
                                 </div>
-                            </div>
-                        `;
-                    } else {
-                        return `
-                            <div class="message assistant">
-                                <div class="assistant-avatar">🤖</div>
-                                <div class="message-content">${msg.message}</div>
-                            </div>
-                        `;
-                    }
-                }).join('');
-                
-                chatMessages.scrollTop = chatMessages.scrollHeight;
+                            `;
+                        } else {
+                            return `
+                                <div class="message assistant">
+                                    <div class="assistant-avatar">🤖</div>
+                                    <div class="message-content">${msg.content}</div>
+                                </div>
+                            `;
+                        }
+                    }).join('');
+                    
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    
+                    // 会話リストのアクティブ状態を更新
+                    await loadConversationsFromDatabase();
+                } else {
+                    console.error('Failed to load conversation');
+                }
+            } catch (error) {
+                console.error('Error loading conversation:', error);
             }
         }
         
@@ -2237,8 +2331,8 @@
                 });
             }
             
-            // 初期化時に会話リストを読み込み
-            updateConversationsList();
+            // 初期化時に会話リストをデータベースから読み込み
+            loadConversationsFromDatabase();
         });
     </script>
 </body>

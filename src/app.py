@@ -1187,6 +1187,172 @@ def agent_chat():
         logger.error(f"Error in agent chat: {str(e)}")
         return jsonify({'error': 'チャットの処理に失敗しました'}), 500
 
+# ===== 会話履歴管理API =====
+
+@app.route('/api/conversations', methods=['GET'])
+@require_auth
+def get_conversations():
+    """ユーザーの会話一覧を取得"""
+    try:
+        current_user = get_current_user()
+        
+        from conversation_service import ConversationService
+        service = ConversationService(firebase_service.get_db())
+        
+        conversations = service.get_user_conversations(current_user['user_id'])
+        
+        # サマリー形式で返却
+        summaries = []
+        for conv in conversations:
+            summary = service.get_conversation_summary(conv.id, current_user['user_id'])
+            if summary:
+                summaries.append(summary)
+        
+        return jsonify(summaries)
+        
+    except Exception as e:
+        logger.error(f"Error getting conversations: {str(e)}")
+        return jsonify({'error': '会話履歴の取得に失敗しました'}), 500
+
+@app.route('/api/conversations', methods=['POST'])
+@require_auth
+def create_conversation():
+    """新しい会話を作成"""
+    try:
+        current_user = get_current_user()
+        data = request.json
+        
+        agent_id = data.get('agent_id')
+        agent_name = data.get('agent_name')
+        initial_message = data.get('initial_message')
+        
+        if not agent_id or not agent_name:
+            return jsonify({'error': 'エージェントIDとエージェント名が必要です'}), 400
+        
+        from conversation_service import ConversationService
+        service = ConversationService(firebase_service.get_db())
+        
+        conversation = service.create_conversation(
+            current_user['user_id'], 
+            agent_id, 
+            agent_name,
+            initial_message
+        )
+        
+        return jsonify(conversation.to_dict()), 201
+        
+    except Exception as e:
+        logger.error(f"Error creating conversation: {str(e)}")
+        return jsonify({'error': '会話の作成に失敗しました'}), 500
+
+@app.route('/api/conversations/<conversation_id>', methods=['GET'])
+@require_auth  
+def get_conversation(conversation_id):
+    """特定の会話を取得"""
+    try:
+        current_user = get_current_user()
+        
+        from conversation_service import ConversationService
+        service = ConversationService(firebase_service.get_db())
+        
+        conversation = service.get_conversation(conversation_id, current_user['user_id'])
+        
+        if not conversation:
+            return jsonify({'error': '会話が見つかりません'}), 404
+        
+        return jsonify(conversation.to_dict())
+        
+    except Exception as e:
+        logger.error(f"Error getting conversation {conversation_id}: {str(e)}")
+        return jsonify({'error': '会話の取得に失敗しました'}), 500
+
+@app.route('/api/conversations/<conversation_id>/messages', methods=['POST'])
+@require_auth
+def add_message_to_conversation(conversation_id):
+    """会話にメッセージを追加"""
+    try:
+        current_user = get_current_user()
+        data = request.json
+        
+        sender = data.get('sender')  # 'user' or 'assistant'
+        content = data.get('content')
+        
+        if not sender or not content:
+            return jsonify({'error': '送信者とメッセージ内容が必要です'}), 400
+        
+        if sender not in ['user', 'assistant']:
+            return jsonify({'error': '無効な送信者です'}), 400
+        
+        from conversation_service import ConversationService
+        service = ConversationService(firebase_service.get_db())
+        
+        success = service.add_message_to_conversation(
+            conversation_id, 
+            current_user['user_id'], 
+            sender, 
+            content
+        )
+        
+        if success:
+            return jsonify({'status': 'success'})
+        else:
+            return jsonify({'error': 'メッセージの追加に失敗しました'}), 400
+        
+    except Exception as e:
+        logger.error(f"Error adding message to conversation {conversation_id}: {str(e)}")
+        return jsonify({'error': 'メッセージの追加に失敗しました'}), 500
+
+@app.route('/api/conversations/<conversation_id>/title', methods=['PUT'])
+@require_auth
+def update_conversation_title(conversation_id):
+    """会話タイトルを更新"""
+    try:
+        current_user = get_current_user()
+        data = request.json
+        
+        title = data.get('title')
+        if not title:
+            return jsonify({'error': 'タイトルが必要です'}), 400
+        
+        from conversation_service import ConversationService
+        service = ConversationService(firebase_service.get_db())
+        
+        success = service.update_conversation_title(
+            conversation_id,
+            current_user['user_id'], 
+            title
+        )
+        
+        if success:
+            return jsonify({'status': 'success'})
+        else:
+            return jsonify({'error': 'タイトルの更新に失敗しました'}), 400
+        
+    except Exception as e:
+        logger.error(f"Error updating conversation title {conversation_id}: {str(e)}")
+        return jsonify({'error': 'タイトルの更新に失敗しました'}), 500
+
+@app.route('/api/conversations/<conversation_id>', methods=['DELETE'])
+@require_auth
+def delete_conversation(conversation_id):
+    """会話を削除"""
+    try:
+        current_user = get_current_user()
+        
+        from conversation_service import ConversationService
+        service = ConversationService(firebase_service.get_db())
+        
+        success = service.delete_conversation(conversation_id, current_user['user_id'])
+        
+        if success:
+            return jsonify({'status': 'success'})
+        else:
+            return jsonify({'error': '会話の削除に失敗しました'}), 400
+        
+    except Exception as e:
+        logger.error(f"Error deleting conversation {conversation_id}: {str(e)}")
+        return jsonify({'error': '会話の削除に失敗しました'}), 500
+
 @app.route('/api/diagnosis/convert/<session_id>', methods=['POST'])
 @require_auth
 def convert_diagnosis(session_id):
