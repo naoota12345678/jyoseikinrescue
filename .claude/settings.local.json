@@ -17,7 +17,8 @@
       "Bash(start http://localhost:8080/subsidy_memo)",
       "Bash(git mv:*)",
       "Bash(dir:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(del \"C:\\Users\\naoot\\Desktop\\jyoseikinrescue-claude\\comprehensive_diagnosis_rules.md\")"
     ],
     "deny": [],
     "ask": [],
