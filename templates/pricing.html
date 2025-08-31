@@ -574,11 +574,11 @@
                     } else if (planCard.dataset.plan === 'heavy') {
                         button.textContent = 'ヘビープランを選択';
                     } else if (planCard.dataset.plan === 'pack_20') {
-                        button.textContent = '20回パック を購入';
+                        button.textContent = '20回パックを購入';
                     } else if (planCard.dataset.plan === 'pack_40') {
-                        button.textContent = '40回パック を購入';
+                        button.textContent = '40回パックを購入';
                     } else if (planCard.dataset.plan === 'pack_90') {
-                        button.textContent = '90回パック を購入';
+                        button.textContent = '90回パックを購入';
                     }
                 }
             });
@@ -614,6 +614,33 @@
                 // URLパラメータを削除
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
+        });
+
+        // ブラウザの戻るボタンやキャッシュから戻ってきた時の対策
+        window.addEventListener('pageshow', (event) => {
+            console.log('Pageshow event triggered, persisted:', event.persisted);
+            // 常にリセット（キャッシュからの復帰でなくても）
+            resetAllButtons();
+        });
+
+        // ページが表示された時（タブ切り替えなど）
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                console.log('Page became visible, resetting buttons');
+                resetAllButtons();
+            }
+        });
+
+        // ページロード完了時にも念のためリセット
+        window.addEventListener('load', () => {
+            console.log('Page loaded, resetting buttons');
+            resetAllButtons();
+        });
+        
+        // フォーカスイベントでもリセット
+        window.addEventListener('focus', () => {
+            console.log('Window focused, resetting buttons');
+            resetAllButtons();
         });
     </script>
 </body>
