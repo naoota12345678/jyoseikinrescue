@@ -1885,6 +1885,9 @@
                     // 使用回数を再読み込み（重要：dashboard.htmlの既存機能を利用）
                     await loadUserData();
                 } else {
+                    // エラー詳細をログ出力
+                    const errorText = await response.text();
+                    console.error('API Error:', response.status, errorText);
                     addIntegratedMessageToChat('assistant', 'エラーが発生しました。もう一度お試しください。');
                 }
             } catch (error) {
