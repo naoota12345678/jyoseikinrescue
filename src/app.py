@@ -19,7 +19,10 @@ try:
     AUTH_ENABLED = True
     logger.info("Authentication modules loaded successfully")
 except Exception as e:
-    logger.warning(f"Authentication modules not available: {str(e)}")
+    logger.error(f"Authentication modules failed to load: {str(e)}")
+    logger.error(f"Error type: {type(e).__name__}")
+    import traceback
+    logger.error(f"Full traceback: {traceback.format_exc()}")
     AUTH_ENABLED = False
     # ダミーのデコレータを提供
     def require_auth(f):
