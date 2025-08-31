@@ -339,6 +339,74 @@
             </div>
         </div>
         
+        <!-- 追加パックセクション（URLパラメータで制御） -->
+        <div id="additionalPacksSection" style="display: none;">
+            <div class="header" style="margin-top: 60px; margin-bottom: 40px;">
+                <h2 style="color: white; font-size: 36px; font-weight: 700; margin-bottom: 15px;">📦 追加パック</h2>
+                <p style="color: rgba(255, 255, 255, 0.9); font-size: 16px;">今すぐ質問回数を追加できます（一回限りの購入）</p>
+            </div>
+            
+            <div class="pricing-grid">
+                <!-- 20回パック -->
+                <div class="plan-card" data-plan="pack_20">
+                    <div class="plan-name">20回パック</div>
+                    <div class="plan-price">
+                        <span class="price-amount">¥1,480</span>
+                        <span class="price-period">一回限り</span>
+                    </div>
+                    <div class="plan-questions">+20回の質問</div>
+                    <ul class="plan-features">
+                        <li>即座に利用開始</li>
+                        <li>現在のプランに追加</li>
+                        <li>有効期限なし</li>
+                        <li>一回限りの支払い</li>
+                    </ul>
+                    <button class="plan-button" onclick="selectPlan('pack_20')">
+                        20回パックを購入
+                    </button>
+                </div>
+                
+                <!-- 40回パック -->
+                <div class="plan-card" data-plan="pack_40">
+                    <div class="plan-name">40回パック</div>
+                    <div class="plan-price">
+                        <span class="price-amount">¥2,680</span>
+                        <span class="price-period">一回限り</span>
+                    </div>
+                    <div class="plan-questions">+40回の質問</div>
+                    <ul class="plan-features">
+                        <li>即座に利用開始</li>
+                        <li>現在のプランに追加</li>
+                        <li>有効期限なし</li>
+                        <li>一回限りの支払い</li>
+                    </ul>
+                    <button class="plan-button" onclick="selectPlan('pack_40')">
+                        40回パックを購入
+                    </button>
+                </div>
+                
+                <!-- 90回パック -->
+                <div class="plan-card recommended" data-plan="pack_90">
+                    <div class="recommended-badge">Best Value</div>
+                    <div class="plan-name">90回パック</div>
+                    <div class="plan-price">
+                        <span class="price-amount">¥5,500</span>
+                        <span class="price-period">一回限り</span>
+                    </div>
+                    <div class="plan-questions">+90回の質問</div>
+                    <ul class="plan-features">
+                        <li>即座に利用開始</li>
+                        <li>現在のプランに追加</li>
+                        <li>有効期限なし</li>
+                        <li>一回限りの支払い</li>
+                    </ul>
+                    <button class="plan-button" onclick="selectPlan('pack_90')">
+                        90回パックを購入
+                    </button>
+                </div>
+            </div>
+        </div>
+        
         <div class="loading" id="loadingIndicator">
             決済ページを準備中...
         </div>
@@ -377,6 +445,9 @@
                 console.log('User authenticated:', user.email);
                 // ユーザーが認証されている場合、UIを表示
                 document.body.style.opacity = '1';
+                
+                // URLパラメータをチェックして追加パック表示を制御
+                checkUrlParametersAndShowPacks();
             } else {
                 console.log('User not authenticated, redirecting to login');
                 // 少し遅延させてからリダイレクト（認証の初期化を待つため）
@@ -387,6 +458,18 @@
                 }, 1000);
             }
         });
+
+        function checkUrlParametersAndShowPacks() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const showPacks = urlParams.get('pack') === 'true';
+            
+            if (showPacks) {
+                const additionalPacksSection = document.getElementById('additionalPacksSection');
+                if (additionalPacksSection) {
+                    additionalPacksSection.style.display = 'block';
+                }
+            }
+        }
 
         async function selectPlan(planType) {
             // 認証状態が初期化されていない場合は待機
@@ -410,7 +493,21 @@
 
             try {
                 const token = await currentUser.getIdToken();
-                const endpoint = `/api/payment/${planType}-plan`;
+                
+                // 追加パックか月額プランかで処理を分岐
+                let endpoint;
+                let successUrl;
+                
+                if (planType.startsWith('pack_')) {
+                    // 追加パック処理
+                    const packCount = planType.split('_')[1];
+                    endpoint = `/api/payment/additional-pack-${packCount}`;
+                    successUrl = window.location.origin + '/dashboard?payment=success&pack=' + packCount;
+                } else {
+                    // 月額プラン処理
+                    endpoint = `/api/payment/${planType}-plan`;
+                    successUrl = window.location.origin + '/dashboard?payment=success&plan=' + planType;
+                }
                 
                 const response = await fetch(endpoint, {
                     method: 'POST',
@@ -419,7 +516,7 @@
                         'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        success_url: window.location.origin + '/dashboard?payment=success&plan=' + planType,
+                        success_url: successUrl,
                         cancel_url: window.location.origin + '/pricing?payment=cancelled'
                     })
                 });

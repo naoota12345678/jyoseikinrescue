@@ -1128,23 +1128,10 @@
                             </div>
                         </div>
                         ` : ''}
-                        
-                        <!-- 現在プランの情報表示（heavy以外） -->
-                        ${planType !== 'heavy' ? `
-                        <div style="background: #f8f9ff; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
-                            <h3 style="color: #667eea; margin-bottom: 1rem;">📋 その他の月額プラン</h3>
-                            <p style="margin-bottom: 1rem; font-size: 0.9rem;">プラン変更も可能です</p>
-                            <div style="display: grid; gap: 0.5rem; font-size: 0.9rem;">
-                                ${planType !== 'light' ? '<div style="padding: 0.5rem; background: white; border-radius: 4px;">💡 <strong>ライト</strong>: 1,480円/月 (20回)</div>' : ''}
-                                ${planType !== 'regular' ? '<div style="padding: 0.5rem; background: white; border-radius: 4px;">⭐ <strong>レギュラー</strong>: 3,300円/月 (50回)</div>' : ''}
-                                ${planType !== 'heavy' ? '<div style="padding: 0.5rem; background: white; border-radius: 4px;">🔥 <strong>ヘビー</strong>: 5,500円/月 (90回)</div>' : ''}
-                            </div>
-                        </div>
-                        ` : ''}
                     `}
                     
-                    <button onclick="goToPricing()" style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 1rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-bottom: 1rem;">
-                        💗 プラン・追加パック選択ページへ
+                    <button onclick="goToPricing(${planType === 'free' ? 'false' : 'true'})" style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 1rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-bottom: 1rem;">
+                        ${planType === 'free' ? '💗 プラン選択ページへ' : '💗 プラン・追加パック選択ページへ'}
                     </button>
                     <button onclick="closeUpgradePrompt()" style="width: 100%; background: #6c757d; color: white; border: none; padding: 0.8rem; border-radius: 8px; cursor: pointer;">
                         後で検討する
@@ -1206,8 +1193,9 @@
             }
         }
 
-        function goToPricing() {
-            window.location.href = '/pricing';
+        function goToPricing(showPacks = false) {
+            const url = showPacks ? '/pricing?pack=true' : '/pricing';
+            window.location.href = url;
         }
 
         async function purchaseAdditionalPack() {
