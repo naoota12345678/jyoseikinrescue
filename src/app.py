@@ -220,24 +220,11 @@ def joseikin_diagnosis():
         diagnosis_data = data.get('diagnosis_data', {})
         
         # 正しい診断用データを読み込み
-        import os
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        file_path = os.path.join(base_dir, 'file', '診断', '2025_jyoseikin_kaniyoryo2_20250831_185114_AI_plain.txt')
-        
-        # デバッグ情報
-        logger.info(f"Base directory: {base_dir}")
-        logger.info(f"Looking for file at: {file_path}")
-        logger.info(f"File exists: {os.path.exists(file_path)}")
-        
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open('2025_jyoseikin_kaniyoryo2_20250831_185114_AI_plain.txt', 'r', encoding='utf-8') as f:
                 joseikin_knowledge = f.read()
-                logger.info(f"診断データファイル読み込み成功: {len(joseikin_knowledge)} 文字")
         except FileNotFoundError:
-            logger.error(f"正しい診断データファイルが見つかりません: {file_path}")
-            joseikin_knowledge = ""
-        except Exception as e:
-            logger.error(f"ファイル読み込みエラー: {str(e)}")
+            logger.error("正しい診断データファイルが見つかりません")
             joseikin_knowledge = ""
         
         # Claude AIを使用して包括的な助成金診断
@@ -1011,29 +998,8 @@ def agent_chat():
         if agent_id not in agent_info:
             return jsonify({'error': '無効なエージェントIDです'}), 400
         
-        # Claude APIを使用してレスポンスを生成
+        # Claude APIを使用してレスポンスを生成（元の方式に戻す）
         claude_service = get_claude_service()
-        
-        # 正しい診断用データを読み込み
-        import os
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        file_path = os.path.join(base_dir, 'file', '診断', '2025_jyoseikin_kaniyoryo2_20250831_185114_AI_plain.txt')
-        
-        # デバッグ情報
-        logger.info(f"[Agent] Base directory: {base_dir}")
-        logger.info(f"[Agent] Looking for file at: {file_path}")
-        logger.info(f"[Agent] File exists: {os.path.exists(file_path)}")
-        
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                knowledge_base = f.read()
-                logger.info(f"エージェント用データファイル読み込み成功: {len(knowledge_base)} 文字")
-        except FileNotFoundError:
-            logger.error(f"正しい診断データファイルが見つかりません: {file_path}")
-            knowledge_base = ""
-        except Exception as e:
-            logger.error(f"ファイル読み込みエラー: {str(e)}")
-            knowledge_base = ""
         
         # 会話履歴を含むコンテキストを構築
         context_messages = []
@@ -1048,10 +1014,8 @@ def agent_chat():
 ユーザー: {message}
 """
         
-        # システムプロンプトに知識ベースを追加
-        system_prompt_with_data = f"{agent_info[agent_id]['system_prompt']}\n\n【2025年度助成金データベース】\n{knowledge_base}"
-        
-        response = claude_service.chat(full_prompt, system_prompt_with_data)
+        # 元のclaude_serviceを使用（エージェント別のファイルを読み込む）
+        response = claude_service.get_agent_response(full_prompt, agent_id)
         
         import time
         
