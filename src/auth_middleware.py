@@ -14,17 +14,22 @@ def require_auth(f):
         try:
             # Authorization ヘッダーから Firebase ID token を取得
             auth_header = request.headers.get('Authorization')
+            logger.info(f"Auth header: {auth_header[:50] if auth_header else 'None'}...")
             
             if not auth_header or not auth_header.startswith('Bearer '):
+                logger.warning("Missing or invalid Authorization header")
                 return jsonify({
                     'error': '認証が必要です',
                     'code': 'AUTH_REQUIRED'
                 }), 401
             
             id_token = auth_header.split(' ')[1]
+            logger.info(f"Extracted token length: {len(id_token)}")
             
             # Firebase ID token を検証
+            logger.info("Attempting to verify Firebase token...")
             decoded_token = firebase_service.verify_token(id_token)
+            logger.info(f"Token verification result: {decoded_token is not None}")
             
             if not decoded_token:
                 return jsonify({
