@@ -26,6 +26,10 @@ except Exception as e:
         return f
     def check_usage_limit(f):
         return f
+    def get_current_user():
+        return {'user_id': 'guest', 'id': 'guest', 'email': 'guest@example.com'}
+    def get_usage_stats():
+        return {'current_usage': 0, 'limit': 1000, 'reset_date': None}
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-here')
