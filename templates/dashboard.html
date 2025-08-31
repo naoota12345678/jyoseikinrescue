@@ -1858,10 +1858,12 @@
                 }
                 
                 // AIエージェントに送信（既存のAPIを使用）
+                const token = await firebase.auth().currentUser.getIdToken();
                 const response = await fetch('/api/agent/chat', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
                     },
                     body: JSON.stringify({
                         agent_id: integratedCurrentAgent,
@@ -1943,10 +1945,12 @@
                     'career-up_tanshuku': 'キャリアアップ助成金専門エージェント（短時間労働者労働時間延長コース）'
                 };
                 
+                const token = await firebase.auth().currentUser.getIdToken();
                 const response = await fetch('/api/conversations', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
                     },
                     body: JSON.stringify({
                         agent_id: integratedCurrentAgent,
@@ -1972,10 +1976,12 @@
             if (!integratedCurrentConversationId) return;
             
             try {
+                const token = await firebase.auth().currentUser.getIdToken();
                 const response = await fetch(`/api/conversations/${integratedCurrentConversationId}/messages`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
                     },
                     body: JSON.stringify({
                         sender: sender,
@@ -1997,7 +2003,12 @@
             integratedIsLoadingConversations = true;
             
             try {
-                const response = await fetch('/api/conversations');
+                const token = await firebase.auth().currentUser.getIdToken();
+                const response = await fetch('/api/conversations', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
                 if (response.ok) {
                     const conversations = await response.json();
                     updateIntegratedConversationsList(conversations);
@@ -2038,7 +2049,12 @@
         // 統合データベースから会話を読み込み
         async function loadIntegratedConversationFromDatabase(conversationId) {
             try {
-                const response = await fetch(`/api/conversations/${conversationId}`);
+                const token = await firebase.auth().currentUser.getIdToken();
+                const response = await fetch(`/api/conversations/${conversationId}`, {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
                 if (response.ok) {
                     const conversation = await response.json();
                     
