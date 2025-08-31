@@ -66,6 +66,13 @@ def debug_auth_status():
     except Exception as e:
         debug_info['current_user_error'] = str(e)
     
+    # Firebase初期化状態も確認
+    try:
+        from firebase_config import firebase_service
+        debug_info['firebase_initialized'] = hasattr(firebase_service, 'db') and firebase_service.db is not None
+    except Exception as e:
+        debug_info['firebase_init_error'] = str(e)
+    
     return jsonify(debug_info)
 
 # サービスの遅延初期化
