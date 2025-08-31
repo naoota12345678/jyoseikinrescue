@@ -15,7 +15,8 @@
       "Bash(python:*)",
       "Bash(curl:*)",
       "Bash(start http://localhost:8080/subsidy_memo)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": [],
