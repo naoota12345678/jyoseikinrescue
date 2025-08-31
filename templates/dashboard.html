@@ -2097,6 +2097,11 @@
         }
 
         function switchToOriginalMode() {
+            // 従来のダッシュボードへの切り替えを無効化（統合ワークスペースのみ使用）
+            console.log('従来のダッシュボードへの切り替えは無効化されています');
+            return false;
+            
+            /* 無効化されたコード
             // 統合UIを隠す
             document.getElementById('integratedChatArea').style.display = 'none';
             
@@ -2104,6 +2109,7 @@
             document.querySelector('.container .agents-header').style.display = 'block';
             document.querySelector('.container .agent-selection').style.display = 'flex';
             document.querySelector('.container .chat-area').style.display = 'block';
+            */
         }
 
         // Enterキーでメッセージ送信（統合UI用）
