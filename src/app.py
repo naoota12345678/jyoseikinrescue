@@ -72,6 +72,24 @@ def debug_test_auth():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/debug/full-auth-test', methods=['POST'])
+@require_auth
+def debug_full_auth_test():
+    """フル認証処理のテスト"""
+    try:
+        current_user = get_current_user()
+        return jsonify({
+            'success': True,
+            'user_found': current_user is not None,
+            'user_id': current_user.get('user_id') if current_user else None,
+            'user_keys': list(current_user.keys()) if current_user else []
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 @app.route('/debug/auth-status')
 def debug_auth_status():
     """認証状態のデバッグ情報"""
