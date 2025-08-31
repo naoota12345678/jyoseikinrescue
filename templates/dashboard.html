@@ -949,20 +949,28 @@
                         
                         // 追加パックか通常プランかで処理を変える
                         if (planType.startsWith('pack_')) {
-                            // 追加パックの場合：即座に複数回リロード
+                            // 追加パックの場合：ポップアップを抑制
+                            window.upgradePromptShown = true;
+                            
+                            // 即座に複数回リロード
                             setTimeout(async () => {
                                 console.log('First pack data reload');
+                                window.upgradePromptShown = true; // 念のため再設定
                                 await loadUserData();
                             }, 1000);
                             
                             setTimeout(async () => {
                                 console.log('Final pack data reload');
+                                window.upgradePromptShown = true; // 念のため再設定
                                 await loadUserData();
                             }, 2500);
                         } else {
-                            // 通常プランの場合
+                            // 通常プランの場合：ポップアップを抑制
+                            window.upgradePromptShown = true;
+                            
                             setTimeout(async () => {
                                 console.log('Final data reload after payment processing');
+                                window.upgradePromptShown = true; // 念のため再設定
                                 await loadUserData();
                             }, 2000);
                         }
@@ -1069,7 +1077,11 @@
             }
             
             // 使用上限に達した場合のアップグレード表示
-            if (remaining === 0 && !window.upgradePromptShown) {
+            // 追加パック購入直後（URLにpack=がある）の場合は表示しない
+            const urlParams = new URLSearchParams(window.location.search);
+            const justPurchasedPack = urlParams.has('pack') || urlParams.get('payment') === 'success';
+            
+            if (remaining === 0 && !window.upgradePromptShown && !justPurchasedPack) {
                 window.upgradePromptShown = true;
                 setTimeout(() => showUpgradePrompt(usage.plan_type || 'free'), 500);
             }
