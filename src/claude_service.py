@@ -169,17 +169,23 @@ class ClaudeService:
     
     def _select_system_prompt_by_agent(self, agent_type: str, question: str) -> str:
         """エージェントタイプに応じてシステムプロンプトを選択"""
+        logger.info(f"_select_system_prompt_by_agent called with agent_type: {agent_type}")
+        
         if agent_type == 'gyoumukaizen':
+            logger.info("Returning business_improvement_prompt")
             return self.business_improvement_prompt
         elif agent_type.startswith('career-up'):
             # キャリアアップ助成金のコース別対応
+            logger.info(f"Career-up agent detected: {agent_type}")
             return self._get_career_up_prompt(agent_type)
         elif agent_type.startswith('jinzai-kaihatsu'):
             # 人材開発支援助成金の各コースに対応
+            logger.info(f"Jinzai-kaihatsu agent detected: {agent_type}")
             course = agent_type.replace('jinzai-kaihatsu_', '') if '_' in agent_type else ''
             return self._get_jinzai_kaihatsu_prompt(course)
         else:
             # その他のエージェントは既存のロジックを使用
+            logger.warning(f"Unknown agent type: {agent_type}, falling back to general prompt")
             return self._select_system_prompt(question)
     
     def _get_jinzai_kaihatsu_prompt(self, course: str) -> str:
@@ -231,6 +237,8 @@ class ClaudeService:
     
     def _get_career_up_prompt(self, agent_type: str) -> str:
         """キャリアアップ助成金のコース別プロンプトを生成"""
+        logger.info(f"_get_career_up_prompt called with agent_type: {agent_type}")
+        
         course_map = {
             'career-up_seishain': ('正社員化コース', 'file/キャリアアップ助成金/1000 正社員化コース.txt'),
             'career-up_shogaisha': ('障害者正社員化コース', 'file/キャリアアップ助成金/2000 障害者正社員化コース.txt'),
@@ -242,9 +250,11 @@ class ClaudeService:
         }
         
         if agent_type not in course_map:
+            logger.warning(f"Agent type {agent_type} not found in course_map")
             return self.general_prompt
             
         course_name, file_name = course_map[agent_type]
+        logger.info(f"Loading course: {course_name}, file: {file_name}")
         
         try:
             import os
@@ -252,16 +262,21 @@ class ClaudeService:
             
             # 共通部分を読み込み
             common_file_path = os.path.join(base_dir, 'file/キャリアアップ助成金/共通部分キャリアアップjyoseikin支給要領_共通.txt')
+            logger.info(f"Reading common file: {common_file_path}")
             with open(common_file_path, 'r', encoding='utf-8') as f:
                 common_content = f.read()
+            logger.info(f"Common content loaded: {len(common_content)} chars")
             
             # コース固有部分を読み込み
             course_file_path = os.path.join(base_dir, file_name)
+            logger.info(f"Reading course file: {course_file_path}")
             with open(course_file_path, 'r', encoding='utf-8') as f:
                 course_content = f.read()
+            logger.info(f"Course content loaded: {len(course_content)} chars")
                 
             # 共通部分とコース固有部分を結合
             full_content = f"{common_content}\n\n=== {course_name} 詳細 ===\n{course_content}"
+            logger.info(f"Full content prepared: {len(full_content)} chars")
                 
             return f"""
 あなたはキャリアアップ助成金の{course_name}専門AIエージェントです。
@@ -333,6 +348,9 @@ class ClaudeService:
 """
         except Exception as e:
             logger.error(f"Error loading career-up course file {file_name}: {str(e)}")
+            logger.error(f"Error details: {type(e).__name__}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
             return f"""
 申し訳ございません。{course_name}の詳細資料の読み込みに失敗しました。
 キャリアアップ助成金に関する一般的な情報は提供できますが、詳細な要件については厚生労働省の公式サイトをご確認ください。
