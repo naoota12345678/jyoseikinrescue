@@ -1499,11 +1499,39 @@
                 const response = await fetch('/api/forms');
                 const result = await response.json();
                 
+                console.log('API Response:', result); // デバッグ用
+                
                 if (result.status !== 'success') {
                     throw new Error(result.message || 'データ取得に失敗しました');
                 }
                 
                 const formsData = result.data;
+                console.log('Forms Data:', formsData); // デバッグ用
+                console.log('Forms Data Length:', formsData ? formsData.length : 0); // デバッグ用
+                
+                // データがない場合の処理
+                if (!formsData || formsData.length === 0) {
+                    const mainContent = document.querySelector('.main-content');
+                    if (mainContent) {
+                        mainContent.innerHTML = `
+                            <div style="background: white; padding: 2rem; border-radius: 12px; margin: 1rem 0; text-align: center;">
+                                <h2 style="color: #4b5563;">📋 申請書類ダウンロード</h2>
+                                <p style="color: #6b7280; margin: 2rem 0;">申請書類データが見つかりません。</p>
+                                <div style="margin-top: 1.5rem; padding: 1rem; background: #fef3c7; border-radius: 6px;">
+                                    <p style="color: #92400e; font-size: 0.9rem; margin: 0;">
+                                        ⚠️ <strong>注意事項</strong><br>
+                                        • 最新の様式は必ず厚生労働省の公式サイトでご確認ください<br>
+                                        • 申請前に必ず最新版をダウンロードしてご利用ください
+                                    </p>
+                                </div>
+                                <button onclick="location.reload()" style="background: #667eea; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; margin-top: 1rem;">
+                                    戻る
+                                </button>
+                            </div>
+                        `;
+                    }
+                    return;
+                }
                 
                 // 動的にHTMLを生成
                 let formsHTML = `
