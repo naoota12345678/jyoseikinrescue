@@ -1498,7 +1498,7 @@
             const mainContent = document.querySelector('.main-content');
             if (mainContent) {
                 mainContent.innerHTML = `
-                    <div style="background: white; padding: 2rem; border-radius: 12px; margin: 1rem 0;">
+                    <div style="background: white; padding: 2rem; border-radius: 12px; margin: 1rem 0; width: 95%; max-width: 1200px; margin: 1rem auto;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #667eea; flex-wrap: nowrap; min-height: 40px;">
                             <h2 style="color: #4b5563; margin: 0; flex-shrink: 0; white-space: nowrap;">📋 申請書類ダウンロード</h2>
                             <button onclick="returnToMemoPage()" style="background: #667eea; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; flex-shrink: 0; white-space: nowrap;">
@@ -1506,26 +1506,26 @@
                             </button>
                         </div>
                         
-                        <div style="display: flex; gap: 1rem; flex-wrap: nowrap; justify-content: space-between; overflow: hidden;">
+                        <div style="display: flex; gap: 2rem; flex-wrap: nowrap; justify-content: center;">
                             <!-- 業務改善助成金 -->
-                            <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; flex: 1; min-width: 0; max-width: calc(50% - 0.5rem);">
-                                <h3 style="color: #667eea; margin-bottom: 0.8rem; font-size: 1.1rem;">🏭 業務改善助成金</h3>
-                                <p style="color: #6b7280; margin-bottom: 1rem; font-size: 0.85rem;">中小企業の生産性向上と最低賃金引上げを支援</p>
+                            <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.5rem; flex: 1; max-width: 450px;">
+                                <h3 style="color: #667eea; margin-bottom: 1rem;">🏭 業務改善助成金</h3>
+                                <p style="color: #6b7280; margin-bottom: 1.5rem; font-size: 0.9rem;">中小企業の生産性向上と最低賃金引上げを支援</p>
                                 
-                                <a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/zigyonushi/shienjigyou/03.html" target="_blank" style="display: block; padding: 0.8rem; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 6px; text-decoration: none; color: #0c4a6e; text-align: center; font-weight: 600; font-size: 0.85rem;">
+                                <a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/zigyonushi/shienjigyou/03.html" target="_blank" style="display: block; padding: 1rem; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; text-decoration: none; color: #0c4a6e; text-align: center; font-weight: 600;">
                                     📋 申請書類・制度詳細<br>
-                                    <span style="font-size: 0.75rem; font-weight: normal;">（厚生労働省公式サイト）</span>
+                                    <span style="font-size: 0.8rem; font-weight: normal;">（厚生労働省公式サイト）</span>
                                 </a>
                             </div>
                             
                             <!-- キャリアアップ助成金 -->
-                            <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; flex: 1; min-width: 0; max-width: calc(50% - 0.5rem);">
-                                <h3 style="color: #667eea; margin-bottom: 0.8rem; font-size: 1.1rem;">👥 キャリアアップ助成金</h3>
-                                <p style="color: #6b7280; margin-bottom: 1rem; font-size: 0.85rem;">有期雇用労働者等の正規雇用労働者等への転換を支援</p>
+                            <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.5rem; flex: 1; max-width: 450px;">
+                                <h3 style="color: #667eea; margin-bottom: 1rem;">👥 キャリアアップ助成金</h3>
+                                <p style="color: #6b7280; margin-bottom: 1.5rem; font-size: 0.9rem;">有期雇用労働者等の正規雇用労働者等への転換を支援</p>
                                 
-                                <a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/part_haken/jigyounushi/career.html" target="_blank" style="display: block; padding: 0.8rem; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 6px; text-decoration: none; color: #0c4a6e; text-align: center; font-weight: 600; font-size: 0.85rem;">
+                                <a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/part_haken/jigyounushi/career.html" target="_blank" style="display: block; padding: 1rem; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; text-decoration: none; color: #0c4a6e; text-align: center; font-weight: 600;">
                                     📋 申請書類・制度詳細<br>
-                                    <span style="font-size: 0.75rem; font-weight: normal;">（厚生労働省公式サイト）</span>
+                                    <span style="font-size: 0.8rem; font-weight: normal;">（厚生労働省公式サイト）</span>
                                 </a>
                             </div>
                         </div>
