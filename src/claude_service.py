@@ -23,7 +23,7 @@ class ClaudeService:
                 logger.error(f"Failed to initialize Anthropic client: {str(e)}")
                 raise
         
-        self.model = "claude-3-5-haiku-20241022"
+        self.model = "claude-3-5-sonnet-20241022"
         
         # Forms Manager初期化
         self.forms_manager = FormsManager()
@@ -551,11 +551,22 @@ ANTHROPIC_API_KEYが設定されていないため、実際のAI診断は行え�
 本格運用には環境変数の設定が必要です。
 """
             
+            # プロンプトキャッシュを使用してシステムプロンプトをキャッシュ
+            system_message = []
+            if context:
+                system_message = [
+                    {
+                        "type": "text",
+                        "text": context,
+                        "cache_control": {"type": "ephemeral"}  # システムプロンプトをキャッシュ
+                    }
+                ]
+            
             message = self.client.messages.create(
                 model=self.model,
                 max_tokens=4000,
                 temperature=0.3,
-                system=context if context else "",
+                system=system_message if system_message else "",
                 messages=[
                     {
                         "role": "user", 
