@@ -23,7 +23,7 @@ class ClaudeService:
                 logger.error(f"Failed to initialize Anthropic client: {str(e)}")
                 raise
         
-        self.model = "claude-3-5-sonnet-20241022"
+        self.model = "claude-3-5-haiku-20241022"
         
         # Forms Manager初期化
         self.forms_manager = FormsManager()

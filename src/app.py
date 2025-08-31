@@ -219,8 +219,13 @@ def joseikin_diagnosis():
         data = request.json
         diagnosis_data = data.get('diagnosis_data', {})
         
-        # 2025年度助成金データを読み込み
-        joseikin_knowledge = _load_joseikin_knowledge()
+        # 正しい診断用データを読み込み
+        try:
+            with open('file/診断/2025_jyoseikin_kaniyoryo2_20250831_185114_AI_plain.txt', 'r', encoding='utf-8') as f:
+                joseikin_knowledge = f.read()
+        except FileNotFoundError:
+            logger.error("正しい診断データファイルが見つかりません")
+            joseikin_knowledge = ""
         
         # Claude AIを使用して包括的な助成金診断
         prompt = f"""
