@@ -1096,6 +1096,97 @@ def save_temp_diagnosis():
         logger.error(f"Error saving temp diagnosis: {str(e)}")
         return jsonify({'error': '診断結果の保存に失敗しました'}), 500
 
+# ===== AIエージェント関連API =====
+
+@app.route('/api/agent/chat', methods=['POST'])
+@require_auth
+def agent_chat():
+    """AIエージェントとのチャット"""
+    try:
+        current_user = get_current_user()
+        data = request.json
+        
+        agent_id = data.get('agent_id')
+        message = data.get('message')
+        conversation_history = data.get('conversation_history', [])
+        
+        if not agent_id or not message:
+            return jsonify({'error': 'エージェントIDとメッセージが必要です'}), 400
+        
+        # エージェント情報を取得（既存のものを使用）
+        agent_info = {
+            'subsidy_expert': {
+                'name': '助成金専門エージェント',
+                'system_prompt': '助成金の専門エージェントとして、最新の情報を基に正確なアドバイスを提供してください。'
+            },
+            'application_expert': {
+                'name': '申請書類作成エージェント', 
+                'system_prompt': '申請書類の作成支援専門エージェントとして、具体的で実践的なアドバイスを提供してください。'
+            },
+            'strategy_expert': {
+                'name': '戦略・計画エージェント',
+                'system_prompt': '助成金活用の戦略と計画立案の専門エージェントとして、包括的なアドバイスを提供してください。'
+            },
+            'gyoumukaizen': {
+                'name': '業務改善助成金専門エージェント',
+                'system_prompt': '業務改善助成金の専門エージェントとして、最新の情報を基に正確なアドバイスを提供してください。'
+            },
+            'career-up': {
+                'name': 'キャリアアップ助成金専門エージェント',
+                'system_prompt': 'キャリアアップ助成金の専門エージェントとして、最新の情報を基に正確なアドバイスを提供してください。'
+            }
+        }
+        
+        if agent_id not in agent_info:
+            return jsonify({'error': '無効なエージェントIDです'}), 400
+        
+        # Claude APIを使用してレスポンスを生成
+        claude_service = get_claude_service()
+        
+        # 助成金データベースを読み込み
+        try:
+            with open('2025_jyoseikin_data.txt', 'r', encoding='utf-8') as f:
+                knowledge_base = f.read()
+        except FileNotFoundError:
+            try:
+                with open('src/2025_jyoseikin_data.txt', 'r', encoding='utf-8') as f:
+                    knowledge_base = f.read()
+            except FileNotFoundError:
+                knowledge_base = ""
+        
+        # 会話履歴を含むコンテキストを構築
+        context_messages = []
+        for msg in conversation_history[-10:]:  # 最新10件まで
+            role = 'user' if msg['sender'] == 'user' else 'assistant'
+            context_messages.append(f"{role}: {msg['message']}")
+        
+        full_prompt = f"""
+これまでの会話:
+{chr(10).join(context_messages) if context_messages else '新しい会話です'}
+
+ユーザー: {message}
+"""
+        
+        # システムプロンプトに知識ベースを追加
+        system_prompt_with_data = f"{agent_info[agent_id]['system_prompt']}\n\n【2025年度助成金データベース】\n{knowledge_base}"
+        
+        response = claude_service.chat(full_prompt, system_prompt_with_data)
+        
+        import time
+        
+        # レスポンスを保存
+        response_data = {
+            'message': response,
+            'agent_name': agent_info[agent_id]['name'],
+            'timestamp': int(time.time() * 1000)
+        }
+        
+        return jsonify(response_data)
+        
+    except Exception as e:
+        logger.error(f"Error in agent chat: {str(e)}")
+        return jsonify({'error': 'チャットの処理に失敗しました'}), 500
+
 @app.route('/api/diagnosis/convert/<session_id>', methods=['POST'])
 @require_auth
 def convert_diagnosis(session_id):

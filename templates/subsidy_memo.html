@@ -78,18 +78,52 @@
         
         .main-content {
             display: grid;
-            grid-template-columns: 300px 1fr 350px;
+            grid-template-columns: 300px 1fr;
             gap: 20px;
+            height: calc(100vh - 140px);
         }
         
-        /* 左端：AI診断結果パネル */
-        .ai-results-panel {
+        /* 左パネル：タブ切り替え式 */
+        .left-panel {
             background: white;
             border-radius: 15px;
-            padding: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            height: fit-content;
-            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .left-panel-tabs {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .left-tab {
+            flex: 1;
+            padding: 12px 16px;
+            background: #f9fafb;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+            transition: all 0.3s;
+        }
+        
+        .left-tab.active {
+            background: white;
+            color: #1f2937;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .left-tab:hover {
+            color: #1f2937;
+        }
+        
+        .tab-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
         }
         
         .panel-header {
@@ -288,12 +322,312 @@
             overflow-y: auto;
         }
 
-        /* 中央：助成金メモエリア */
-        .subsidy-memo-area {
+        /* 中央：チャット画面 */
+        .center-panel {
             background: white;
             border-radius: 15px;
-            padding: 25px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .agent-selector {
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .agent-dropdown-container {
+            position: relative;
+            max-width: 400px;
+        }
+        
+        .agent-dropdown-btn {
+            width: 100%;
+            padding: 12px 20px;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #1f2937;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .agent-dropdown-btn:hover {
+            border-color: #667eea;
+            background: #f9fafb;
+        }
+        
+        .agent-dropdown-btn.active .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+        
+        .agent-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 8px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            overflow: hidden;
+        }
+        
+        .agent-dropdown-item {
+            padding: 14px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+            color: #4b5563;
+        }
+        
+        .agent-dropdown-item:last-child {
+            border-bottom: none;
+        }
+        
+        .agent-dropdown-item:hover {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+        
+        .agent-with-courses {
+            position: relative;
+        }
+        
+        .course-arrow {
+            float: right;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+        
+        .agent-courses-menu {
+            position: absolute;
+            top: 0;
+            left: 100%;
+            margin-left: 8px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+            overflow: hidden;
+            min-width: 250px;
+        }
+        
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(100vh - 300px);
+        }
+        
+        .chat-input-area {
+            padding: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .chat-input-container {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+        
+        .chat-input {
+            flex: 1;
+            min-height: 44px;
+            max-height: 120px;
+            padding: 12px 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 22px;
+            resize: none;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.4;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .chat-input:focus {
+            border-color: #667eea;
+        }
+        
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            border: none;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+        
+        .send-btn:hover {
+            background: #5a67d8;
+            transform: scale(1.05);
+        }
+        
+        .send-btn:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* ChatGPTスタイルのメッセージ */
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message.user .user-message {
+            background: #667eea;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+        
+        .message.assistant {
+            justify-content: flex-start;
+        }
+        
+        .assistant-avatar {
+            width: 32px;
+            height: 32px;
+            background: #f3f4f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        
+        .message.assistant .message-content {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 70%;
+            word-wrap: break-word;
+            color: #374151;
+        }
+        
+        /* 会話履歴項目 */
+        .conversation-item {
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+            margin-bottom: 8px;
+        }
+        
+        .conversation-item:hover {
+            background: #f3f4f6;
+        }
+        
+        .conversation-item.active {
+            background: #ede9fe;
+            border-color: #667eea;
+        }
+        
+        .conversation-title {
+            font-weight: 500;
+            color: #1f2937;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        
+        .conversation-preview {
+            font-size: 12px;
+            color: #6b7280;
+            line-height: 1.3;
+        }
+        
+        .conversation-time {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+        
+        /* 診断結果項目 */
+        .diagnosis-item {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .diagnosis-item:hover {
+            background: #fef3c7;
+            border-color: #f59e0b;
+        }
+        
+        .diagnosis-title {
+            font-weight: 500;
+            color: #1f2937;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+        
+        .diagnosis-summary {
+            font-size: 12px;
+            color: #6b7280;
+            line-height: 1.3;
+        }
+        
+        /* 空の状態表示 */
+        .empty-state {
+            padding: 40px 20px;
+            text-align: center;
+            color: #6b7280;
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        .empty-state-text {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .empty-state-desc {
+            font-size: 14px;
+            opacity: 0.8;
         }
         
         .memo-header {
@@ -700,62 +1034,128 @@
         </div>
         
         <div class="main-content">
-            <!-- 左端：AI診断結果表示エリア -->
-            <div class="ai-results-panel">
-                <div class="panel-header">
-                    <h3>🤖 AI診断結果</h3>
-                    <div class="panel-actions">
-                        <button class="action-btn" onclick="goToDiagnosis()" title="新規診断">📋</button>
-                        <button class="action-btn" onclick="goToAIConsultation()" title="AI相談">💬</button>
+            <!-- 左パネル：タブ切り替え（会話履歴・診断結果） -->
+            <div class="left-panel">
+                <div class="left-panel-tabs">
+                    <button class="left-tab active" id="conversationsTab" onclick="switchLeftTab('conversations')">
+                        💬 会話履歴
+                    </button>
+                    <button class="left-tab" id="diagnosisTab" onclick="switchLeftTab('diagnosis')">
+                        🔍 診断結果
+                    </button>
+                </div>
+                
+                <!-- 会話履歴タブ -->
+                <div id="conversationsContent" class="tab-content">
+                    <div id="conversationsList" class="conversations-list">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">💬</div>
+                            <div class="empty-state-text">まだ会話がありません</div>
+                            <div class="empty-state-desc">AIエージェントを選択してチャットを開始</div>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="ai-results-content" id="aiResultsContent">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">🔍</div>
-                        <div class="empty-state-text">まだ診断結果がありません</div>
-                        <button class="start-diagnosis-btn" onclick="goToDiagnosis()">
-                            最初の診断を実行
-                        </button>
+                <!-- 診断結果タブ -->
+                <div id="diagnosisContent" class="tab-content" style="display: none;">
+                    <div id="diagnosisResultsList" class="diagnosis-list">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🔍</div>
+                            <div class="empty-state-text">まだ診断結果がありません</div>
+                            <div class="empty-state-desc">無料診断を実行してみましょう</div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 中央：助成金メモエリア -->
-            <div class="subsidy-memo-area">
-                <div class="memo-header">
-                    <h3>📝 助成金メモ管理</h3>
-                    <button class="add-new-btn" onclick="showNewSubsidyModal()">
-                        ➕ 新規追加
-                    </button>
-                </div>
-                
-                <div class="search-bar">
-                    <input type="text" id="searchInput" placeholder="助成金名や対象者で検索..." onkeyup="searchSubsidies()">
-                </div>
-                
-                <div id="subsidiesList" class="subsidy-cards">
-                    <!-- 助成金カードがここに表示される -->
-                </div>
-            </div>
-            
-            <!-- 右端：チャット履歴 -->
-            <div class="chat-history">
-                <div class="chat-header">
-                    📝 チャット履歴・メモ
-                </div>
-                <div class="chat-messages" id="chatMessages">
-                    <div class="empty-state">
-                        <div class="empty-state-text">助成金を選択してください</div>
+            <!-- 中央パネル：AIエージェント統合画面 -->
+            <div class="center-panel">
+                <!-- AIエージェント選択バー -->
+                <div class="agent-selector">
+                    <div class="agent-dropdown-container">
+                        <button class="agent-dropdown-btn" onclick="toggleAgentDropdown()">
+                            <span id="selectedAgentText">エージェントを選択</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </button>
+                        <div id="agentDropdownMenu" class="agent-dropdown-menu" style="display: none;">
+                            <div class="agent-dropdown-item" onclick="selectAgent('gyoumukaizen')">
+                                業務改善助成金専門エージェント
+                            </div>
+                            <div class="agent-dropdown-item agent-with-courses" onclick="showCoursesForAgent('career-up')">
+                                キャリアアップ助成金専門エージェント
+                                <span class="course-arrow">▶</span>
+                            </div>
+                            <div class="agent-dropdown-item" onclick="selectAgent('jinzai-kaihatsu')">
+                                人材開発支援助成金専門エージェント
+                            </div>
+                            <div class="agent-dropdown-item" onclick="selectAgent('65sai-cho')">
+                                65歳超雇用推進助成金専門エージェント
+                            </div>
+                            <div class="agent-dropdown-item" onclick="selectAgent('hatarakikata')">
+                                働き方改革推進支援助成金専門エージェント
+                            </div>
+                            <div class="agent-dropdown-item" onclick="selectAgent('ryoritsu-shien')">
+                                両立支援等助成金専門エージェント
+                            </div>
+                            <div class="agent-dropdown-item" onclick="selectAgent('koyo-chosei')">
+                                雇用調整助成金専門エージェント
+                            </div>
+                            <div class="agent-dropdown-item" onclick="selectAgent('shogaisha')">
+                                障害者雇用関連助成金専門エージェント
+                            </div>
+                            <div class="agent-dropdown-item" onclick="selectAgent('judokitsuen')">
+                                受動喫煙防止対策助成金専門エージェント
+                            </div>
+                            <div class="agent-dropdown-item" onclick="selectAgent('other')">
+                                その他の助成金エージェント
+                            </div>
+                        </div>
+                        
+                        <!-- キャリアアップ助成金のコース選択サブメニュー -->
+                        <div id="careerUpCoursesMenu" class="agent-courses-menu" style="display: none;">
+                            <div class="agent-dropdown-item" onclick="selectAgent('career-up_seishain')">
+                                正社員化コース
+                            </div>
+                            <div class="agent-dropdown-item" onclick="selectAgent('career-up_chingin')">
+                                賃金規定等改定コース
+                            </div>
+                            <div class="agent-dropdown-item" onclick="selectAgent('career-up_shogaisha')">
+                                障害者正社員化コース
+                            </div>
+                            <div class="agent-dropdown-item" onclick="selectAgent('career-up_kyotsu')">
+                                賃金規定等共通化コース
+                            </div>
+                            <div class="agent-dropdown-item" onclick="selectAgent('career-up_shoyo')">
+                                諸手当制度共通化コース
+                            </div>
+                            <div class="agent-dropdown-item" onclick="selectAgent('career-up_shahoken')">
+                                社会保険適用時処遇改善コース
+                            </div>
+                            <div class="agent-dropdown-item" onclick="selectAgent('career-up_tanshuku')">
+                                短時間労働者労働時間延長コース
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="chat-actions" style="display: none;" id="chatActions">
-                    <button class="add-memo-btn" onclick="addMemo()">
-                        💬 メモを追加
-                    </button>
-                    <button class="add-subsidy-btn" onclick="showNewSubsidyModal()">
-                        ➕ 新規助成金追加
-                    </button>
+
+                <!-- チャット画面 -->
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🤖</div>
+                            <div class="empty-state-text">AIエージェントを選択してください</div>
+                            <div class="empty-state-desc">上のドロップダウンから専門エージェントを選択してチャットを開始</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input-area" id="chatInputArea" style="display: none;">
+                        <div class="chat-input-container">
+                            <textarea class="chat-input" id="chatInput" placeholder="助成金について質問してください..." rows="1"></textarea>
+                            <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                                ➤
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1560,6 +1960,286 @@
             };
             return icons[subsidyId] || '📋';
         }
+        
+        // ========================================
+        // 新しい統合画面用のJavaScript機能
+        // ========================================
+        
+        // グローバル変数
+        let currentAgent = null;
+        let currentConversationId = null;
+        let conversations = [];
+        let diagnosisResults = [];
+        
+        // 左パネルタブ切り替え
+        function switchLeftTab(tabName) {
+            // タブボタンの切り替え
+            document.querySelectorAll('.left-tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            
+            // コンテンツの切り替え
+            document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
+            document.getElementById(tabName + 'Content').style.display = 'block';
+        }
+        
+        // ドロップダウン表示切り替え
+        function toggleAgentDropdown() {
+            const menu = document.getElementById('agentDropdownMenu');
+            const btn = document.querySelector('.agent-dropdown-btn');
+            
+            if (menu.style.display === 'none') {
+                menu.style.display = 'block';
+                btn.classList.add('active');
+            } else {
+                menu.style.display = 'none';
+                btn.classList.remove('active');
+                hideAllCoursesMenus();
+            }
+        }
+        
+        // コース選択メニュー表示
+        function showCoursesForAgent(agentId) {
+            if (agentId === 'career-up') {
+                const coursesMenu = document.getElementById('careerUpCoursesMenu');
+                coursesMenu.style.display = 'block';
+            }
+        }
+        
+        // 全てのコースメニューを隠す
+        function hideAllCoursesMenus() {
+            document.getElementById('careerUpCoursesMenu').style.display = 'none';
+        }
+        
+        // AIエージェント選択
+        function selectAgent(agentId) {
+            currentAgent = agentId;
+            
+            // ドロップダウンメニューを閉じる
+            document.getElementById('agentDropdownMenu').style.display = 'none';
+            document.querySelector('.agent-dropdown-btn').classList.remove('active');
+            
+            // エージェント名を更新
+            const agentNames = {
+                'gyoumukaizen': '業務改善助成金専門エージェント',
+                'career-up_seishain': 'キャリアアップ助成金専門エージェント（正社員化コース）',
+                'career-up_chingin': 'キャリアアップ助成金専門エージェント（賃金規定等改定コース）',
+                'career-up_shogaisha': 'キャリアアップ助成金専門エージェント（障害者正社員化コース）',
+                'career-up_kyotsu': 'キャリアアップ助成金専門エージェント（賃金規定等共通化コース）',
+                'career-up_shoyo': 'キャリアアップ助成金専門エージェント（諸手当制度共通化コース）',
+                'career-up_shahoken': 'キャリアアップ助成金専門エージェント（社会保険適用時処遇改善コース）',
+                'career-up_tanshuku': 'キャリアアップ助成金専門エージェント（短時間労働者労働時間延長コース）',
+                'jinzai-kaihatsu': '人材開発支援助成金専門エージェント',
+                '65sai-cho': '65歳超雇用推進助成金専門エージェント',
+                'hatarakikata': '働き方改革推進支援助成金専門エージェント',
+                'ryoritsu-shien': '両立支援等助成金専門エージェント',
+                'koyo-chosei': '雇用調整助成金専門エージェント',
+                'shogaisha': '障害者雇用関連助成金専門エージェント',
+                'judokitsuen': '受動喫煙防止対策助成金専門エージェント',
+                'other': 'その他の助成金エージェント'
+            };
+            
+            document.getElementById('selectedAgentText').textContent = agentNames[agentId] || 'エージェント';
+            
+            // チャット入力エリアを表示
+            document.getElementById('chatInputArea').style.display = 'block';
+            
+            // チャット画面を初期化
+            initializeChatArea(agentId);
+        }
+        
+        // チャット画面初期化
+        function initializeChatArea(agentId) {
+            const chatMessages = document.getElementById('chatMessages');
+            const agentNames = {
+                'subsidy_expert': '助成金専門エージェント',
+                'application_expert': '申請書類作成エージェント',
+                'strategy_expert': '戦略・計画エージェント',
+                'gyoumukaizen': '業務改善助成金専門エージェント',
+                'career-up': 'キャリアアップ助成金専門エージェント'
+            };
+            
+            chatMessages.innerHTML = `
+                <div class="message assistant">
+                    <div class="assistant-avatar">🤖</div>
+                    こんにちは！${agentNames[agentId] || 'AIエージェント'}です。<br>
+                    助成金に関するご質問をお気軽にどうぞ。
+                </div>
+            `;
+        }
+        
+        // メッセージ送信
+        async function sendMessage() {
+            const chatInput = document.getElementById('chatInput');
+            const message = chatInput.value.trim();
+            
+            if (!message || !currentAgent) return;
+            
+            // ユーザーメッセージを表示
+            addMessageToChat('user', message);
+            chatInput.value = '';
+            
+            // 送信ボタンを無効化
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            
+            try {
+                // AIエージェントに送信（既存のAPIを使用）
+                const response = await fetch('/api/agent/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        agent_id: currentAgent,
+                        message: message,
+                        conversation_history: getConversationHistory()
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addMessageToChat('assistant', data.message);
+                    saveConversationToStorage();
+                } else {
+                    addMessageToChat('assistant', 'エラーが発生しました。もう一度お試しください。');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                addMessageToChat('assistant', '通信エラーが発生しました。');
+            }
+            
+            sendBtn.disabled = false;
+        }
+        
+        // チャットにメッセージを追加
+        function addMessageToChat(sender, message) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            if (sender === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="user-message">
+                        <div class="message-content">${message}</div>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="assistant-avatar">🤖</div>
+                    <div class="message-content">${message}</div>
+                `;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // 会話履歴を取得
+        function getConversationHistory() {
+            const messages = Array.from(document.querySelectorAll('#chatMessages .message'));
+            return messages.map(msg => {
+                const isUser = msg.classList.contains('user');
+                const content = msg.querySelector('.message-content');
+                return {
+                    sender: isUser ? 'user' : 'assistant',
+                    message: content ? content.textContent : ''
+                };
+            });
+        }
+        
+        // 会話をLocalStorageに保存
+        function saveConversationToStorage() {
+            if (!currentAgent) return;
+            
+            const conversation = {
+                id: Date.now(),
+                agent: currentAgent,
+                title: `${currentAgent}との会話`,
+                messages: getConversationHistory(),
+                timestamp: new Date().toISOString()
+            };
+            
+            let savedConversations = JSON.parse(localStorage.getItem('aiConversations') || '[]');
+            savedConversations.push(conversation);
+            localStorage.setItem('aiConversations', JSON.stringify(savedConversations));
+            
+            updateConversationsList();
+        }
+        
+        // 会話リストを更新
+        function updateConversationsList() {
+            const conversationsList = document.getElementById('conversationsList');
+            const savedConversations = JSON.parse(localStorage.getItem('aiConversations') || '[]');
+            
+            if (savedConversations.length === 0) {
+                conversationsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💬</div>
+                        <div class="empty-state-text">まだ会話がありません</div>
+                        <div class="empty-state-desc">AIエージェントを選択してチャットを開始</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            conversationsList.innerHTML = savedConversations.map(conv => `
+                <div class="conversation-item" onclick="loadConversation(${conv.id})">
+                    <div class="conversation-title">${conv.title}</div>
+                    <div class="conversation-preview">${conv.messages[0]?.message || ''}</div>
+                    <div class="conversation-time">${new Date(conv.timestamp).toLocaleString()}</div>
+                </div>
+            `).join('');
+        }
+        
+        // 会話を読み込み
+        function loadConversation(conversationId) {
+            const savedConversations = JSON.parse(localStorage.getItem('aiConversations') || '[]');
+            const conversation = savedConversations.find(c => c.id === conversationId);
+            
+            if (conversation) {
+                currentConversationId = conversationId;
+                selectAgent(conversation.agent);
+                
+                // メッセージを復元
+                const chatMessages = document.getElementById('chatMessages');
+                chatMessages.innerHTML = conversation.messages.map(msg => {
+                    if (msg.sender === 'user') {
+                        return `
+                            <div class="message user">
+                                <div class="user-message">
+                                    <div class="message-content">${msg.message}</div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        return `
+                            <div class="message assistant">
+                                <div class="assistant-avatar">🤖</div>
+                                <div class="message-content">${msg.message}</div>
+                            </div>
+                        `;
+                    }
+                }).join('');
+                
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+        
+        // Enterキーでメッセージ送信
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatInput = document.getElementById('chatInput');
+            if (chatInput) {
+                chatInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                });
+            }
+            
+            // 初期化時に会話リストを読み込み
+            updateConversationsList();
+        });
     </script>
 </body>
 </html>
