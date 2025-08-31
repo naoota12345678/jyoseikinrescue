@@ -41,26 +41,40 @@ def require_auth(f):
             logger.info(f"Decoded token: {decoded_token}")
             uid = decoded_token.get('uid') or decoded_token.get('user_id') or decoded_token.get('sub')
             logger.info(f"Extracted UID: {uid}")
+            
+            logger.info("Creating User service...")
             user_service = User(firebase_service)
+            logger.info("User service created, getting user by UID...")
             user = user_service.get_user_by_uid(uid)
+            logger.info(f"get_user_by_uid result: {user is not None}")
             
             if not user:
                 # 新規ユーザーの場合は自動作成
                 logger.info(f"Creating new user for uid: {uid}")
-                user_id = user_service.create_user({
-                    'uid': uid,
-                    'email': decoded_token.get('email'),
-                    'display_name': decoded_token.get('name', '')
-                })
-                user = user_service.get_user_by_id(user_id)
-                logger.info(f"New user created with id: {user_id}")
+                try:
+                    user_id = user_service.create_user({
+                        'uid': uid,
+                        'email': decoded_token.get('email'),
+                        'display_name': decoded_token.get('name', '')
+                    })
+                    logger.info(f"User creation returned ID: {user_id}")
+                    user = user_service.get_user_by_id(user_id)
+                    logger.info(f"Retrieved created user: {user is not None}")
+                except Exception as e:
+                    logger.error(f"Error creating user: {str(e)}")
+                    return jsonify({
+                        'error': 'ユーザー作成に失敗しました',
+                        'code': 'USER_CREATION_FAILED'
+                    }), 500
             
             # グローバル変数に設定
+            logger.info(f"Setting current user in g: {user is not None}")
             # user_idフィールドを確実に設定
             if user and 'user_id' not in user:
                 user['user_id'] = uid
             g.current_user = user
             g.uid = uid
+            logger.info("Auth middleware completed successfully")
             
             return f(*args, **kwargs)
             
