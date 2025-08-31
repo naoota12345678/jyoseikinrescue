@@ -646,7 +646,6 @@
             </div>
             <div class="header-right">
                 <a href="/diagnosis" class="free-diagnosis-btn">🎯 無料診断（100種類超）</a>
-                <button onclick="switchToIntegratedMode()" class="memo-btn" style="border: none; cursor: pointer;">💬 統合チャット</button>
                 <a href="/subsidy-memo" class="memo-btn">📝 メモ管理</a>
                 <div class="user-info" id="userInfo">
                     <span id="userEmail">読み込み中...</span>
@@ -657,7 +656,7 @@
     </header>
 
     <!-- メインコンテンツ -->
-    <div class="container">
+    <div class="container" style="display: none;">
         <!-- エージェント選択エリア -->
         <div class="agent-selector" id="agentSelector">
             <h2>🤖 専門AIエージェントを選択してください</h2>
@@ -755,12 +754,7 @@
     <!-- ========================================
          ChatGPT風統合UIエリア（subsidy_memo.htmlから移植）
          ======================================== -->
-    <div id="integratedChatArea" class="main-content-integrated" style="display: none;">
-        <!-- 統合モード戻るボタン -->
-        <div style="grid-column: 1 / -1; background: white; border-radius: 10px; padding: 10px 20px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px;">
-            <button onclick="switchToOriginalMode()" style="background: #667eea; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">← 従来モード</button>
-            <span style="color: #4b5563; font-weight: 500;">ChatGPT風統合ワークスペース</span>
-        </div>
+    <div id="integratedChatArea" class="main-content-integrated" style="display: grid;">
         
         <!-- 左パネル：タブ切り替え（会話履歴・診断結果） -->
         <div class="left-panel">
