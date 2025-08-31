@@ -1039,8 +1039,11 @@ def agent_chat():
         return jsonify(response_data)
         
     except Exception as e:
-        logger.error(f"Error in agent chat: {str(e)}")
-        return jsonify({'error': 'チャットの処理に失敗しました'}), 500
+        import traceback
+        error_detail = traceback.format_exc()
+        logger.error(f"Error in agent chat: {str(e)}\n{error_detail}")
+        # デバッグ用に詳細なエラーを返す（本番環境では削除すること）
+        return jsonify({'error': f'チャットの処理に失敗しました: {str(e)}'}), 500
 
 # ===== 会話履歴管理API =====
 
