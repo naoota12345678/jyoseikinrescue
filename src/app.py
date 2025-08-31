@@ -754,6 +754,25 @@ def create_pack_90_checkout():
     """90回追加パック（5,500円）の決済セッションを作成"""
     return _create_pack_checkout('pack_90', 90)
 
+# 新しいURL形式でのエンドポイント（pricing.htmlから呼び出される）
+@app.route('/api/payment/additional-pack-20', methods=['POST'])
+@require_auth
+def create_additional_pack_20_checkout():
+    """20回追加パック（1,480円）の決済セッションを作成"""
+    return _create_pack_checkout('pack_20', 20)
+
+@app.route('/api/payment/additional-pack-40', methods=['POST'])
+@require_auth
+def create_additional_pack_40_checkout():
+    """40回追加パック（2,680円）の決済セッションを作成"""
+    return _create_pack_checkout('pack_40', 40)
+
+@app.route('/api/payment/additional-pack-90', methods=['POST'])
+@require_auth
+def create_additional_pack_90_checkout():
+    """90回追加パック（5,500円）の決済セッションを作成"""
+    return _create_pack_checkout('pack_90', 90)
+
 def _create_pack_checkout(pack_type: str, questions_count: int):
     """追加パック決済セッション作成の共通処理"""
     try:
