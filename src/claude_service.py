@@ -10,7 +10,7 @@ class ClaudeService:
     def __init__(self):
         api_key = os.getenv('CLAUDE_API_KEY') or os.getenv('ANTHROPIC_API_KEY')
         if not api_key:
-            logger.warning("ANTHROPIC_API_KEY is not set, using mock responses")
+            logger.warning("CLAUDE_API_KEY/ANTHROPIC_API_KEY is not set, using mock responses")
             self.client = None
             self.mock_mode = True
         else:
@@ -19,6 +19,7 @@ class ClaudeService:
                 self.client = anthropic.Anthropic(
                     api_key=api_key
                 )
+                logger.info(f"Anthropic client initialized successfully with {'CLAUDE_API_KEY' if os.getenv('CLAUDE_API_KEY') else 'ANTHROPIC_API_KEY'}")
             except Exception as e:
                 logger.error(f"Failed to initialize Anthropic client: {str(e)}")
                 raise
