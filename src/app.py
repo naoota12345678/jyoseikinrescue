@@ -42,6 +42,36 @@ app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-here')
 def static_files(filename):
     return send_from_directory('../static', filename)
 
+@app.route('/debug/test-auth', methods=['POST'])
+def debug_test_auth():
+    """認証処理のテスト用エンドポイント"""
+    try:
+        auth_header = request.headers.get('Authorization')
+        
+        debug_info = {
+            'has_auth_header': bool(auth_header),
+            'header_format_correct': auth_header and auth_header.startswith('Bearer ') if auth_header else False,
+        }
+        
+        if auth_header and auth_header.startswith('Bearer '):
+            token = auth_header.split(' ')[1]
+            debug_info['token_length'] = len(token)
+            debug_info['token_first_10'] = token[:10] + '...'
+            
+            # Firebase検証をテスト
+            try:
+                from firebase_config import firebase_service
+                decoded = firebase_service.verify_token(token)
+                debug_info['firebase_verify_success'] = decoded is not None
+                if decoded:
+                    debug_info['decoded_uid'] = decoded.get('uid')
+            except Exception as e:
+                debug_info['firebase_verify_error'] = str(e)
+        
+        return jsonify(debug_info)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/debug/auth-status')
 def debug_auth_status():
     """認証状態のデバッグ情報"""
