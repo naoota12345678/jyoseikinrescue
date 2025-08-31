@@ -154,20 +154,7 @@ def grant_check():
         logger.error(f"Error in grant check endpoint: {str(e)}")
         return jsonify({'error': 'サーバーエラーが発生しました'}), 500
 
-def _load_joseikin_knowledge():
-    """2025年度助成金データを読み込み"""
-    try:
-        import os
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        file_path = os.path.join(base_dir, '2025_jyoseikin_data.txt')
-        
-        with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-            logger.info(f"Successfully loaded 2025 subsidy data: {len(content)} chars")
-            return content
-    except Exception as e:
-        logger.error(f"Error loading 2025 subsidy data: {str(e)}")
-        return "助成金データの読み込みに失敗しました。"
+# 削除済み: _load_joseikin_knowledge() 関数は不正確なハードコードデータを使用していたため削除
 
 # 利用制限管理（メモリベース、本格運用時はRedis推奨）
 diagnosis_rate_limit = {}
@@ -1162,16 +1149,13 @@ def agent_chat():
         # Claude APIを使用してレスポンスを生成
         claude_service = get_claude_service()
         
-        # 助成金データベースを読み込み
+        # 正しい診断用データを読み込み
         try:
-            with open('2025_jyoseikin_data.txt', 'r', encoding='utf-8') as f:
+            with open('file/診断/2025_jyoseikin_kaniyoryo2_20250831_185114_AI_plain.txt', 'r', encoding='utf-8') as f:
                 knowledge_base = f.read()
         except FileNotFoundError:
-            try:
-                with open('src/2025_jyoseikin_data.txt', 'r', encoding='utf-8') as f:
-                    knowledge_base = f.read()
-            except FileNotFoundError:
-                knowledge_base = ""
+            logger.error("正しい診断データファイルが見つかりません")
+            knowledge_base = ""
         
         # 会話履歴を含むコンテキストを構築
         context_messages = []
