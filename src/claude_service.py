@@ -580,3 +580,54 @@ ANTHROPIC_API_KEYが設定されていないため、実際のAI診断は行え�
         except Exception as e:
             logger.error(f"Claude chat error: {str(e)}")
             return f"申し訳ございません。AI診断中にエラーが発生しました: {str(e)}"
+    
+    def get_agent_response(self, prompt: str, agent_id: str) -> str:
+        """
+        専門エージェント用のレスポンス生成（個別ファイル読み込み方式）
+        """
+        try:
+            # モックモードの場合
+            if self.mock_mode:
+                return f"""
+【{agent_id}専門エージェント - テストモード】
+
+{prompt}
+
+申し訳ございませんが、現在はテスト環境で動作中です。
+ANTHROPIC_API_KEYが設定されていないため、実際のAI相談は行えません。
+
+実際の運用時には、専門エージェントが以下のような詳細な回答を行います：
+- 各助成金の詳細要件説明
+- 具体的な支給額算定
+- 申請手続きの流れ
+- 必要書類の案内
+
+本格運用には環境変数の設定が必要です。
+"""
+            
+            # エージェントタイプに応じてシステムプロンプトを取得
+            system_prompt = self._select_system_prompt_by_agent(agent_id, prompt)
+            
+            message = self.client.messages.create(
+                model=self.model,
+                max_tokens=4000,
+                temperature=0.3,
+                system=system_prompt,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ]
+            )
+            
+            response = message.content[0].text
+            
+            # 様式URL情報を追加（必要に応じて）
+            response = self._include_form_urls(agent_id, response, prompt)
+            
+            return response
+            
+        except Exception as e:
+            logger.error(f"Agent response error: {str(e)}")
+            return "申し訳ございません。現在システムに問題が発生しています。しばらく時間をおいて再度お試しください。"
