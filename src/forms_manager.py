@@ -15,12 +15,11 @@ class FormsManager:
         """
         初期化
         Args:
-            json_path: subsidy_forms.jsonのパス（デフォルトはプロジェクトルート）
+            json_path: subsidy_forms.jsonのパス（デフォルトはsrc/ディレクトリ）
         """
         if json_path is None:
-            # プロジェクトルートのsubsidy_forms.jsonを参照
-            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            json_path = os.path.join(base_dir, 'subsidy_forms.json')
+            # src/subsidy_forms.jsonを参照
+            json_path = os.path.join(os.path.dirname(__file__), 'subsidy_forms.json')
         
         self.json_path = json_path
         self.data = self._load_json()
