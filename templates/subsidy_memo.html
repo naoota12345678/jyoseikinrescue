@@ -1534,13 +1534,18 @@
                         </div>
                         
                         <div style="text-align: center; margin-top: 1.5rem;">
-                            <button onclick="location.reload()" style="background: #667eea; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer;">
-                                戻る
+                            <button onclick="returnToMemoPage()" style="background: #667eea; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer;">
+                                メモ画面に戻る
                             </button>
                         </div>
                     </div>
                 `;
             }
+        }
+        
+        // 申請書類ダウンロードページからメモページに戻る
+        function returnToMemoPage() {
+            location.reload();
         }
         
         function getSubsidyIcon(subsidyId) {
