@@ -1138,66 +1138,76 @@ def ai_results():
 def get_application_forms():
     """全助成金の申請書類情報を取得"""
     try:
-        # forms_managerのインポートをトライキャッチ
+        forms_data = []
+        
+        # まずsubsidy_forms.jsonから直接読み込みを試みる（これがメインの方法）
+        import json
+        import os
+        json_path = os.path.join(os.path.dirname(__file__), '..', 'subsidy_forms.json')
+        
+        if os.path.exists(json_path):
+            try:
+                with open(json_path, 'r', encoding='utf-8') as f:
+                    subsidies = json.load(f)
+                    
+                for subsidy_id, subsidy_info in subsidies.items():
+                    # アクティブなもののみ追加（active=trueまたはactiveフィールドがない場合は含める）
+                    if subsidy_info.get('active', True):
+                        forms_data.append({
+                            'id': subsidy_id,
+                            'name': subsidy_info.get('name', ''),
+                            'description': subsidy_info.get('description', ''),
+                            'main_page': subsidy_info.get('urls', {}).get('main_page', {}),
+                            'forms': subsidy_info.get('urls', {}).get('forms', {}),
+                            'guides': subsidy_info.get('urls', {}).get('guides', {}),
+                            'last_checked': subsidy_info.get('last_checked', '不明'),
+                            'notes': subsidy_info.get('notes', '')
+                        })
+                logger.info(f"Successfully loaded {len(forms_data)} forms from subsidy_forms.json")
+            except Exception as json_error:
+                logger.error(f"Error reading subsidy_forms.json: {str(json_error)}")
+        else:
+            logger.warning(f"subsidy_forms.json not found at {json_path}")
+            
+        # FormsManagerが利用可能な場合は、そちらから追加データを取得
         try:
             from forms_manager import FormsManager
             forms_manager = FormsManager()
             
             # アクティブな助成金の一覧を取得
             active_agents = forms_manager.get_active_agents()
-            forms_data = []
+            existing_ids = {form['id'] for form in forms_data}
             
             for agent_id in active_agents:
-                agent_info = forms_manager.get_agent_info(agent_id)
-                if agent_info:
-                    forms_data.append({
-                        'id': agent_id,
-                        'name': agent_info.get('name', ''),
-                        'description': agent_info.get('description', ''),
-                        'main_page': agent_info.get('urls', {}).get('main_page', {}),
-                        'forms': agent_info.get('urls', {}).get('forms', {}),
-                        'guides': agent_info.get('urls', {}).get('guides', {}),
-                        'last_checked': agent_info.get('last_checked', '不明'),
-                        'notes': agent_info.get('notes', '')
-                    })
-                    
-        except ImportError as import_error:
-            logger.error(f"FormsManager import error: {str(import_error)}")
-            # インポートエラーの場合、subsidy_forms.jsonから直接読み込み
-            import json
-            import os
-            json_path = os.path.join(os.path.dirname(__file__), '..', 'subsidy_forms.json')
-            
-            if os.path.exists(json_path):
-                with open(json_path, 'r', encoding='utf-8') as f:
-                    subsidies = json.load(f)
-                    
-                forms_data = []
-                for subsidy_id, subsidy_info in subsidies.items():
-                    forms_data.append({
-                        'id': subsidy_id,
-                        'name': subsidy_info.get('name', ''),
-                        'description': subsidy_info.get('description', ''),
-                        'main_page': subsidy_info.get('urls', {}).get('main_page', {}),
-                        'forms': subsidy_info.get('urls', {}).get('forms', {}),
-                        'guides': subsidy_info.get('urls', {}).get('guides', {}),
-                        'last_checked': subsidy_info.get('last_checked', '不明'),
-                        'notes': subsidy_info.get('notes', '')
-                    })
-            else:
-                forms_data = []
+                if agent_id not in existing_ids:  # 重複を避ける
+                    agent_info = forms_manager.get_agent_info(agent_id)
+                    if agent_info:
+                        forms_data.append({
+                            'id': agent_id,
+                            'name': agent_info.get('name', ''),
+                            'description': agent_info.get('description', ''),
+                            'main_page': agent_info.get('urls', {}).get('main_page', {}),
+                            'forms': agent_info.get('urls', {}).get('forms', {}),
+                            'guides': agent_info.get('urls', {}).get('guides', {}),
+                            'last_checked': agent_info.get('last_checked', '不明'),
+                            'notes': agent_info.get('notes', '')
+                        })
+        except ImportError:
+            # FormsManagerが利用できない場合は無視（subsidy_forms.jsonのデータのみ使用）
+            pass
         
         return jsonify({
             'status': 'success',
-            'data': forms_data
+            'data': forms_data,
+            'count': len(forms_data)
         })
         
     except Exception as e:
         logger.error(f"Error getting forms data: {str(e)}")
         return jsonify({
             'status': 'error',
-            'message': '申請書類情報の取得に失敗しました',
-            'data': []  # 空の配列を返す
+            'message': f'申請書類情報の取得に失敗しました: {str(e)}',
+            'data': []
         }), 500
 
 @app.route('/terms')
