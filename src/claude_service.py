@@ -113,11 +113,18 @@ class ClaudeService:
 
 必ず交付要綱に基づいて正確な情報を提供し、企業の状況に応じた具体的なアドバイスを行ってください。
 
-【申請様式について】
-申請様式が必要な場合は、以下のように案内してください：
-- 必ず厚生労働省の公式サイトから最新様式をダウンロードするよう案内
-- 様式番号と用途を明確に説明
-- 記入方法や注意点を詳しく解説
+【申請様式について - 重要】
+申請様式が必要な場合の対応：
+- **絶対にURLを自分で生成しないでください**
+- 「申請様式については以下でご案内します」とだけ回答してください
+- システムが自動的に正しい公式URLを追加します
+- 様式番号と用途は説明してOK
+- 記入方法や注意点は詳しく解説してOK
+
+【厳守事項】
+- URLは絶対に生成しない（例：https://www.mhlw.go.jp/... などは書かない）
+- 「厚生労働省のホームページで」などの具体的なサイト名も書かない
+- 申請様式のダウンロード方法を聞かれたら「以下でご案内します」とだけ答える
 """
             else:
                 # ファイルが読み込めない場合のフォールバック
@@ -280,11 +287,18 @@ class ClaudeService:
 - 他の助成金との関係
 - 支給申請期限
 
-【申請様式について】
-申請様式が必要な場合は、以下のように案内してください：
-- 必ず厚生労働省の公式サイトから最新様式をダウンロードするよう案内
-- 様式番号と用途を明確に説明
-- 記入方法や注意点を詳しく解説
+【申請様式について - 重要】
+申請様式が必要な場合の対応：
+- **絶対にURLを自分で生成しないでください**
+- 「申請様式については以下でご案内します」とだけ回答してください
+- システムが自動的に正しい公式URLを追加します
+- 様式番号と用途は説明してOK
+- 記入方法や注意点は詳しく解説してOK
+
+【厳守事項】
+- URLは絶対に生成しない（例：https://www.mhlw.go.jp/... などは書かない）
+- 「厚生労働省のホームページで」などの具体的なサイト名も書かない
+- 申請様式のダウンロード方法を聞かれたら「以下でご案内します」とだけ答える
 
 必ず支給要領に基づいて正確な情報を提供し、企業の状況に応じた具体的なアドバイスを行ってください。
 """
@@ -295,24 +309,13 @@ class ClaudeService:
 キャリアアップ助成金に関する一般的な情報は提供できますが、詳細な要件については厚生労働省の公式サイトをご確認ください。
 """
     
-    def _include_form_urls(self, agent_type: str, response: str) -> str:
+    def _include_form_urls(self, agent_type: str, response: str, original_question: str = "") -> str:
         """
-        回答に様式URLの案内を追加
-        Args:
-            agent_type: エージェントタイプ
-            response: 元の回答
-        Returns:
-            URL情報を追加した回答
+        シンプルな様式URL案内（複雑な自動検出は削除）
+        必要な場合はメモセクションの申請書類ページを案内
         """
-        # 様式関連のキーワードをチェック
-        form_keywords = ['様式', '申請書', '交付申請', '実績報告', '支給申請', 'ダウンロード']
-        
-        if any(keyword in response for keyword in form_keywords):
-            # 様式URL情報を追加
-            form_message = self.forms_manager.format_url_message(agent_type)
-            if "該当する助成金の情報が見つかりません" not in form_message:
-                response += "\n\n" + form_message
-        
+        # シンプルに：AIが勝手にURLを生成しないよう防止するのみ
+        # 申請書類が必要な場合は、ユーザーがメモセクションから確認できるようにする
         return response
     
     def get_grant_consultation(self, company_info: Dict, question: str, agent_type: str = 'gyoumukaizen') -> str:
@@ -378,7 +381,7 @@ class ClaudeService:
             response = message.content[0].text
             
             # 様式URL情報を追加（必要に応じて）
-            response = self._include_form_urls(agent_type, response)
+            response = self._include_form_urls(agent_type, response, question)
             
             return response
             

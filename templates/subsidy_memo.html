@@ -687,6 +687,9 @@
                 <button class="btn btn-primary" onclick="showNewSubsidyModal()">
                     ➕ 新規助成金を追加
                 </button>
+                <button class="btn btn-secondary" onclick="showApplicationForms()">
+                    📋 申請書類ダウンロード
+                </button>
                 <button class="btn btn-secondary" onclick="showUpcomingDeadlines()">
                     📅 期限確認
                 </button>
@@ -1488,6 +1491,122 @@
             
             // チャットアクションボタンを非表示
             document.getElementById('chatActions').style.display = 'none';
+        }
+        
+        async function showApplicationForms() {
+            try {
+                // APIから全助成金の申請書類データを取得
+                const response = await fetch('/api/forms');
+                const result = await response.json();
+                
+                if (result.status !== 'success') {
+                    throw new Error(result.message || 'データ取得に失敗しました');
+                }
+                
+                const formsData = result.data;
+                
+                // 動的にHTMLを生成
+                let formsHTML = `
+                    <div style="background: white; padding: 2rem; border-radius: 12px; margin: 1rem 0;">
+                        <h2 style="color: #4b5563; margin-bottom: 1.5rem; border-bottom: 2px solid #667eea; padding-bottom: 0.5rem;">📋 申請書類ダウンロード</h2>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+                `;
+                
+                // 各助成金のカードを生成
+                formsData.forEach(subsidy => {
+                    const icon = getSubsidyIcon(subsidy.id);
+                    formsHTML += `
+                        <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.5rem;">
+                            <h3 style="color: #667eea; margin-bottom: 1rem;">${icon} ${subsidy.name}</h3>
+                            <p style="color: #6b7280; margin-bottom: 1rem; font-size: 0.9rem;">${subsidy.description}</p>
+                    `;
+                    
+                    // 申請様式リンク
+                    if (subsidy.forms && Object.keys(subsidy.forms).length > 0) {
+                        formsHTML += '<div style="margin-bottom: 1rem;">';
+                        Object.entries(subsidy.forms).forEach(([key, form]) => {
+                            formsHTML += `
+                                <a href="${form.url}" target="_blank" style="display: block; padding: 0.5rem; background: #f9fafb; border-radius: 4px; text-decoration: none; color: #374151; margin-bottom: 0.5rem;">
+                                    📄 ${key} ${form.name}
+                                </a>
+                            `;
+                        });
+                        formsHTML += '</div>';
+                    }
+                    
+                    // ガイドリンク
+                    if (subsidy.guides && Object.keys(subsidy.guides).length > 0) {
+                        Object.entries(subsidy.guides).forEach(([key, guide]) => {
+                            formsHTML += `
+                                <a href="${guide.url}" target="_blank" style="display: block; padding: 0.75rem; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 4px; text-decoration: none; color: #0c4a6e; text-align: center; font-weight: 600; margin-bottom: 0.5rem;">
+                                    📋 ${key}<br>
+                                    <span style="font-size: 0.8rem; font-weight: normal;">（厚生労働省公式サイト）</span>
+                                </a>
+                            `;
+                        });
+                    }
+                    
+                    // 最終更新日
+                    if (subsidy.last_checked && subsidy.last_checked !== '不明') {
+                        formsHTML += `<p style="font-size: 0.8rem; color: #9ca3af; text-align: right; margin-top: 0.5rem;">最終確認: ${subsidy.last_checked}</p>`;
+                    }
+                    
+                    formsHTML += '</div>';
+                });
+                
+                formsHTML += `
+                        </div>
+                        <div style="margin-top: 1.5rem; padding: 1rem; background: #fef3c7; border-radius: 6px;">
+                            <p style="color: #92400e; font-size: 0.9rem; margin: 0;">
+                                ⚠️ <strong>注意事項</strong><br>
+                                • 最新の様式は必ず厚生労働省の公式サイトでご確認ください<br>
+                                • 申請前に必ず最新版をダウンロードしてご利用ください
+                            </p>
+                        </div>
+                        <div style="text-align: center; margin-top: 1.5rem;">
+                            <button onclick="location.reload()" style="background: #667eea; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer;">
+                                戻る
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // メインコンテンツエリアに表示
+                const mainContent = document.querySelector('.main-content');
+                if (mainContent) {
+                    mainContent.innerHTML = formsHTML;
+                }
+                
+            } catch (error) {
+                console.error('Error loading forms data:', error);
+                // エラー時のフォールバック表示
+                const mainContent = document.querySelector('.main-content');
+                if (mainContent) {
+                    mainContent.innerHTML = `
+                        <div style="background: white; padding: 2rem; border-radius: 12px; margin: 1rem 0; text-align: center;">
+                            <h2 style="color: #dc2626;">エラーが発生しました</h2>
+                            <p style="color: #6b7280;">申請書類データの取得に失敗しました。しばらく時間をおいて再度お試しください。</p>
+                            <button onclick="location.reload()" style="background: #667eea; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; margin-top: 1rem;">
+                                戻る
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+        }
+        
+        function getSubsidyIcon(subsidyId) {
+            const icons = {
+                'gyoumukaizen': '🏭',
+                'career-up_seishain': '👥',
+                'career-up_chingin': '💰',
+                'career-up_shogaisha': '♿',
+                'career-up_kyotsu': '⚖️',
+                'career-up_shoyo': '🏆',
+                'career-up_shahoken': '🏥',
+                'career-up_tanshuku': '⏰'
+            };
+            return icons[subsidyId] || '📋';
         }
     </script>
 </body>

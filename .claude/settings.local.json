@@ -10,7 +10,11 @@
       "Read(C:\\Users\\naoot\\Pictures\\Screenshots/**)",
       "Read(C:\\Users\\naoot\\Pictures\\Screenshots/**)",
       "Read(C:\\Users\\naoot\\Downloads/**)",
-      "Bash(copy \"C:\\Users\\naoot\\Downloads\\スクリーンショット_2025-08-30_191300-removebg-preview.png\" \"C:\\Users\\naoot\\Desktop\\jyoseikinrescue-claude\\static\\logo.png\")"
+      "Bash(copy \"C:\\Users\\naoot\\Downloads\\スクリーンショット_2025-08-30_191300-removebg-preview.png\" \"C:\\Users\\naoot\\Desktop\\jyoseikinrescue-claude\\static\\logo.png\")",
+      "WebFetch(domain:www.mhlw.go.jp)",
+      "Bash(python:*)",
+      "Bash(curl:*)",
+      "Bash(start http://localhost:8080/subsidy_memo)"
     ],
     "deny": [],
     "ask": [],

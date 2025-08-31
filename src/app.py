@@ -1134,6 +1134,43 @@ def ai_results():
         logger.error(f"Error handling AI results: {str(e)}")
         return jsonify({'error': 'AI診断結果の処理に失敗しました'}), 500
 
+@app.route('/api/forms', methods=['GET'])
+def get_application_forms():
+    """全助成金の申請書類情報を取得"""
+    try:
+        from forms_manager import FormsManager
+        forms_manager = FormsManager()
+        
+        # アクティブな助成金の一覧を取得
+        active_agents = forms_manager.get_active_agents()
+        forms_data = []
+        
+        for agent_id in active_agents:
+            agent_info = forms_manager.get_agent_info(agent_id)
+            if agent_info:
+                forms_data.append({
+                    'id': agent_id,
+                    'name': agent_info.get('name', ''),
+                    'description': agent_info.get('description', ''),
+                    'main_page': agent_info.get('urls', {}).get('main_page', {}),
+                    'forms': agent_info.get('urls', {}).get('forms', {}),
+                    'guides': agent_info.get('urls', {}).get('guides', {}),
+                    'last_checked': agent_info.get('last_checked', '不明'),
+                    'notes': agent_info.get('notes', '')
+                })
+        
+        return jsonify({
+            'status': 'success',
+            'data': forms_data
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting forms data: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': '申請書類情報の取得に失敗しました'
+        }), 500
+
 @app.route('/terms')
 def terms():
     """利用規約ページ"""

@@ -21,26 +21,26 @@
         "forms": {
           "様式第1号": {
             "name": "交付申請書",
-            "url": "https://www.mhlw.go.jp/content/11200000/001234567.docx",
-            "description": "交付申請時に提出する申請書",
+            "url": "https://www.mhlw.go.jp/content/11200000/001471716.docx",
+            "description": "交付申請時に提出する申請書（令和7年度版）",
             "phase": "交付申請"
           },
           "様式第3号": {
-            "name": "計画変更申請書",
-            "url": "https://www.mhlw.go.jp/content/11200000/001234568.docx",
-            "description": "計画変更時に提出",
+            "name": "事業計画変更申請書",
+            "url": "https://www.mhlw.go.jp/content/11200000/001471717.docx",
+            "description": "計画変更時に提出（令和7年度版）",
             "phase": "計画変更"
           },
           "様式第9号": {
-            "name": "実績報告書",
-            "url": "https://www.mhlw.go.jp/content/11200000/001234569.docx",
-            "description": "事業完了後の実績報告",
+            "name": "事業実績報告書",
+            "url": "https://www.mhlw.go.jp/content/11200000/001471721.docx",
+            "description": "事業完了後の実績報告（令和7年度版）",
             "phase": "実績報告"
           },
           "様式第10号": {
             "name": "支給申請書",
-            "url": "https://www.mhlw.go.jp/content/11200000/001234570.docx",
-            "description": "助成金の支給申請",
+            "url": "https://www.mhlw.go.jp/content/11200000/001471722.docx",
+            "description": "助成金の支給申請（令和7年度版）",
             "phase": "支給申請"
           }
         },
