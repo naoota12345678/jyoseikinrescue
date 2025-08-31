@@ -42,6 +42,30 @@ app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-here')
 def static_files(filename):
     return send_from_directory('../static', filename)
 
+@app.route('/debug/auth-status')
+def debug_auth_status():
+    """認証状態のデバッグ情報"""
+    import sys
+    import os
+    
+    debug_info = {
+        'AUTH_ENABLED': AUTH_ENABLED,
+        'python_version': sys.version,
+        'environment_vars': {
+            'SECRET_KEY': 'SET' if os.getenv('SECRET_KEY') else 'NOT_SET',
+            'ANTHROPIC_API_KEY': 'SET' if os.getenv('ANTHROPIC_API_KEY') else 'NOT_SET',
+            'FIREBASE_SERVICE_ACCOUNT_KEY': 'SET' if os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY') else 'NOT_SET'
+        }
+    }
+    
+    try:
+        current_user_info = get_current_user()
+        debug_info['current_user'] = current_user_info
+    except Exception as e:
+        debug_info['current_user_error'] = str(e)
+    
+    return jsonify(debug_info)
+
 # サービスの遅延初期化
 claude_service = None
 auth_service = None
