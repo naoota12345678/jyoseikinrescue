@@ -18,7 +18,11 @@
       "Bash(git mv:*)",
       "Bash(dir:*)",
       "WebSearch",
-      "Bash(del \"C:\\Users\\naoot\\Desktop\\jyoseikinrescue-claude\\comprehensive_diagnosis_rules.md\")"
+      "Bash(del \"C:\\Users\\naoot\\Desktop\\jyoseikinrescue-claude\\comprehensive_diagnosis_rules.md\")",
+      "Bash(for file in \"file\\キャリアアップ助成金\"/*.txt)",
+      "Bash(do echo \"$file:\")",
+      "Bash(wc:*)",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": [],
