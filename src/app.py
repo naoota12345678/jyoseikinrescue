@@ -1117,6 +1117,11 @@ def agent_chat():
         # 元のclaude_serviceを使用（エージェント別のファイルを読み込む）
         response = claude_service.get_agent_response(full_prompt, agent_id)
         
+        # 応答から会話履歴の混入を削除
+        # 「ユーザー:」「次の質問例:」以降の部分を削除
+        import re
+        response = re.sub(r'(ユーザー:|次の質問例:).*$', '', response, flags=re.DOTALL).strip()
+        
         import time
         
         # 統合会話履歴に保存
