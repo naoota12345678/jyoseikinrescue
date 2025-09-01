@@ -1913,7 +1913,18 @@
                         integratedCurrentConversationId = data.conversation_id;
                     }
                     
-                    addIntegratedMessageToChat('assistant', data.message);
+                    // AIレスポンスから質問ボタンのHTMLを除去
+                    let cleanMessage = data.message;
+                    // 質問ボタンのHTML要素を削除（包括的）
+                    cleanMessage = cleanMessage.replace(/<button[^>]*>.*?<\/button>/gs, '');
+                    // インラインスタイルのボタンも削除
+                    cleanMessage = cleanMessage.replace(/<div[^>]*style[^>]*background[^>]*blue[^>]*>.*?<\/div>/gs, '');
+                    // onclick属性を含む要素も削除
+                    cleanMessage = cleanMessage.replace(/<div[^>]*onclick[^>]*>.*?<\/div>/gs, '');
+                    // 質問らしきテキストを含むクリック可能要素を削除
+                    cleanMessage = cleanMessage.replace(/<div[^>]*>[^<]*(?:見積|質問|について|ですか)[^<]*<\/div>/gs, '');
+                    
+                    addIntegratedMessageToChat('assistant', cleanMessage);
                     
                     // 会話リストを更新（統合会話履歴から自動読み込み）
                     await loadIntegratedConversationsFromDatabase();
@@ -2284,10 +2295,17 @@
                                         </div>
                                     `;
                                 } else {
+                                    // AIメッセージから質問ボタンのHTMLを除去（包括的）
+                                    let cleanContent = msg.content;
+                                    cleanContent = cleanContent.replace(/<button[^>]*>.*?<\/button>/gs, '');
+                                    cleanContent = cleanContent.replace(/<div[^>]*style[^>]*background[^>]*blue[^>]*>.*?<\/div>/gs, '');
+                                    cleanContent = cleanContent.replace(/<div[^>]*onclick[^>]*>.*?<\/div>/gs, '');
+                                    cleanContent = cleanContent.replace(/<div[^>]*>[^<]*(?:見積|質問|について|ですか)[^<]*<\/div>/gs, '');
+                                    
                                     return `
                                         <div class="message assistant">
                                             <div class="assistant-avatar">🤖</div>
-                                            <div class="message-content">${msg.content}</div>
+                                            <div class="message-content">${cleanContent}</div>
                                         </div>
                                     `;
                                 }
