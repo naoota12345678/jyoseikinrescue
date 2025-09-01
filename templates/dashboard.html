@@ -2307,10 +2307,10 @@
                                     processedMessages.add(messageKey);
                                     
                                     if (msg.sender === 'user') {
-                                        addIntegratedMessageToChat(msg.content, 'user');
+                                        addIntegratedMessageToChat('user', msg.content);
                                     } else {
                                         // AIメッセージはそのまま表示（質問ボタンも含む）
-                                        addIntegratedMessageToChat(msg.content, 'assistant');
+                                        addIntegratedMessageToChat('assistant', msg.content);
                                     }
                                 } else {
                                     console.log('Duplicate message skipped during restoration:', messageKey);
