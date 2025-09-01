@@ -604,16 +604,22 @@ ANTHROPIC_API_KEYが設定されていないため、実際のAI診断は行え�
         """
         専門エージェント用のレスポンス生成（個別ファイル読み込み方式）
         """
+        logger.info(f"=== get_agent_response START ===")
+        logger.info(f"agent_id: {agent_id}")
+        logger.info(f"prompt: {prompt[:100]}...")
+        logger.info(f"mock_mode: {self.mock_mode}")
+        
         try:
             # モックモードの場合
             if self.mock_mode:
+                logger.warning("Running in mock mode - no API key set")
                 return f"""
 【{agent_id}専門エージェント - テストモード】
 
 {prompt}
 
 申し訳ございませんが、現在はテスト環境で動作中です。
-ANTHROPIC_API_KEYが設定されていないため、実際のAI相談は行えません。
+CLAUDE_API_KEYが設定されていないため、実際のAI相談は行えません。
 
 実際の運用時には、専門エージェントが以下のような詳細な回答を行います：
 - 各助成金の詳細要件説明
@@ -624,8 +630,10 @@ ANTHROPIC_API_KEYが設定されていないため、実際のAI相談は行え�
 本格運用には環境変数の設定が必要です。
 """
             
+            logger.info("Not in mock mode, getting system prompt...")
             # エージェントタイプに応じてシステムプロンプトを取得
             system_prompt = self._select_system_prompt_by_agent(agent_id, prompt)
+            logger.info(f"System prompt first 100 chars: {system_prompt[:100]}...")
             
             message = self.client.messages.create(
                 model=self.model,
