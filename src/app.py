@@ -1120,14 +1120,25 @@ def agent_chat():
         # デバッグ: レスポンス内容をログ出力（質問ボタン調査用）
         logger.info(f"Raw Claude response preview: {response[:500]}...")
         
-        # 応答から会話履歴の混入を削除
-        # 「ユーザー:」「次の質問例:」以降の部分を削除
-        import re
-        response = re.sub(r'(ユーザー:|次の質問例:).*$', '', response, flags=re.DOTALL).strip()
+        # エラーメッセージかどうかを判定
+        is_error_response = (
+            "申し訳ございません" in response and 
+            ("サーバーが込み合っています" in response or 
+             "時間がかかりすぎています" in response or 
+             "サーバーが混雑しています" in response or 
+             "認証に問題が発生しています" in response or 
+             "一時的な問題が発生している" in response)
+        )
         
-        # 質問ボタンのHTMLも除去（限定的・安全な対策）
-        # 明確にボタンタグのみを削除（他の要素への影響を最小限に）
-        response = re.sub(r'<button[^>]*>[^<]*(?:見積|質問|について|ですか)[^<]*</button>', '', response, flags=re.IGNORECASE)
+        # 応答から会話履歴の混入を削除（エラーでない場合のみ）
+        if not is_error_response:
+            # 「ユーザー:」「次の質問例:」以降の部分を削除
+            import re
+            response = re.sub(r'(ユーザー:|次の質問例:).*$', '', response, flags=re.DOTALL).strip()
+            
+            # 質問ボタンのHTMLも除去（限定的・安全な対策）
+            # 明確にボタンタグのみを削除（他の要素への影響を最小限に）
+            response = re.sub(r'<button[^>]*>[^<]*(?:見積|質問|について|ですか)[^<]*</button>', '', response, flags=re.IGNORECASE)
         
         import time
         
@@ -1158,11 +1169,12 @@ def agent_chat():
             logger.error(f"Error saving conversation: {str(e)}")
             # 保存エラーがあっても応答は返す
         
-        # 質問使用回数を増加
-        result = get_subscription_service().use_question(current_user.get('user_id') or current_user['id'])
-        
-        if not result['success']:
-            logger.error(f"Failed to record question usage: {result.get('error')}")
+        # エラーでない場合のみ質問使用回数を増加
+        if not is_error_response:
+            result = get_subscription_service().use_question(current_user.get('user_id') or current_user['id'])
+            
+            if not result['success']:
+                logger.error(f"Failed to record question usage: {result.get('error')}")
         
         # 最新の使用状況を取得
         updated_usage = get_subscription_service().get_usage_stats(current_user.get('user_id') or current_user['id'])
