@@ -131,7 +131,7 @@ class IntegratedConversationService:
             logger.error(f"Error getting conversation: {str(e)}")
             return None
     
-    def get_conversations(self, user_id: str, limit: int = 50) -> List[Dict[str, Any]]:
+    def get_conversations(self, user_id: str, limit: int = 30) -> List[Dict[str, Any]]:
         """ユーザーの会話一覧を取得（更新日時順）"""
         try:
             conversations_ref = (self.db.collection(self.collection_name)
