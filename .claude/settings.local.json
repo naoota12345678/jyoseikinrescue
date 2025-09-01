@@ -22,7 +22,8 @@
       "Bash(for file in \"file\\キャリアアップ助成金\"/*.txt)",
       "Bash(do echo \"$file:\")",
       "Bash(wc:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(gcloud run services update:*)"
     ],
     "deny": [],
     "ask": [],
