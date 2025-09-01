@@ -1939,9 +1939,19 @@
             sendBtn.disabled = false;
         }
 
-        // 統合チャットにメッセージを追加
+        // 統合チャットにメッセージを追加（重複チェック付き）
         function addIntegratedMessageToChat(sender, message) {
             const chatMessages = document.getElementById('integratedChatMessages');
+            
+            // 重複チェック：同じ内容のメッセージが既に存在するかチェック
+            const existingMessages = chatMessages.querySelectorAll(`.message.${sender} .message-content`);
+            for (let existingMsg of existingMessages) {
+                if (existingMsg.textContent.trim() === message.trim()) {
+                    console.log('Duplicate message detected, skipping:', message);
+                    return; // 重複メッセージは追加しない
+                }
+            }
+            
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}`;
             
