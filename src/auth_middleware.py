@@ -14,7 +14,6 @@ def require_auth(f):
         try:
             # Authorization ヘッダーから Firebase ID token を取得
             auth_header = request.headers.get('Authorization')
-            logger.info(f"Auth header: {auth_header[:50] if auth_header else 'None'}...")
             
             if not auth_header or not auth_header.startswith('Bearer '):
                 logger.warning("Missing or invalid Authorization header")
