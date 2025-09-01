@@ -209,21 +209,14 @@ class ClaudeService:
         try:
             import os
             base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            logger.info(f"Base dir: {base_dir}")
             
             # 共通部分を読み込み
             common_file_path = os.path.join(base_dir, 'file/キャリアアップ助成金/共通部分キャリアアップjyoseikin支給要領_共通.txt')
-            logger.info(f"Common file path: {common_file_path}")
-            logger.info(f"Common file exists: {os.path.exists(common_file_path)}")
-            
             with open(common_file_path, 'r', encoding='utf-8') as f:
                 common_content = f.read()
-            logger.info(f"Common content loaded: {len(common_content)} chars")
             
             # コース固有部分を読み込み
             course_file_path = os.path.join(base_dir, file_name)
-            logger.info(f"Course file path: {course_file_path}")
-            logger.info(f"Course file exists: {os.path.exists(course_file_path)}")
             with open(course_file_path, 'r', encoding='utf-8') as f:
                 course_content = f.read()
                 

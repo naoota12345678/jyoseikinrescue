@@ -17,6 +17,8 @@ COPY templates/ ./templates/
 COPY static/ ./static/
 # 助成金関連のドキュメントをコピー
 COPY *.txt ./
+# 助成金データファイルをコピー
+COPY file/ ./file/
 
 # 非root用のユーザーを作成
 RUN useradd --create-home --shell /bin/bash app
