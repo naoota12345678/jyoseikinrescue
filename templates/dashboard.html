@@ -1868,18 +1868,22 @@
                     body: JSON.stringify({
                         agent_id: integratedCurrentAgent,
                         message: message,
-                        conversation_history: getIntegratedConversationHistory()
+                        conversation_history: getIntegratedConversationHistory(),
+                        conversation_id: integratedCurrentConversationId
                     })
                 });
                 
                 if (response.ok) {
                     const data = await response.json();
+                    
+                    // conversation_idを更新（新しい会話の場合）
+                    if (data.conversation_id) {
+                        integratedCurrentConversationId = data.conversation_id;
+                    }
+                    
                     addIntegratedMessageToChat('assistant', data.message);
                     
-                    // アシスタントメッセージをデータベースに保存
-                    await saveIntegratedMessageToDatabase('assistant', data.message);
-                    
-                    // 会話リストを更新
+                    // 会話リストを更新（統合会話履歴から自動読み込み）
                     await loadIntegratedConversationsFromDatabase();
 
                     // 使用回数を再読み込み（重要：dashboard.htmlの既存機能を利用）

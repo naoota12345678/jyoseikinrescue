@@ -1119,11 +1119,39 @@ def agent_chat():
         
         import time
         
+        # 統合会話履歴に保存
+        conversation_id = data.get('conversation_id')
+        try:
+            from integrated_conversation_service import IntegratedConversationService
+            conv_service = IntegratedConversationService(firebase_service.get_db())
+            
+            if not conversation_id:
+                # 新しい会話を作成
+                conversation = conv_service.create_conversation(
+                    current_user['user_id'],
+                    agent_id,
+                    agent_info[agent_id]['name'],
+                    message
+                )
+                conversation_id = conversation['id']
+                
+                # アシスタントの応答も追加
+                conv_service.add_message(conversation_id, current_user['user_id'], response, 'assistant')
+            else:
+                # 既存の会話にメッセージを追加
+                conv_service.add_message(conversation_id, current_user['user_id'], message, 'user')
+                conv_service.add_message(conversation_id, current_user['user_id'], response, 'assistant')
+        
+        except Exception as e:
+            logger.error(f"Error saving conversation: {str(e)}")
+            # 保存エラーがあっても応答は返す
+        
         # レスポンスを保存
         response_data = {
             'message': response,
             'agent_name': agent_info[agent_id]['name'],
-            'timestamp': int(time.time() * 1000)
+            'timestamp': int(time.time() * 1000),
+            'conversation_id': conversation_id
         }
         
         return jsonify(response_data)
@@ -1140,23 +1168,16 @@ def agent_chat():
 @app.route('/api/conversations', methods=['GET'])
 @require_auth
 def get_conversations():
-    """ユーザーの会話一覧を取得"""
+    """ユーザーの統合会話一覧を取得"""
     try:
         current_user = get_current_user()
         
-        from conversation_service import ConversationService
-        service = ConversationService(firebase_service.get_db())
+        from integrated_conversation_service import IntegratedConversationService
+        service = IntegratedConversationService(firebase_service.get_db())
         
-        conversations = service.get_user_conversations(current_user['user_id'])
+        conversations = service.get_conversations(current_user['user_id'])
         
-        # サマリー形式で返却
-        summaries = []
-        for conv in conversations:
-            summary = service.get_conversation_summary(conv.id, current_user['user_id'])
-            if summary:
-                summaries.append(summary)
-        
-        return jsonify(summaries)
+        return jsonify(conversations)
         
     except Exception as e:
         logger.error(f"Error getting conversations: {str(e)}")
@@ -1165,7 +1186,7 @@ def get_conversations():
 @app.route('/api/conversations', methods=['POST'])
 @require_auth
 def create_conversation():
-    """新しい会話を作成"""
+    """新しい統合会話を作成"""
     try:
         current_user = get_current_user()
         data = request.json
@@ -1177,8 +1198,8 @@ def create_conversation():
         if not agent_id or not agent_name:
             return jsonify({'error': 'エージェントIDとエージェント名が必要です'}), 400
         
-        from conversation_service import ConversationService
-        service = ConversationService(firebase_service.get_db())
+        from integrated_conversation_service import IntegratedConversationService
+        service = IntegratedConversationService(firebase_service.get_db())
         
         conversation = service.create_conversation(
             current_user['user_id'], 
@@ -1187,7 +1208,7 @@ def create_conversation():
             initial_message
         )
         
-        return jsonify(conversation.to_dict()), 201
+        return jsonify(conversation), 201
         
     except Exception as e:
         logger.error(f"Error creating conversation: {str(e)}")
@@ -1196,19 +1217,19 @@ def create_conversation():
 @app.route('/api/conversations/<conversation_id>', methods=['GET'])
 @require_auth  
 def get_conversation(conversation_id):
-    """特定の会話を取得"""
+    """特定の統合会話を取得"""
     try:
         current_user = get_current_user()
         
-        from conversation_service import ConversationService
-        service = ConversationService(firebase_service.get_db())
+        from integrated_conversation_service import IntegratedConversationService
+        service = IntegratedConversationService(firebase_service.get_db())
         
         conversation = service.get_conversation(conversation_id, current_user['user_id'])
         
         if not conversation:
             return jsonify({'error': '会話が見つかりません'}), 404
         
-        return jsonify(conversation.to_dict())
+        return jsonify(conversation)
         
     except Exception as e:
         logger.error(f"Error getting conversation {conversation_id}: {str(e)}")
@@ -1231,14 +1252,14 @@ def add_message_to_conversation(conversation_id):
         if sender not in ['user', 'assistant']:
             return jsonify({'error': '無効な送信者です'}), 400
         
-        from conversation_service import ConversationService
-        service = ConversationService(firebase_service.get_db())
+        from integrated_conversation_service import IntegratedConversationService
+        service = IntegratedConversationService(firebase_service.get_db())
         
-        success = service.add_message_to_conversation(
+        success = service.add_message(
             conversation_id, 
             current_user['user_id'], 
-            sender, 
-            content
+            content,
+            sender
         )
         
         if success:
@@ -1262,8 +1283,8 @@ def update_conversation_title(conversation_id):
         if not title:
             return jsonify({'error': 'タイトルが必要です'}), 400
         
-        from conversation_service import ConversationService
-        service = ConversationService(firebase_service.get_db())
+        from integrated_conversation_service import IntegratedConversationService
+        service = IntegratedConversationService(firebase_service.get_db())
         
         success = service.update_conversation_title(
             conversation_id,
@@ -1287,8 +1308,8 @@ def delete_conversation(conversation_id):
     try:
         current_user = get_current_user()
         
-        from conversation_service import ConversationService
-        service = ConversationService(firebase_service.get_db())
+        from integrated_conversation_service import IntegratedConversationService
+        service = IntegratedConversationService(firebase_service.get_db())
         
         success = service.delete_conversation(conversation_id, current_user['user_id'])
         
