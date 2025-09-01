@@ -2206,42 +2206,46 @@
                 
                 if (response.ok) {
                     const conversation = await response.json();
-                    // エージェントを選択して会話を復元
+                    
+                    // 統合ワークスペースでエージェントを選択
                     currentAgent = conversation.agent_id;
-                    showAgentChat(conversation.agent_id);
+                    selectIntegratedAgent(conversation.agent_id);
                     
                     // DOM要素が準備されるまで少し待つ
                     setTimeout(() => {
-                        // メッセージを復元
-                        const chatMessages = document.getElementById('chatMessages');
-                        if (chatMessages && conversation.messages && conversation.messages.length > 0) {
-                            chatMessages.innerHTML = conversation.messages.map(msg => {
+                        // 統合チャットエリアのメッセージを復元
+                        const integratedChatMessages = document.getElementById('integratedChatMessages');
+                        if (integratedChatMessages && conversation.messages && conversation.messages.length > 0) {
+                            integratedChatMessages.innerHTML = conversation.messages.map(msg => {
                                 if (msg.sender === 'user') {
-                                    return `<div class="message user-message">${msg.content}</div>`;
+                                    return `
+                                        <div class="message user">
+                                            <div class="message-content">${msg.content}</div>
+                                        </div>
+                                    `;
                                 } else {
-                                    return `<div class="message ai-message">${msg.content}</div>`;
+                                    return `
+                                        <div class="message assistant">
+                                            <div class="assistant-avatar">🤖</div>
+                                            <div class="message-content">${msg.content}</div>
+                                        </div>
+                                    `;
                                 }
                             }).join('');
-                            chatMessages.scrollTop = chatMessages.scrollHeight;
-                        } else if (chatMessages) {
-                            // メッセージがない場合はウェルカムメッセージを表示
-                            const agentNames = {
-                                'gyoumukaizen': '業務改善助成金',
-                                'career-up_seishain': 'キャリアアップ助成金（正社員化コース）',
-                                'career-up_chingin': 'キャリアアップ助成金（賃金規定等改定コース）',
-                                'career-up_shogaisha': 'キャリアアップ助成金（障害者正社員化コース）',
-                                'career-up_kyotsu': 'キャリアアップ助成金（賃金規定等共通化コース）',
-                                'career-up_shoyo': 'キャリアアップ助成金（賞与・退職金制度導入コース）',
-                                'career-up_shahoken': 'キャリアアップ助成金（社会保険適用時処遇改善コース）',
-                                'career-up_tanshuku': 'キャリアアップ助成金（短時間労働者労働時間延長コース）'
-                            };
-                            const agentName = agentNames[conversation.agent_id] || conversation.agent_name;
-                            chatMessages.innerHTML = `<div class="message ai-message">こんにちは！${agentName}専門エージェントです。何かご質問はありますか？</div>`;
+                            integratedChatMessages.scrollTop = integratedChatMessages.scrollHeight;
+                        }
+                        
+                        // 入力エリアを表示
+                        const inputArea = document.getElementById('integratedChatInputArea');
+                        if (inputArea) {
+                            inputArea.style.display = 'block';
                         }
                     }, 100);
                     
                     // 現在の会話IDを保存
                     window.currentConversationId = conversationId;
+                    
+                    console.log('Conversation loaded:', conversationId);
                 }
             } catch (error) {
                 console.error('Error loading conversation:', error);
