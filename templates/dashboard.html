@@ -2207,9 +2207,24 @@
                 if (response.ok) {
                     const conversation = await response.json();
                     
-                    // 統合ワークスペースでエージェントを選択
+                    // 統合ワークスペースでエージェントを設定（利用回数チェックなし）
                     currentAgent = conversation.agent_id;
-                    selectIntegratedAgent(conversation.agent_id);
+                    integratedCurrentAgent = conversation.agent_id;
+                    integratedCurrentConversationId = conversationId;
+                    
+                    // エージェント名を表示
+                    const agentNames = {
+                        'gyoumukaizen': '業務改善助成金専門エージェント',
+                        'career-up_seishain': 'キャリアアップ助成金専門エージェント（正社員化コース）',
+                        'career-up_chingin': 'キャリアアップ助成金専門エージェント（賃金規定等改定コース）',
+                        'career-up_shogaisha': 'キャリアアップ助成金専門エージェント（障害者正社員化コース）',
+                        'career-up_kyotsu': 'キャリアアップ助成金専門エージェント（賃金規定等共通化コース）',
+                        'career-up_shoyo': 'キャリアアップ助成金専門エージェント（賞与・退職金制度導入コース）',
+                        'career-up_shahoken': 'キャリアアップ助成金専門エージェント（社会保険適用時処遇改善コース）',
+                        'career-up_tanshuku': 'キャリアアップ助成金専門エージェント（短時間労働者労働時間延長コース）'
+                    };
+                    const agentName = agentNames[conversation.agent_id] || conversation.agent_name;
+                    document.getElementById('selectedAgentText').textContent = agentName;
                     
                     // DOM要素が準備されるまで少し待つ
                     setTimeout(() => {
