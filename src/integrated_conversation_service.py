@@ -134,10 +134,9 @@ class IntegratedConversationService:
     def get_conversations(self, user_id: str, limit: int = 50) -> List[Dict[str, Any]]:
         """ユーザーの会話一覧を取得（更新日時順）"""
         try:
+            # シンプルなクエリに変更してテスト
             conversations_ref = (self.db.collection(self.collection_name)
                                .where('user_id', '==', user_id)
-                               .where('is_active', '==', True)
-                               .order_by('updated_at', direction=firestore.Query.DESCENDING)
                                .limit(limit))
             
             docs = conversations_ref.stream()
