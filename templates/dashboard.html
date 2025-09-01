@@ -918,6 +918,9 @@
                 currentUser = user;
                 await loadUserData();
                 
+                // 会話履歴を読み込み
+                await loadConversationsFromAPI();
+                
                 // agent_typeパラメータからエージェントを自動選択
                 if (agentType) {
                     console.log('Auto-selecting agent from URL:', agentType);
@@ -2135,9 +2138,91 @@
             */
         }
 
+        // 会話履歴をAPIから読み込み
+        async function loadConversationsFromAPI() {
+            try {
+                const token = await firebase.auth().currentUser.getIdToken();
+                const response = await fetch('/api/conversations', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+                
+                if (response.ok) {
+                    const conversations = await response.json();
+                    updateConversationsList(conversations);
+                } else {
+                    console.error('Failed to load conversations');
+                }
+            } catch (error) {
+                console.error('Error loading conversations:', error);
+            }
+        }
+        
+        // 会話リストを更新
+        function updateConversationsList(conversations) {
+            const conversationsList = document.getElementById('conversationsList');
+            if (!conversationsList) return;
+            
+            if (!conversations || conversations.length === 0) {
+                conversationsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💬</div>
+                        <div class="empty-state-text">まだ会話がありません</div>
+                        <div class="empty-state-desc">AIエージェントを選択してチャットを開始</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            conversationsList.innerHTML = conversations.map(conv => `
+                <div class="conversation-item" onclick="loadConversation('${conv.id}')">
+                    <div class="conversation-title">${conv.title || 'タイトルなし'}</div>
+                    <div class="conversation-preview">${conv.preview || ''}</div>
+                    <div class="conversation-time">${new Date(conv.updated_at).toLocaleString()}</div>
+                </div>
+            `).join('');
+        }
+        
+        // 会話を読み込み
+        async function loadConversation(conversationId) {
+            try {
+                const token = await firebase.auth().currentUser.getIdToken();
+                const response = await fetch(`/api/conversations/${conversationId}`, {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+                
+                if (response.ok) {
+                    const conversation = await response.json();
+                    // エージェントを選択して会話を復元
+                    currentAgent = conversation.agent_id;
+                    showAgentChat(conversation.agent_id);
+                    
+                    // メッセージを復元
+                    const chatMessages = document.getElementById('chatMessages');
+                    if (chatMessages && conversation.messages) {
+                        chatMessages.innerHTML = conversation.messages.map(msg => {
+                            if (msg.sender === 'user') {
+                                return `<div class="message user">${msg.content}</div>`;
+                            } else {
+                                return `<div class="message assistant">${msg.content}</div>`;
+                            }
+                        }).join('');
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }
+                    
+                    // 現在の会話IDを保存
+                    window.currentConversationId = conversationId;
+                }
+            } catch (error) {
+                console.error('Error loading conversation:', error);
+            }
+        }
+        
         // ページ読み込み時の初期化
         document.addEventListener('DOMContentLoaded', function() {
-            // 会話履歴は認証後に自動読み込みされる（onAuthStateChangedで処理）
             console.log('Dashboard initialized');
         });
 
