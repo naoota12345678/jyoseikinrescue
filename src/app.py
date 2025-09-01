@@ -1056,6 +1056,11 @@ def agent_chat():
         message = data.get('message')
         conversation_history = data.get('conversation_history', [])
         
+        logger.info(f"=== AGENT CHAT REQUEST ===")
+        logger.info(f"Agent ID: {agent_id}")
+        logger.info(f"Message: {message[:100]}...")
+        logger.info(f"User: {current_user.get('email') if current_user else 'Unknown'}")
+        
         if not agent_id or not message:
             return jsonify({'error': 'エージェントIDとメッセージが必要です'}), 400
         
@@ -1096,10 +1101,15 @@ def agent_chat():
         }
         
         if agent_id not in agent_info:
+            logger.error(f"Invalid agent ID: {agent_id}")
+            logger.error(f"Available agent IDs: {list(agent_info.keys())}")
             return jsonify({'error': '無効なエージェントIDです'}), 400
+        
+        logger.info(f"Agent found: {agent_info[agent_id]['name']}")
         
         # Claude APIを使用してレスポンスを生成（元の方式に戻す）
         claude_service = get_claude_service()
+        logger.info("Claude service initialized")
         
         # 会話履歴を含むコンテキストを構築
         context_messages = []
@@ -1115,7 +1125,9 @@ def agent_chat():
 """
         
         # 元のclaude_serviceを使用（エージェント別のファイルを読み込む）
+        logger.info(f"Calling claude_service.get_agent_response with agent_id: {agent_id}")
         response = claude_service.get_agent_response(full_prompt, agent_id)
+        logger.info(f"Response received, first 100 chars: {response[:100]}...")
         
         import time
         
