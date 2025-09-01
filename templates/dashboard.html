@@ -2135,20 +2135,10 @@
             */
         }
 
-        // Enterキーでメッセージ送信（統合UI用）
+        // ページ読み込み時の初期化
         document.addEventListener('DOMContentLoaded', function() {
-            // 統合UIモードに切り替え
-            switchToIntegratedMode();
-            
-            const integratedChatInput = document.getElementById('integratedChatInput');
-            if (integratedChatInput) {
-                integratedChatInput.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        sendIntegratedMessage();
-                    }
-                });
-            }
+            // 会話履歴は認証後に自動読み込みされる（onAuthStateChangedで処理）
+            console.log('Dashboard initialized');
         });
 
         // ========================================
