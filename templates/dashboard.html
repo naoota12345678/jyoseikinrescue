@@ -2293,31 +2293,32 @@
                         // 統合チャットエリアのメッセージを復元
                         const integratedChatMessages = document.getElementById('integratedChatMessages');
                         if (integratedChatMessages && conversation.messages && conversation.messages.length > 0) {
-                            // 既存の質問例ボタンを全て削除
-                            const existingButtons = integratedChatMessages.querySelectorAll('.question-suggestion-button');
-                            existingButtons.forEach(btn => btn.remove());
+                            // チャットエリアを完全にクリア
+                            integratedChatMessages.innerHTML = '';
                             
-                            integratedChatMessages.innerHTML = conversation.messages.map(msg => {
-                                if (msg.sender === 'user') {
-                                    return `
-                                        <div class="message user">
-                                            <div class="message-content">${msg.content}</div>
-                                        </div>
-                                    `;
-                                } else {
-                                    // AIメッセージから質問ボタンを安全に除去
-                                    let cleanContent = msg.content;
-                                    // 質問系のボタンタグのみを削除（安全・限定的）
-                                    cleanContent = cleanContent.replace(/<button[^>]*>[^<]*(?:見積|質問|について|ですか)[^<]*<\/button>/gi, '');
+                            // 重複を防ぐため、ユニークなメッセージのみを追加
+                            const processedMessages = new Set();
+                            
+                            conversation.messages.forEach(msg => {
+                                // メッセージの一意性を確保するキーを作成
+                                const messageKey = `${msg.sender}:${msg.content.substring(0, 100)}`;
+                                
+                                if (!processedMessages.has(messageKey)) {
+                                    processedMessages.add(messageKey);
                                     
-                                    return `
-                                        <div class="message assistant">
-                                            <div class="assistant-avatar">🤖</div>
-                                            <div class="message-content">${cleanContent}</div>
-                                        </div>
-                                    `;
+                                    if (msg.sender === 'user') {
+                                        addIntegratedMessageToChat(msg.content, 'user');
+                                    } else {
+                                        // AIメッセージから質問ボタンを除去
+                                        let cleanContent = msg.content;
+                                        cleanContent = cleanContent.replace(/<button[^>]*>[^<]*(?:見積|質問|について|ですか)[^<]*<\/button>/gi, '');
+                                        addIntegratedMessageToChat(cleanContent, 'assistant');
+                                    }
+                                } else {
+                                    console.log('Duplicate message skipped during restoration:', messageKey);
                                 }
-                            }).join('');
+                            });
+                            
                             integratedChatMessages.scrollTop = integratedChatMessages.scrollHeight;
                         }
                         
