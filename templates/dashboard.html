@@ -1345,11 +1345,21 @@
                 welcome: 'こんにちは！助成金専門エージェントです。ご質問をお聞かせください。'
             };
             
-            document.getElementById('agentTitle').textContent = config.title;
-            document.getElementById('welcomeMessage').textContent = config.welcome;
+            const agentTitle = document.getElementById('agentTitle');
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            
+            if (agentTitle) {
+                agentTitle.textContent = config.title;
+            }
+            if (welcomeMessage) {
+                welcomeMessage.textContent = config.welcome;
+            }
             
             // チャットエリアにスクロール
-            document.getElementById('agentChatArea').scrollIntoView({ behavior: 'smooth' });
+            const agentChatArea = document.getElementById('agentChatArea');
+            if (agentChatArea) {
+                agentChatArea.scrollIntoView({ behavior: 'smooth' });
+            }
         }
 
         async function sendQuestion() {
