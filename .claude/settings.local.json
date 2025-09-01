@@ -23,7 +23,9 @@
       "Bash(do echo \"$file:\")",
       "Bash(wc:*)",
       "Bash(done)",
-      "Bash(gcloud run services update:*)"
+      "Bash(gcloud run services update:*)",
+      "Bash(gcloud run services describe:*)",
+      "Bash(gcloud logging read:*)"
     ],
     "deny": [],
     "ask": [],
