@@ -2137,6 +2137,9 @@
 
         // Enterキーでメッセージ送信（統合UI用）
         document.addEventListener('DOMContentLoaded', function() {
+            // 統合UIモードに切り替え
+            switchToIntegratedMode();
+            
             const integratedChatInput = document.getElementById('integratedChatInput');
             if (integratedChatInput) {
                 integratedChatInput.addEventListener('keydown', function(e) {
