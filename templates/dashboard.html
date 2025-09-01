@@ -2101,13 +2101,31 @@
                 return;
             }
             
-            conversationsList.innerHTML = conversations.map(conv => `
-                <div class="conversation-item ${conv.id === integratedCurrentConversationId ? 'active' : ''}" onclick="loadIntegratedConversationFromDatabase('${conv.id}')">
-                    <div class="conversation-title">${conv.title}</div>
-                    <div class="conversation-preview">${conv.preview}</div>
-                    <div class="conversation-time">${new Date(conv.updated_at).toLocaleString()}</div>
-                </div>
-            `).join('');
+            conversationsList.innerHTML = conversations.map(conv => {
+                // エージェント名マッピング
+                const agentNames = {
+                    'gyoumukaizen': '業務改善助成金',
+                    'career-up_seishain': 'キャリアアップ(正社員化)',
+                    'career-up_chingin': 'キャリアアップ(賃金規定)',
+                    'career-up_shogaisha': 'キャリアアップ(障害者)',
+                    'career-up_kyotsu': 'キャリアアップ(共通化)',
+                    'career-up_shoyo': 'キャリアアップ(賞与)',
+                    'career-up_shahoken': 'キャリアアップ(社保)',
+                    'career-up_tanshuku': 'キャリアアップ(時短)'
+                };
+                const agentName = agentNames[conv.agent_id] || conv.agent_name || '専門エージェント';
+                
+                return `
+                    <div class="conversation-item ${conv.id === integratedCurrentConversationId ? 'active' : ''}" onclick="loadIntegratedConversationFromDatabase('${conv.id}')">
+                        <div class="conversation-title">${conv.title}</div>
+                        <div class="conversation-preview">${conv.preview}</div>
+                        <div class="conversation-meta">
+                            <span class="conversation-agent">${agentName}</span>
+                            <span class="conversation-time">${new Date(conv.updated_at).toLocaleString()}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
         // 統合データベースから会話を読み込み
