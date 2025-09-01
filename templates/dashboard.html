@@ -1928,6 +1928,10 @@
                     </div>
                 `;
             } else {
+                // AIメッセージの場合、既存の質問例ボタンを削除してから追加
+                const existingButtons = chatMessages.querySelectorAll('.question-suggestion-button');
+                existingButtons.forEach(btn => btn.remove());
+                
                 messageDiv.innerHTML = `
                     <div class="assistant-avatar">🤖</div>
                     <div class="message-content">${message}</div>
@@ -2231,6 +2235,10 @@
                         // 統合チャットエリアのメッセージを復元
                         const integratedChatMessages = document.getElementById('integratedChatMessages');
                         if (integratedChatMessages && conversation.messages && conversation.messages.length > 0) {
+                            // 既存の質問例ボタンを全て削除
+                            const existingButtons = integratedChatMessages.querySelectorAll('.question-suggestion-button');
+                            existingButtons.forEach(btn => btn.remove());
+                            
                             integratedChatMessages.innerHTML = conversation.messages.map(msg => {
                                 if (msg.sender === 'user') {
                                     return `
