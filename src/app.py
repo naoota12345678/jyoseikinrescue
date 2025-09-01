@@ -1122,10 +1122,9 @@ def agent_chat():
         import re
         response = re.sub(r'(ユーザー:|次の質問例:).*$', '', response, flags=re.DOTALL).strip()
         
-        # 質問ボタンのHTMLも除去（根本対策）
-        response = re.sub(r'<button[^>]*>.*?</button>', '', response, flags=re.DOTALL | re.IGNORECASE)
-        response = re.sub(r'<div[^>]*onclick[^>]*>.*?</div>', '', response, flags=re.DOTALL | re.IGNORECASE)
-        response = re.sub(r'<div[^>]*style[^>]*background[^>]*blue[^>]*>.*?</div>', '', response, flags=re.DOTALL | re.IGNORECASE)
+        # 質問ボタンのHTMLも除去（限定的・安全な対策）
+        # 明確にボタンタグのみを削除（他の要素への影響を最小限に）
+        response = re.sub(r'<button[^>]*>[^<]*(?:見積|質問|について|ですか)[^<]*</button>', '', response, flags=re.IGNORECASE)
         
         import time
         

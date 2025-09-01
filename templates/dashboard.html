@@ -1913,16 +1913,10 @@
                         integratedCurrentConversationId = data.conversation_id;
                     }
                     
-                    // AIレスポンスから質問ボタンのHTMLを除去
+                    // AIレスポンスから質問ボタンを安全に除去
                     let cleanMessage = data.message;
-                    // 質問ボタンのHTML要素を削除（包括的）
-                    cleanMessage = cleanMessage.replace(/<button[^>]*>.*?<\/button>/gs, '');
-                    // インラインスタイルのボタンも削除
-                    cleanMessage = cleanMessage.replace(/<div[^>]*style[^>]*background[^>]*blue[^>]*>.*?<\/div>/gs, '');
-                    // onclick属性を含む要素も削除
-                    cleanMessage = cleanMessage.replace(/<div[^>]*onclick[^>]*>.*?<\/div>/gs, '');
-                    // 質問らしきテキストを含むクリック可能要素を削除
-                    cleanMessage = cleanMessage.replace(/<div[^>]*>[^<]*(?:見積|質問|について|ですか)[^<]*<\/div>/gs, '');
+                    // 質問系のボタンタグのみを削除（安全・限定的）
+                    cleanMessage = cleanMessage.replace(/<button[^>]*>[^<]*(?:見積|質問|について|ですか)[^<]*<\/button>/gi, '');
                     
                     addIntegratedMessageToChat('assistant', cleanMessage);
                     
@@ -1958,16 +1952,13 @@
                     </div>
                 `;
             } else {
-                // AIメッセージの場合、既存の質問例ボタンを完全に削除
-                const existingButtons = chatMessages.querySelectorAll('.question-suggestion-button, button, [onclick]');
-                existingButtons.forEach(btn => btn.remove());
-                
-                // すべてのスタイル付きdivも削除（質問ボタンの可能性）
-                const styledDivs = chatMessages.querySelectorAll('div[style*="background"]');
-                styledDivs.forEach(div => {
-                    if (div.textContent.includes('見積') || div.textContent.includes('質問') || 
-                        div.textContent.includes('について') || div.textContent.includes('ですか')) {
-                        div.remove();
+                // AIメッセージの場合、必要最小限の削除
+                const existingButtons = chatMessages.querySelectorAll('button');
+                existingButtons.forEach(btn => {
+                    if (btn.textContent && (btn.textContent.includes('見積') || 
+                        btn.textContent.includes('質問') || btn.textContent.includes('について') || 
+                        btn.textContent.includes('ですか'))) {
+                        btn.remove();
                     }
                 });
                 
@@ -1979,18 +1970,6 @@
             
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
-            
-            // メッセージ追加後に再度クリーンアップ（遅延実行される要素対策）
-            setTimeout(() => {
-                const laterButtons = chatMessages.querySelectorAll('button, [onclick], div[style*="background"]');
-                laterButtons.forEach(btn => {
-                    if (btn.textContent && (btn.textContent.includes('見積') || 
-                        btn.textContent.includes('質問') || btn.textContent.includes('について') || 
-                        btn.textContent.includes('ですか'))) {
-                        btn.remove();
-                    }
-                });
-            }, 100);
         }
 
         // 統合会話履歴を取得
@@ -2316,12 +2295,10 @@
                                         </div>
                                     `;
                                 } else {
-                                    // AIメッセージから質問ボタンのHTMLを除去（包括的）
+                                    // AIメッセージから質問ボタンを安全に除去
                                     let cleanContent = msg.content;
-                                    cleanContent = cleanContent.replace(/<button[^>]*>.*?<\/button>/gs, '');
-                                    cleanContent = cleanContent.replace(/<div[^>]*style[^>]*background[^>]*blue[^>]*>.*?<\/div>/gs, '');
-                                    cleanContent = cleanContent.replace(/<div[^>]*onclick[^>]*>.*?<\/div>/gs, '');
-                                    cleanContent = cleanContent.replace(/<div[^>]*>[^<]*(?:見積|質問|について|ですか)[^<]*<\/div>/gs, '');
+                                    // 質問系のボタンタグのみを削除（安全・限定的）
+                                    cleanContent = cleanContent.replace(/<button[^>]*>[^<]*(?:見積|質問|について|ですか)[^<]*<\/button>/gi, '');
                                     
                                     return `
                                         <div class="message assistant">
