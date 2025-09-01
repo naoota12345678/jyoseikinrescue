@@ -394,7 +394,19 @@ class ClaudeService:
             
         except Exception as e:
             logger.error(f"Claude API error: {str(e)}")
-            return "申し訳ございません。現在システムに問題が発生しています。しばらく時間をおいて再度お試しください。"
+            error_str = str(e).lower()
+            
+            # Claude APIのエラータイプに応じてユーザーフレンドリーなメッセージを返す
+            if 'rate_limit' in error_str or 'rate limit' in error_str:
+                return "申し訳ございません。Claude側のサーバーが込み合っています。少し時間をおいて再度質問してください。"
+            elif 'timeout' in error_str or 'time' in error_str:
+                return "申し訳ございません。応答に時間がかかりすぎています。少し時間をおいて再度質問してください。"
+            elif 'overloaded' in error_str or 'busy' in error_str:
+                return "申し訳ございません。Claude側のサーバーが混雑しています。しばらく時間をおいて再度お試しください。"
+            elif 'api_key' in error_str or 'authentication' in error_str:
+                return "申し訳ございません。システムの認証に問題が発生しています。管理者にお問い合わせください。"
+            else:
+                return "申し訳ございません。Claude側で一時的な問題が発生している可能性があります。少し時間をおいて再度お試しください。"
     
     def check_available_grants(self, company_info: Dict) -> List[Dict]:
         """
@@ -558,7 +570,19 @@ ANTHROPIC_API_KEYが設定されていないため、実際のAI診断は行え�
             
         except Exception as e:
             logger.error(f"Claude chat error: {str(e)}")
-            return f"申し訳ございません。AI診断中にエラーが発生しました: {str(e)}"
+            error_str = str(e).lower()
+            
+            # Claude APIのエラータイプに応じてユーザーフレンドリーなメッセージを返す
+            if 'rate_limit' in error_str or 'rate limit' in error_str:
+                return "申し訳ございません。Claude側のサーバーが込み合っています。少し時間をおいて再度質問してください。"
+            elif 'timeout' in error_str or 'time' in error_str:
+                return "申し訳ございません。応答に時間がかかりすぎています。少し時間をおいて再度質問してください。"
+            elif 'overloaded' in error_str or 'busy' in error_str:
+                return "申し訳ございません。Claude側のサーバーが混雑しています。しばらく時間をおいて再度お試しください。"
+            elif 'api_key' in error_str or 'authentication' in error_str:
+                return "申し訳ございません。システムの認証に問題が発生しています。管理者にお問い合わせください。"
+            else:
+                return "申し訳ございません。Claude側で一時的な問題が発生している可能性があります。少し時間をおいて再度お試しください。"
     
     def get_agent_response(self, prompt: str, agent_id: str) -> str:
         """
@@ -613,4 +637,16 @@ CLAUDE_API_KEYが設定されていないため、実際のAI相談は行えま�
             
         except Exception as e:
             logger.error(f"Agent response error: {str(e)}")
-            return "申し訳ございません。現在システムに問題が発生しています。しばらく時間をおいて再度お試しください。"
+            error_str = str(e).lower()
+            
+            # Claude APIのエラータイプに応じてユーザーフレンドリーなメッセージを返す
+            if 'rate_limit' in error_str or 'rate limit' in error_str:
+                return "申し訳ございません。Claude側のサーバーが込み合っています。少し時間をおいて再度質問してください。"
+            elif 'timeout' in error_str or 'time' in error_str:
+                return "申し訳ございません。応答に時間がかかりすぎています。少し時間をおいて再度質問してください。"
+            elif 'overloaded' in error_str or 'busy' in error_str:
+                return "申し訳ございません。Claude側のサーバーが混雑しています。しばらく時間をおいて再度お試しください。"
+            elif 'api_key' in error_str or 'authentication' in error_str:
+                return "申し訳ございません。システムの認証に問題が発生しています。管理者にお問い合わせください。"
+            else:
+                return "申し訳ございません。Claude側で一時的な問題が発生している可能性があります。少し時間をおいて再度お試しください。"
