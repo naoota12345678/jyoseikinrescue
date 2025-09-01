@@ -205,7 +205,7 @@
 ## 環境変数・設定
 
 ### GitHub Secrets設定済み変数名（絶対に変更しない）
-- `CLAUDE_API_KEY`
+- `CLAUDE_API_KEY` ← **これがメインのAPI KEY（ANTHROPIC_API_KEYではない！）**
 - `FIREBASE_CLIENT_EMAIL`
 - `FIREBASE_CLIENT_ID` 
 - `FIREBASE_PRIVATE_KEY`
@@ -218,7 +218,7 @@
 - `STRIPE_WEBHOOK_SECRET`
 
 ### アプリケーション設定
-- ANTHROPIC_API_KEY: Claude APIキー（モックモード対応）
+- CLAUDE_API_KEY: Claude APIキー（**これを使用、ANTHROPIC_API_KEYは使わない**）
 - SECRET_KEY: Flask セッション用
 - Firebase認証設定済み
 - Stripe決済設定済み
@@ -226,6 +226,53 @@
 ### 重要な注意事項
 **新しい環境変数を追加する際は、上記のGitHub Secrets変数名と完全に一致させること。**
 **新しい変数名を勝手に作成せず、既存の変数名を必ず使用すること。**
+**特にCLAUDE_API_KEYは絶対に変更しない（ANTHROPIC_API_KEYと混同しない）**
+
+### 2025-09-01 専門エージェントmockモード問題解決セッション 🔧
+**問題**: 
+- 専門エージェント（キャリアアップ助成金等）が「専門エージェントではありません」と汎用回答を返す
+- Cloud Runで無限再起動ループが発生
+
+**原因特定**:
+1. **APIキー未設定によるmockモード動作**
+   - `CLAUDE_API_KEY`環境変数がCloud Runに設定されていない可能性
+   - mock_mode=Trueの場合、テストメッセージのみ返却
+   - ライブ環境では`CLAUDE_API_KEY`で統一（ANTHROPIC_API_KEYではない）
+
+2. **デバッグログによるCloud Runクラッシュ**
+   - 大量のデバッグログ出力（数万文字のファイル内容など）
+   - メモリ不足/タイムアウトで無限再起動ループ
+
+**実施した修正**:
+1. **デバッグログの大幅削減**（コミット: 229a258）
+   - ファイル内容の詳細ログを削除
+   - 繰り返し呼ばれる冗長なログを削除
+   - 最小限の必要なログのみ残す
+
+2. **エラーハンドリング改善**
+   - agent_type判定ロジックの強化
+   - 文字列前後の空白削除処理追加
+
+**未解決の課題**:
+- Cloud RunへのCLAUDE_API_KEY環境変数設定確認
+- 専門エージェントの実際の動作確認
+- Cloud Runのログ確認（gcloud config set run/region asia-northeast1が必要）
+
+**次のステップ**:
+1. Cloud Runの環境変数確認：
+   ```bash
+   gcloud run services describe jyoseikinrescue --region=asia-northeast1
+   ```
+2. CLAUDE_API_KEYが設定されていない場合は設定：
+   ```bash
+   gcloud run services update jyoseikinrescue --set-env-vars="CLAUDE_API_KEY=your-key" --region=asia-northeast1
+   ```
+3. 専門エージェントの動作テスト
+
+**重要な決定事項**:
+- 環境変数は`CLAUDE_API_KEY`で統一（変更禁止）
+- デバッグログは最小限に抑える
+- Cloud Runのリージョンは`asia-northeast1`
 
 ## プロジェクト構造メモ
 - `/templates/index.html`: トップページ（無料診断メイン）
