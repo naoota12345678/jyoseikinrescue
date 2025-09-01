@@ -25,7 +25,8 @@
       "Bash(done)",
       "Bash(gcloud run services update:*)",
       "Bash(gcloud run services describe:*)",
-      "Bash(gcloud logging read:*)"
+      "Bash(gcloud logging read:*)",
+      "Bash(firebase deploy:*)"
     ],
     "deny": [],
     "ask": [],

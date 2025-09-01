@@ -32,6 +32,22 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
+    // 統合会話履歴：本人のみアクセス可能
+    match /conversations/{conversationId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid == resource.data.user_id;
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.user_id;
+    }
+    
+    // レガシー専門エージェント会話履歴：本人のみアクセス可能
+    match /agent_conversations/{conversationId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid == resource.data.user_id;
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.user_id;
+    }
+    
     // その他のドキュメントは全てアクセス拒否
     match /{document=**} {
       allow read, write: if false;

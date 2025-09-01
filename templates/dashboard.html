@@ -2200,18 +2200,35 @@
                     currentAgent = conversation.agent_id;
                     showAgentChat(conversation.agent_id);
                     
-                    // メッセージを復元
-                    const chatMessages = document.getElementById('chatMessages');
-                    if (chatMessages && conversation.messages) {
-                        chatMessages.innerHTML = conversation.messages.map(msg => {
-                            if (msg.sender === 'user') {
-                                return `<div class="message user">${msg.content}</div>`;
-                            } else {
-                                return `<div class="message assistant">${msg.content}</div>`;
-                            }
-                        }).join('');
-                        chatMessages.scrollTop = chatMessages.scrollHeight;
-                    }
+                    // DOM要素が準備されるまで少し待つ
+                    setTimeout(() => {
+                        // メッセージを復元
+                        const chatMessages = document.getElementById('chatMessages');
+                        if (chatMessages && conversation.messages && conversation.messages.length > 0) {
+                            chatMessages.innerHTML = conversation.messages.map(msg => {
+                                if (msg.sender === 'user') {
+                                    return `<div class="message user-message">${msg.content}</div>`;
+                                } else {
+                                    return `<div class="message ai-message">${msg.content}</div>`;
+                                }
+                            }).join('');
+                            chatMessages.scrollTop = chatMessages.scrollHeight;
+                        } else if (chatMessages) {
+                            // メッセージがない場合はウェルカムメッセージを表示
+                            const agentNames = {
+                                'gyoumukaizen': '業務改善助成金',
+                                'career-up_seishain': 'キャリアアップ助成金（正社員化コース）',
+                                'career-up_chingin': 'キャリアアップ助成金（賃金規定等改定コース）',
+                                'career-up_shogaisha': 'キャリアアップ助成金（障害者正社員化コース）',
+                                'career-up_kyotsu': 'キャリアアップ助成金（賃金規定等共通化コース）',
+                                'career-up_shoyo': 'キャリアアップ助成金（賞与・退職金制度導入コース）',
+                                'career-up_shahoken': 'キャリアアップ助成金（社会保険適用時処遇改善コース）',
+                                'career-up_tanshuku': 'キャリアアップ助成金（短時間労働者労働時間延長コース）'
+                            };
+                            const agentName = agentNames[conversation.agent_id] || conversation.agent_name;
+                            chatMessages.innerHTML = `<div class="message ai-message">こんにちは！${agentName}専門エージェントです。何かご質問はありますか？</div>`;
+                        }
+                    }, 100);
                     
                     // 現在の会話IDを保存
                     window.currentConversationId = conversationId;
