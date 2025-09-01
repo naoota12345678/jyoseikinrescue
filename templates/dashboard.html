@@ -1958,9 +1958,18 @@
                     </div>
                 `;
             } else {
-                // AIメッセージの場合、既存の質問例ボタンを削除してから追加
-                const existingButtons = chatMessages.querySelectorAll('.question-suggestion-button');
+                // AIメッセージの場合、既存の質問例ボタンを完全に削除
+                const existingButtons = chatMessages.querySelectorAll('.question-suggestion-button, button, [onclick]');
                 existingButtons.forEach(btn => btn.remove());
+                
+                // すべてのスタイル付きdivも削除（質問ボタンの可能性）
+                const styledDivs = chatMessages.querySelectorAll('div[style*="background"]');
+                styledDivs.forEach(div => {
+                    if (div.textContent.includes('見積') || div.textContent.includes('質問') || 
+                        div.textContent.includes('について') || div.textContent.includes('ですか')) {
+                        div.remove();
+                    }
+                });
                 
                 messageDiv.innerHTML = `
                     <div class="assistant-avatar">🤖</div>
@@ -1970,6 +1979,18 @@
             
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // メッセージ追加後に再度クリーンアップ（遅延実行される要素対策）
+            setTimeout(() => {
+                const laterButtons = chatMessages.querySelectorAll('button, [onclick], div[style*="background"]');
+                laterButtons.forEach(btn => {
+                    if (btn.textContent && (btn.textContent.includes('見積') || 
+                        btn.textContent.includes('質問') || btn.textContent.includes('について') || 
+                        btn.textContent.includes('ですか'))) {
+                        btn.remove();
+                    }
+                });
+            }, 100);
         }
 
         // 統合会話履歴を取得

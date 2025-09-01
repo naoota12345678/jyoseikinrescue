@@ -1122,6 +1122,11 @@ def agent_chat():
         import re
         response = re.sub(r'(ユーザー:|次の質問例:).*$', '', response, flags=re.DOTALL).strip()
         
+        # 質問ボタンのHTMLも除去（根本対策）
+        response = re.sub(r'<button[^>]*>.*?</button>', '', response, flags=re.DOTALL | re.IGNORECASE)
+        response = re.sub(r'<div[^>]*onclick[^>]*>.*?</div>', '', response, flags=re.DOTALL | re.IGNORECASE)
+        response = re.sub(r'<div[^>]*style[^>]*background[^>]*blue[^>]*>.*?</div>', '', response, flags=re.DOTALL | re.IGNORECASE)
+        
         import time
         
         # 統合会話履歴に保存
