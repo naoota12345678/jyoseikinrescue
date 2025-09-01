@@ -2309,10 +2309,8 @@
                                     if (msg.sender === 'user') {
                                         addIntegratedMessageToChat(msg.content, 'user');
                                     } else {
-                                        // AIメッセージから質問ボタンを除去
-                                        let cleanContent = msg.content;
-                                        cleanContent = cleanContent.replace(/<button[^>]*>[^<]*(?:見積|質問|について|ですか)[^<]*<\/button>/gi, '');
-                                        addIntegratedMessageToChat(cleanContent, 'assistant');
+                                        // AIメッセージはそのまま表示（質問ボタンも含む）
+                                        addIntegratedMessageToChat(msg.content, 'assistant');
                                     }
                                 } else {
                                     console.log('Duplicate message skipped during restoration:', messageKey);
