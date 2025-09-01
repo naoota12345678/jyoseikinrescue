@@ -29,27 +29,6 @@ class ClaudeService:
         # Forms Manager初期化
         self.forms_manager = FormsManager()
         
-        # 業務改善助成金専門外の質問への対応プロンプト
-        self.general_prompt = """
-申し訳ございませんが、このサービスは「業務改善助成金」に特化した専門相談サービスです。
-
-【対応可能な内容】
-✅ 業務改善助成金の制度説明
-✅ 申請要件の確認
-✅ 助成額の算定
-✅ 対象設備・機器の相談
-✅ 申請手続きの流れ
-✅ 必要書類の説明
-
-【対応できない内容】
-❌ 他の助成金・補助金（キャリアアップ助成金、ものづくり補助金等）
-❌ 業務改善助成金以外の制度
-
-業務改善助成金についてご質問がございましたら、お気軽にお聞かせください。
-詳細で正確な専門アドバイスを提供いたします。
-
-その他の助成金・補助金については、専門の社会保険労務士または中小企業診断士にご相談いただくことをお勧めします。
-"""
         
         # 業務改善助成金専門プロンプト
         self.business_improvement_prompt = self._load_business_improvement_prompt()
@@ -133,39 +112,16 @@ class ClaudeService:
 """
             else:
                 # ファイルが読み込めない場合のフォールバック
-                return self.general_prompt
+                return "業務改善助成金の要綱ファイルが読み込めませんでした。"
                 
         except Exception as e:
             logger.error(f"Error loading business improvement prompt: {str(e)}")
-            return self.general_prompt
+            return "業務改善助成金の要綱ファイルが読み込めませんでした。"
     
     def _select_system_prompt(self, question: str) -> str:
-        """質問内容に応じて適切なシステムプロンプトを選択"""
-        question_lower = question.lower()
-        
-        # 業務改善助成金関連のキーワード
-        business_keywords = [
-            "業務改善", "最低賃金", "設備投資", "生産性向上",
-            "pos", "レジ", "機械装置", "賃金引上げ"
-        ]
-        
-        # 他の助成金・補助金のキーワード（除外対象）
-        other_grants = [
-            "キャリアアップ", "ものづくり補助金", "小規模事業者持続化", 
-            "it導入補助金", "人材開発支援", "雇用調整助成金",
-            "創業補助金", "事業再構築"
-        ]
-        
-        # 他の助成金・補助金の質問は専門外として処理
-        if any(keyword in question_lower for keyword in other_grants):
-            return self.general_prompt
-        
-        # 業務改善助成金関連の質問
-        if any(keyword in question_lower for keyword in business_keywords):
-            return self.business_improvement_prompt
-        
-        # 曖昧な質問は専門外として処理
-        return self.general_prompt
+        """質問内容に応じて適切なシステムプロンプトを選択（廃止予定）"""
+        # この関数は専門エージェント方式に移行したため使用されません
+        return self.business_improvement_prompt
     
     def _select_system_prompt_by_agent(self, agent_type: str, question: str) -> str:
         """エージェントタイプに応じてシステムプロンプトを選択"""
@@ -247,7 +203,7 @@ class ClaudeService:
         
         if agent_type not in course_map:
             logger.warning(f"Agent type {agent_type} not found in course_map")
-            return self.general_prompt
+            return f"エージェントタイプ {agent_type} は定義されていません。"
             
         course_name, file_name = course_map[agent_type]
         try:
