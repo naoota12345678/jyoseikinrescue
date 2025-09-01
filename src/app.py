@@ -1158,12 +1158,22 @@ def agent_chat():
             logger.error(f"Error saving conversation: {str(e)}")
             # 保存エラーがあっても応答は返す
         
+        # 質問使用回数を増加
+        result = get_subscription_service().use_question(current_user.get('user_id') or current_user['id'])
+        
+        if not result['success']:
+            logger.error(f"Failed to record question usage: {result.get('error')}")
+        
+        # 最新の使用状況を取得
+        updated_usage = get_subscription_service().get_usage_stats(current_user.get('user_id') or current_user['id'])
+        
         # レスポンスを保存
         response_data = {
             'message': response,
             'agent_name': agent_info[agent_id]['name'],
             'timestamp': int(time.time() * 1000),
-            'conversation_id': conversation_id
+            'conversation_id': conversation_id,
+            'usage_stats': updated_usage
         }
         
         return jsonify(response_data)
