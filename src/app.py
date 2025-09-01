@@ -1103,7 +1103,7 @@ def agent_chat():
         
         # 会話履歴を含むコンテキストを構築
         context_messages = []
-        for msg in conversation_history[-30:]:  # 最新30件まで
+        for msg in conversation_history[-10:]:  # 最新10件まで（トークンコスト削減）
             role = '次の質問例' if msg['sender'] == 'user' else 'assistant'
             context_messages.append(f"{role}: {msg['message']}")
         
