@@ -701,7 +701,7 @@
             left: 0;
             width: 100%;
             height: 100vh;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.2);
             z-index: 9998;
         }
 
@@ -2653,15 +2653,8 @@
                     // 会話リストのアクティブ状態を更新
                     await loadIntegratedConversationsFromDatabase();
                     
-                    // モバイルの場合、ハンバーガーメニューを閉じてチャット画面に戻る
-                    if (window.innerWidth <= 768) {
-                        const overlay = document.getElementById('mobileMenuOverlay');
-                        const sidebar = document.getElementById('mobileSidebar');
-                        if (overlay && sidebar) {
-                            overlay.style.display = 'none';
-                            sidebar.style.transform = 'translateX(-100%)';
-                        }
-                    }
+                    // モバイルでは会話履歴選択時にメニューを閉じずに、チャット更新のみ行う
+                    // オーバーレイタップまたはチャット部分タップで手動でメニューを閉じられる
                 } else {
                     console.error('Failed to load integrated conversation');
                 }
@@ -2848,6 +2841,20 @@
         // ページ読み込み時の初期化
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Dashboard initialized');
+            
+            // モバイルでチャット部分をタップした時にハンバーガーメニューを閉じる
+            const rightPanel = document.querySelector('.right-panel');
+            if (rightPanel) {
+                rightPanel.addEventListener('click', function(e) {
+                    if (window.innerWidth <= 768) {
+                        const sidebar = document.querySelector('.mobile-sidebar');
+                        const overlay = document.querySelector('.mobile-overlay');
+                        if (sidebar && sidebar.classList.contains('active')) {
+                            closeMobileMenu();
+                        }
+                    }
+                });
+            }
         });
 
         // ========================================
