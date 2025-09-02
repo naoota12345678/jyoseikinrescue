@@ -2652,6 +2652,16 @@
                     
                     // 会話リストのアクティブ状態を更新
                     await loadIntegratedConversationsFromDatabase();
+                    
+                    // モバイルの場合、ハンバーガーメニューを閉じてチャット画面に戻る
+                    if (window.innerWidth <= 768) {
+                        const overlay = document.getElementById('mobileMenuOverlay');
+                        const sidebar = document.getElementById('mobileSidebar');
+                        if (overlay && sidebar) {
+                            overlay.style.display = 'none';
+                            sidebar.style.transform = 'translateX(-100%)';
+                        }
+                    }
                 } else {
                     console.error('Failed to load integrated conversation');
                 }
