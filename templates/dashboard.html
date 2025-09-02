@@ -1952,13 +1952,26 @@
                 }
             }
             
+            // 改行を<br>タグに変換し、HTMLエスケープ処理
+            function formatMessage(text) {
+                // HTMLエスケープ
+                const escaped = text
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+                // 改行を<br>に変換
+                return escaped.replace(/\n/g, '<br>');
+            }
+            
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}`;
             
             if (sender === 'user') {
                 messageDiv.innerHTML = `
                     <div class="user-message">
-                        <div class="message-content">${message}</div>
+                        <div class="message-content">${formatMessage(message)}</div>
                     </div>
                 `;
             } else {
@@ -1974,7 +1987,7 @@
                 
                 messageDiv.innerHTML = `
                     <div class="assistant-avatar">🤖</div>
-                    <div class="message-content">${message}</div>
+                    <div class="message-content">${formatMessage(message)}</div>
                 `;
             }
             
