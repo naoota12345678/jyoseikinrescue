@@ -665,7 +665,7 @@
             </div>
             <div class="header-right">
                 <a href="/diagnosis" class="free-diagnosis-btn">🎯 無料診断（100種類超）</a>
-                <a href="/subsidy-memo" class="memo-btn">📝 メモ管理</a>
+                <button onclick="showApplicationForms()" class="memo-btn" style="background: #667eea; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">📋 申請書類</button>
                 <div class="user-info" id="userInfo">
                     <span id="userEmail">読み込み中...</span>
                     <button onclick="logout()" style="padding: 0.5rem 1rem; background: #dc3545; color: white; border: none; border-radius: 4px;">ログアウト</button>
@@ -1765,6 +1765,63 @@
                 menu.style.display = 'none';
                 btn.classList.remove('active');
                 hideAllCoursesMenus();
+            }
+        }
+
+        // 申請書類ダウンロードページを表示
+        function showApplicationForms() {
+            const chatMessages = document.getElementById('integratedChatMessages');
+            if (chatMessages) {
+                // 現在のチャット内容を一時的に保存
+                const originalContent = chatMessages.innerHTML;
+                
+                chatMessages.innerHTML = `
+                    <div style="background: white; padding: 2rem; border-radius: 12px; width: 100%; box-sizing: border-box;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #667eea;">
+                            <h2 style="color: #4b5563; margin: 0;">📋 申請書類ダウンロード</h2>
+                            <button onclick="returnFromApplicationForms()" style="background: #667eea; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
+                                ← チャットに戻る
+                            </button>
+                        </div>
+                        
+                        <div style="display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center;">
+                            <!-- 業務改善助成金 -->
+                            <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.5rem; flex: 1; max-width: 450px;">
+                                <h3 style="color: #667eea; margin-bottom: 1rem;">🏭 業務改善助成金</h3>
+                                <p style="color: #6b7280; margin-bottom: 1.5rem; font-size: 0.9rem;">中小企業の生産性向上と最低賃金引上げを支援</p>
+                                
+                                <a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/zigyonushi/shienjigyou/03.html" target="_blank" style="display: block; padding: 1rem; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; text-decoration: none; color: #0c4a6e; text-align: center; font-weight: 600;">
+                                    📋 申請書類・制度詳細<br>
+                                    <span style="font-size: 0.8rem; font-weight: normal;">（厚生労働省公式サイト）</span>
+                                </a>
+                            </div>
+                            
+                            <!-- キャリアアップ助成金 -->
+                            <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.5rem; flex: 1; max-width: 450px;">
+                                <h3 style="color: #667eea; margin-bottom: 1rem;">👥 キャリアアップ助成金</h3>
+                                <p style="color: #6b7280; margin-bottom: 1.5rem; font-size: 0.9rem;">有期雇用労働者等の正規雇用労働者等への転換を支援</p>
+                                
+                                <a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/part_haken/jigyounushi/career.html" target="_blank" style="display: block; padding: 1rem; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; text-decoration: none; color: #0c4a6e; text-align: center; font-weight: 600;">
+                                    📋 申請書類・制度詳細<br>
+                                    <span style="font-size: 0.8rem; font-weight: normal;">（厚生労働省公式サイト）</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // 元のコンテンツを保存
+                chatMessages.dataset.originalContent = originalContent;
+            }
+        }
+
+        // 申請書類ページからチャットに戻る
+        function returnFromApplicationForms() {
+            const chatMessages = document.getElementById('integratedChatMessages');
+            if (chatMessages && chatMessages.dataset.originalContent) {
+                chatMessages.innerHTML = chatMessages.dataset.originalContent;
+                delete chatMessages.dataset.originalContent;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
             }
         }
 
