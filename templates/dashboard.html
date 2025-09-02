@@ -855,6 +855,18 @@
                 padding: 8px 12px;
                 font-size: 0.85rem;
             }
+
+            /* モバイルで不要な要素を非表示 */
+            .free-diagnosis-btn, 
+            .memo-btn,
+            .user-info {
+                display: none !important;
+            }
+
+            /* 使用状況は残す */
+            .usage-info {
+                font-size: 0.85rem;
+            }
         }
     </style>
 </head>
@@ -869,13 +881,17 @@
     <div class="mobile-sidebar">
         <!-- ヘッダー（ロゴ） -->
         <div class="mobile-sidebar-header">
-            <span class="mobile-sidebar-logo">🎯 助成金レスキュー</span>
+            <img src="/static/logo.png" alt="助成金レスキュー" style="height: 40px; width: auto;">
+            <span class="mobile-sidebar-logo">助成金レスキュー</span>
         </div>
         
         <!-- メニュー項目 -->
         <div class="mobile-sidebar-menu">
             <button class="mobile-menu-item" onclick="startNewChat()">
                 ➕ 新しいチャット
+            </button>
+            <button class="mobile-menu-item" onclick="window.location.href='/diagnosis'; closeMobileMenu();">
+                🎯 無料診断
             </button>
             <button class="mobile-menu-item" onclick="showMobileConversations()">
                 💬 会話履歴
