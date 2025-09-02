@@ -649,9 +649,274 @@
             font-size: 14px;
             opacity: 0.8;
         }
+
+        /* ========================================
+           モバイル対応レスポンシブデザイン
+           ======================================== */
+        
+        /* ハンバーガーメニューボタン */
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 10000;
+            background: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            cursor: pointer;
+            font-size: 24px;
+            width: 44px;
+            height: 44px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* モバイルサイドメニュー */
+        .mobile-sidebar {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100vh;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            z-index: 9999;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .mobile-sidebar.active {
+            left: 0;
+        }
+
+        /* オーバーレイ */
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0,0,0,0.5);
+            z-index: 9998;
+        }
+
+        .mobile-overlay.active {
+            display: block;
+        }
+
+        /* サイドバー内容 */
+        .mobile-sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mobile-sidebar-logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .mobile-sidebar-menu {
+            padding: 10px 0;
+        }
+
+        .mobile-menu-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #374151;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-size: 16px;
+        }
+
+        .mobile-menu-item:hover {
+            background: #f3f4f6;
+        }
+
+        .mobile-sidebar-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            border-top: 1px solid #e5e7eb;
+            padding: 10px;
+            background: white;
+        }
+
+        .mobile-usage-info {
+            padding: 10px 20px;
+            font-size: 14px;
+            color: #6b7280;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .mobile-user-section {
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mobile-user-email {
+            font-size: 14px;
+            color: #374151;
+        }
+
+        .mobile-user-submenu {
+            display: none;
+            background: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .mobile-user-submenu.active {
+            display: block;
+        }
+
+        .mobile-submenu-item {
+            padding: 12px 20px 12px 40px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #374151;
+            transition: background 0.2s;
+        }
+
+        .mobile-submenu-item:hover {
+            background: #f3f4f6;
+        }
+
+        /* レスポンシブ設定 */
+        @media (max-width: 768px) {
+            /* ハンバーガーメニューを表示 */
+            .mobile-menu-btn {
+                display: flex;
+            }
+
+            .mobile-sidebar {
+                display: block;
+            }
+
+            /* ヘッダーを調整 */
+            .header {
+                padding-left: 60px;
+            }
+
+            /* グリッドレイアウトを変更 */
+            .main-content-integrated {
+                grid-template-columns: 1fr !important;
+                padding: 10px;
+                height: calc(100vh - 120px);
+            }
+
+            /* 左パネルを非表示 */
+            .left-panel {
+                display: none;
+            }
+
+            /* 中央パネルを全幅に */
+            .center-panel {
+                width: 100%;
+                border-radius: 10px;
+            }
+
+            /* エージェント選択を調整 */
+            .agent-dropdown-container {
+                max-width: 100%;
+            }
+
+            /* ヘッダーレイアウト調整 */
+            .header-content {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+            }
+
+            .header-left, .header-right {
+                width: 100%;
+                justify-content: center;
+            }
+
+            /* ボタンサイズ調整 */
+            .free-diagnosis-btn, .memo-btn {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- モバイル用ハンバーガーメニュー -->
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+    
+    <!-- モバイル用オーバーレイ -->
+    <div class="mobile-overlay" onclick="closeMobileMenu()"></div>
+    
+    <!-- モバイル用サイドバー -->
+    <div class="mobile-sidebar">
+        <!-- ヘッダー（ロゴ） -->
+        <div class="mobile-sidebar-header">
+            <span class="mobile-sidebar-logo">🎯 助成金レスキュー</span>
+        </div>
+        
+        <!-- メニュー項目 -->
+        <div class="mobile-sidebar-menu">
+            <button class="mobile-menu-item" onclick="startNewChat()">
+                ➕ 新しいチャット
+            </button>
+            <button class="mobile-menu-item" onclick="showMobileConversations()">
+                💬 会話履歴
+            </button>
+            <button class="mobile-menu-item" onclick="showMobileDiagnosis()">
+                🔍 診断結果
+            </button>
+            <button class="mobile-menu-item" onclick="showApplicationForms(); closeMobileMenu();">
+                📋 申請書類
+            </button>
+        </div>
+        
+        <!-- 使用状況 -->
+        <div class="mobile-usage-info">
+            <div>残り: <span id="mobileRemainingQuestions">-</span>回</div>
+            <div>プラン: <span id="mobilePlanType">-</span></div>
+        </div>
+        
+        <!-- ユーザー情報（フッター） -->
+        <div class="mobile-sidebar-footer">
+            <div class="mobile-user-section" onclick="toggleMobileUserMenu()">
+                <span class="mobile-user-email" id="mobileUserEmail">読み込み中...</span>
+                <span>▼</span>
+            </div>
+            <div class="mobile-user-submenu" id="mobileUserSubmenu">
+                <div class="mobile-submenu-item" onclick="showUpgradeOptions()">
+                    ⬆️ プラン変更
+                </div>
+                <div class="mobile-submenu-item" onclick="showAddonOptions()">
+                    📦 追加パック購入
+                </div>
+                <div class="mobile-submenu-item" onclick="showHelp()">
+                    ❓ ヘルプ
+                </div>
+                <div class="mobile-submenu-item" onclick="logout()">
+                    🚪 ログアウト
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 共通ヘッダー -->
     <header class="header">
         <div class="header-content">
@@ -1837,6 +2102,126 @@
         function hideAllCoursesMenus() {
             document.getElementById('careerUpCoursesMenu').style.display = 'none';
         }
+
+        // ========================================
+        // モバイルメニュー用関数
+        // ========================================
+        
+        // モバイルメニューを開く
+        function toggleMobileMenu() {
+            const sidebar = document.querySelector('.mobile-sidebar');
+            const overlay = document.querySelector('.mobile-overlay');
+            
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            
+            // モバイル用の情報を更新
+            updateMobileInfo();
+        }
+
+        // モバイルメニューを閉じる
+        function closeMobileMenu() {
+            const sidebar = document.querySelector('.mobile-sidebar');
+            const overlay = document.querySelector('.mobile-overlay');
+            
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        // モバイル用情報を更新
+        function updateMobileInfo() {
+            // PC版から情報をコピー
+            const remainingQuestions = document.getElementById('remainingQuestions').textContent;
+            const planType = document.getElementById('planType').textContent;
+            const userEmail = document.getElementById('userEmail').textContent;
+            
+            document.getElementById('mobileRemainingQuestions').textContent = remainingQuestions;
+            document.getElementById('mobilePlanType').textContent = planType;
+            document.getElementById('mobileUserEmail').textContent = userEmail;
+        }
+
+        // ユーザーメニューの開閉
+        function toggleMobileUserMenu() {
+            const submenu = document.getElementById('mobileUserSubmenu');
+            submenu.classList.toggle('active');
+        }
+
+        // 新しいチャットを開始
+        function startNewChat() {
+            // チャット画面をクリア
+            const chatMessages = document.getElementById('integratedChatMessages');
+            if (chatMessages) {
+                chatMessages.innerHTML = '';
+            }
+            
+            // エージェント選択をリセット
+            integratedCurrentAgent = null;
+            integratedCurrentConversationId = null;
+            document.getElementById('selectedAgentText').textContent = 'エージェントを選択';
+            
+            // メニューを閉じる
+            closeMobileMenu();
+        }
+
+        // モバイルで会話履歴を表示
+        function showMobileConversations() {
+            // PC版の会話履歴タブをアクティブに
+            switchLeftTab('conversations');
+            
+            // モバイルで左パネルを表示（一時的）
+            const leftPanel = document.querySelector('.left-panel');
+            if (window.innerWidth <= 768) {
+                leftPanel.style.display = 'block';
+                leftPanel.style.position = 'fixed';
+                leftPanel.style.top = '60px';
+                leftPanel.style.left = '0';
+                leftPanel.style.width = '100%';
+                leftPanel.style.height = 'calc(100vh - 60px)';
+                leftPanel.style.zIndex = '9000';
+            }
+            
+            closeMobileMenu();
+        }
+
+        // モバイルで診断結果を表示
+        function showMobileDiagnosis() {
+            // PC版の診断結果タブをアクティブに
+            switchLeftTab('diagnosis');
+            
+            // モバイルで左パネルを表示（一時的）
+            const leftPanel = document.querySelector('.left-panel');
+            if (window.innerWidth <= 768) {
+                leftPanel.style.display = 'block';
+                leftPanel.style.position = 'fixed';
+                leftPanel.style.top = '60px';
+                leftPanel.style.left = '0';
+                leftPanel.style.width = '100%';
+                leftPanel.style.height = 'calc(100vh - 60px)';
+                leftPanel.style.zIndex = '9000';
+            }
+            
+            closeMobileMenu();
+        }
+
+        // ヘルプを表示（仮実装）
+        function showHelp() {
+            alert('ヘルプページは準備中です。\nお問い合わせ: support@jyoseikin-rescue.com');
+            closeMobileMenu();
+        }
+
+        // 左パネルを閉じるボタン（モバイル用）
+        window.addEventListener('click', function(e) {
+            if (window.innerWidth <= 768) {
+                const leftPanel = document.querySelector('.left-panel');
+                if (leftPanel && leftPanel.style.position === 'fixed') {
+                    // 左パネル外をクリックしたら閉じる
+                    if (!leftPanel.contains(e.target) && !e.target.closest('.mobile-menu-item')) {
+                        leftPanel.style.display = 'none';
+                        leftPanel.style.position = '';
+                    }
+                }
+            }
+        });
 
         // 統合AIエージェント選択（重要：利用回数チェック付き）
         async function selectIntegratedAgent(agentId) {
