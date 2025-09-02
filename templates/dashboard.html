@@ -882,7 +882,6 @@
         <!-- ヘッダー（ロゴ） -->
         <div class="mobile-sidebar-header">
             <img src="/static/logo.png" alt="助成金レスキュー" style="height: 40px; width: auto;">
-            <span class="mobile-sidebar-logo">助成金レスキュー</span>
         </div>
         
         <!-- メニュー項目 -->
@@ -1388,6 +1387,13 @@
                 window.upgradePromptShown = true;
                 setTimeout(() => showUpgradePrompt(usage.plan_type || 'free'), 500);
             }
+            
+            // モバイル情報も同時に更新
+            setTimeout(() => {
+                if (typeof updateMobileInfo === 'function') {
+                    updateMobileInfo();
+                }
+            }, 100);
         }
 
         function showUpgradePrompt(planType) {
@@ -2146,10 +2152,13 @@
 
         // モバイル用情報を更新
         function updateMobileInfo() {
-            // PC版から情報をコピー
+            // PC版から情報をコピー（非表示でも値を取得）
             const remainingQuestions = document.getElementById('remainingQuestions').textContent;
             const planType = document.getElementById('planType').textContent;
-            const userEmail = document.getElementById('userEmail').textContent;
+            
+            // userEmailが非表示の場合もテキストを取得
+            const userEmailElement = document.getElementById('userEmail');
+            const userEmail = userEmailElement ? userEmailElement.textContent : 'ユーザー';
             
             document.getElementById('mobileRemainingQuestions').textContent = remainingQuestions;
             document.getElementById('mobilePlanType').textContent = planType;
