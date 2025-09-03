@@ -563,12 +563,12 @@
                             <button onclick="saveDiagnosisAndRegister()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 1rem 2rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);">
                                 📝 無料お試し専門AI相談を始める（5回無料）
                             </button>
-                            <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">※ 診断結果がメモに保存され、申請準備を管理できます</p>
+                            <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">※ 診断結果が保存され、AI相談を開始できます</p>
                         </div>
                         
                         <div style="margin-bottom: 1.5rem;" id="saveToMemoSection" style="display: none;">
                             <button onclick="saveToMemoDirectly()" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; padding: 1rem 2rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);">
-                                💾 診断結果をメモに保存
+                                💾 診断結果を保存してダッシュボードへ
                             </button>
                             <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">※ 既にログイン済みの方はこちら</p>
                         </div>
@@ -670,24 +670,35 @@
         }
         
         async function saveDiagnosisAndRegister() {
-            // 診断結果が存在する場合は保存
+            // 診断結果を自動保存（localStorageに保存）
             if (currentDiagnosisResults) {
-                await saveDiagnosisResults(currentDiagnosisResults);
+                const aiResultData = {
+                    type: 'diagnosis',
+                    timestamp: new Date().toISOString(),
+                    content: currentDiagnosisResults,
+                    summary: '診断結果'
+                };
+                
+                let aiResults = JSON.parse(localStorage.getItem('aiDiagnosisResults') || '[]');
+                aiResults.unshift(aiResultData);
+                localStorage.setItem('aiDiagnosisResults', JSON.stringify(aiResults));
+                console.log('診断結果を自動保存しました');
             }
             
             // 認証状態をチェック
-            try {
-                const response = await fetch('/api/auth/user');
-                if (response.ok) {
-                    // 認証済みの場合はダッシュボードへ
-                    window.location.href = '/dashboard';
+            if (isUserLoggedIn) {
+                // ログイン済みの場合は直接ダッシュボードへ
+                window.location.href = '/dashboard';
+            } else {
+                // 未ログインの場合は選択画面を表示
+                const choice = confirm('診断結果を保存しました。\n\n「OK」→ 会員登録（無料）\n「キャンセル」→ ログイン画面へ');
+                if (choice) {
+                    // 会員登録へ
+                    window.location.href = '/?register=true';
                 } else {
-                    // 未認証の場合は登録画面へ
+                    // ログイン画面へ
                     window.location.href = '/';
                 }
-            } catch (error) {
-                // エラーの場合は登録画面へ
-                window.location.href = '/';
             }
         }
         
@@ -764,57 +775,29 @@ ${result.description}`
             }
         }
         
-        // 直接メモに保存する機能
+        // ログイン済みユーザー用の直接保存機能
         async function saveToMemoDirectly() {
             if (!currentDiagnosisResults || !isUserLoggedIn) {
                 alert('診断結果がないか、ログインが必要です。');
                 return;
             }
             
-            try {
-                const user = firebase.auth().currentUser;
-                if (!user) {
-                    alert('認証に問題があります。再度ログインしてください。');
-                    return;
-                }
-                
-                console.log('診断保存: ユーザーID =', user.uid);
-                console.log('診断保存: ユーザーEmail =', user.email);
-                
-                const token = await user.getIdToken();
-                // 診断実行時に保存した会社情報を使用
-                const companyInfo = savedCompanyInfo || getCurrentCompanyInfo();
-                
-                // 会社情報デバッグ
-                console.log('使用する会社情報:', companyInfo);
-                console.log('保存された会社情報:', savedCompanyInfo);
-                console.log('現在のフォーム情報:', getCurrentCompanyInfo());
-                
-                // AI診断結果を左端パネル用に保存（メモとしては保存しない）
-                const aiResultData = {
-                    type: 'diagnosis',
-                    timestamp: new Date().toISOString(),
-                    content: currentDiagnosisResults,
-                    summary: '診断結果'
-                };
-                
-                // localStorageに保存（将来的にはサーバーに保存）
-                let aiResults = JSON.parse(localStorage.getItem('aiDiagnosisResults') || '[]');
-                aiResults.unshift(aiResultData);
-                localStorage.setItem('aiDiagnosisResults', JSON.stringify(aiResults));
-                
-                console.log('AI診断結果を左側パネル用に保存しました:', aiResultData);
-                
-                alert('診断結果を保存しました！');
-                // メモ管理画面に遷移
-                if (confirm('メモ管理画面を開きますか？')) {
-                    window.location.href = '/subsidy-memo';
-                }
-                
-            } catch (error) {
-                console.error('メモ保存エラー:', error);
-                alert('メモの保存に失敗しました。しばらく時間をおいて再度お試しください。');
-            }
+            // 診断結果を自動保存（localStorageに保存）
+            const aiResultData = {
+                type: 'diagnosis',
+                timestamp: new Date().toISOString(),
+                content: currentDiagnosisResults,
+                summary: '診断結果'
+            };
+            
+            let aiResults = JSON.parse(localStorage.getItem('aiDiagnosisResults') || '[]');
+            aiResults.unshift(aiResultData);
+            localStorage.setItem('aiDiagnosisResults', JSON.stringify(aiResults));
+            
+            console.log('診断結果を保存しました:', aiResultData);
+            
+            // 直接ダッシュボードに遷移（ポップアップなし）
+            window.location.href = '/dashboard';
         }
     </script>
 </body>

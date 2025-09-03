@@ -26,7 +26,9 @@
       "Bash(gcloud run services update:*)",
       "Bash(gcloud run services describe:*)",
       "Bash(gcloud logging read:*)",
-      "Bash(firebase deploy:*)"
+      "Bash(firebase deploy:*)",
+      "Read(C:\\Users\\naoot\\Downloads/**)",
+      "Bash(copy:*)"
     ],
     "deny": [],
     "ask": [],
