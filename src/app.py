@@ -1500,6 +1500,11 @@ def get_application_forms():
             'data': []
         }), 500
 
+@app.route('/landing')
+def landing_page():
+    """新しいランディングページ"""
+    return render_template('landing_page.html')
+
 @app.route('/terms')
 def terms():
     """利用規約ページ"""

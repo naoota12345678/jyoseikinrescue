@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>助成金レスキュー - AI助成金エージェント | 社労士が開発した継続型サポート</title>
+    <meta name="description" content="あなたの会社に眠る「もらえるお金」を発見。100種類以上の助成金から可能性を掘り起こすAIエージェント。月額1,480円から。">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
+            line-height: 1.7;
+            color: #21292A;
+            background: #f4eddc;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* ヘッダー */
+        header {
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #E35614;
+        }
+        
+        .logo img {
+            height: 40px;
+            margin-right: 10px;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn-secondary {
+            padding: 0.5rem 1.5rem;
+            border: 2px solid #E35614;
+            background: transparent;
+            color: #E35614;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        
+        .btn-secondary:hover {
+            background: #E35614;
+            color: white;
+        }
+        
+        /* ヒーローセクション */
+        .hero {
+            padding: 120px 0 60px;
+            background: linear-gradient(135deg, #f4eddc 0%, #fff 100%);
+        }
+        
+        .hero-content {
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #21292A;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+        }
+        
+        .hero h1 .highlight {
+            color: #E35614;
+            background: linear-gradient(135deg, #E35614 0%, #D14510 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero .subtitle {
+            font-size: 1.3rem;
+            color: #666;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+        
+        .hero .description {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 3rem;
+            line-height: 1.8;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn-primary {
+            padding: 1.2rem 3rem;
+            background: linear-gradient(135deg, #E35614 0%, #D14510 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(227, 86, 20, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(227, 86, 20, 0.4);
+        }
+        
+        .btn-story {
+            color: #E35614;
+            text-decoration: underline;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        /* セクション共通 */
+        .section {
+            padding: 80px 0;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: #21292A;
+        }
+        
+        /* 問題提起セクション */
+        .problem-section {
+            background: white;
+        }
+        
+        .problem-lead {
+            text-align: center;
+            font-size: 1.3rem;
+            color: #666;
+            margin-bottom: 3rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .comparison-table {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .comparison-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .comparison-table th {
+            background: #E35614;
+            color: white;
+            padding: 1.5rem;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .comparison-table td {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .comparison-table .label {
+            font-weight: bold;
+            color: #E35614;
+        }
+        
+        .comparison-table .old-way {
+            color: #999;
+        }
+        
+        .comparison-table .new-way {
+            color: #21292A;
+            font-weight: 600;
+        }
+        
+        /* 価値提案セクション */
+        .value-section {
+            background: #f4eddc;
+        }
+        
+        .value-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .value-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .value-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .value-card .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .value-card h3 {
+            font-size: 1.5rem;
+            color: #E35614;
+            margin-bottom: 1rem;
+        }
+        
+        .value-card p {
+            color: #666;
+            line-height: 1.8;
+        }
+        
+        /* ストーリーセクション */
+        .story-section {
+            background: white;
+        }
+        
+        .story-content {
+            max-width: 800px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #fff 0%, #f4eddc 100%);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .story-content h3 {
+            color: #E35614;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+        
+        .story-content p {
+            margin-bottom: 1.5rem;
+            color: #666;
+            line-height: 1.9;
+        }
+        
+        .story-highlight {
+            background: #f4eddc;
+            padding: 1.5rem;
+            border-left: 4px solid #E35614;
+            margin: 2rem 0;
+            border-radius: 10px;
+        }
+        
+        /* 使い方セクション */
+        .how-to-section {
+            background: #f4eddc;
+        }
+        
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .step-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .step-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: #E35614;
+            color: white;
+            border-radius: 50%;
+            line-height: 40px;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .step-card h4 {
+            color: #E35614;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .step-card p {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .guide-link {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 15px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .guide-link a {
+            color: #E35614;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+        
+        /* 料金プランセクション */
+        .pricing-section {
+            background: white;
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .pricing-card {
+            background: white;
+            border: 2px solid #eee;
+            border-radius: 20px;
+            padding: 2.5rem;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .pricing-card.featured {
+            border-color: #E35614;
+            transform: scale(1.05);
+            box-shadow: 0 20px 40px rgba(227, 86, 20, 0.2);
+        }
+        
+        .pricing-card.featured::before {
+            content: "おすすめ";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #E35614;
+            color: white;
+            padding: 0.3rem 1.5rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .plan-name {
+            font-size: 1.5rem;
+            color: #E35614;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        
+        .plan-price {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #21292A;
+            margin-bottom: 0.5rem;
+        }
+        
+        .plan-price small {
+            font-size: 1rem;
+            color: #999;
+        }
+        
+        .plan-count {
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+        
+        .plan-description {
+            color: #666;
+            margin-bottom: 2rem;
+            min-height: 60px;
+        }
+        
+        .plan-button {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #E35614;
+            background: transparent;
+            color: #E35614;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .pricing-card.featured .plan-button {
+            background: #E35614;
+            color: white;
+        }
+        
+        .plan-button:hover {
+            background: #E35614;
+            color: white;
+        }
+        
+        /* サポートセクション */
+        .support-section {
+            background: #f4eddc;
+        }
+        
+        .support-content {
+            max-width: 700px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .support-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .support-item {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .support-item .icon {
+            font-size: 2rem;
+            color: #E35614;
+            margin-bottom: 1rem;
+        }
+        
+        .support-item h4 {
+            color: #21292A;
+            margin-bottom: 1rem;
+        }
+        
+        .support-item p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+        
+        /* 最終CTAセクション */
+        .final-cta {
+            background: linear-gradient(135deg, #E35614 0%, #D14510 100%);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+        
+        .final-cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .final-cta .btn-white {
+            padding: 1.2rem 3rem;
+            background: white;
+            color: #E35614;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .final-cta .btn-white:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        
+        /* フッター */
+        footer {
+            background: #21292A;
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+        
+        .footer-links a:hover {
+            opacity: 1;
+        }
+        
+        /* レスポンシブ */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .section-title {
+                font-size: 1.8rem;
+            }
+            
+            .pricing-card.featured {
+                transform: none;
+            }
+            
+            .header-content {
+                padding: 1rem;
+            }
+            
+            .nav-buttons {
+                gap: 0.5rem;
+            }
+            
+            .btn-secondary {
+                padding: 0.4rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .comparison-table {
+                font-size: 0.9rem;
+            }
+            
+            .comparison-table th,
+            .comparison-table td {
+                padding: 1rem;
+            }
+        }
+        
+        /* アニメーション */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.8s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <img src="/static/logo.png" alt="助成金レスキュー">
+                助成金レスキュー
+            </div>
+            <div class="nav-buttons">
+                <a href="/auth" class="btn-secondary">ログイン</a>
+                <a href="/diagnosis" class="btn-secondary">無料診断</a>
+            </div>
+        </div>
+    </header>
+    
+    <!-- ヒーローセクション -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content fade-in-up">
+                <h1>
+                    あなたの会社に眠る<br>
+                    <span class="highlight">「もらえるお金」</span>、見つけませんか？
+                </h1>
+                <p class="subtitle">
+                    社労士が自分用に開発したAIが、100種類以上の助成金から可能性を掘り起こします
+                </p>
+                <p class="description">
+                    助成金申請は、思い立った1日で終わる短期決戦ではありません。<br>
+                    3ヶ月、半年、1年と続く長期的なプロジェクト。<br>
+                    だからこそ、月額1,480円の継続パートナーが必要です。
+                </p>
+                <div class="cta-buttons">
+                    <a href="/diagnosis" class="btn-primary">まずは無料診断で可能性をチェック</a>
+                    <a href="#story" class="btn-story">社労士が開発した理由を見る →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 問題提起セクション -->
+    <section class="problem-section section">
+        <div class="container">
+            <p class="problem-lead">
+                「助成金は手続きが複雑で費用も高い...」<br>
+                そう思って、年間数十万〜数百万円のチャンスを逃していませんか？
+            </p>
+            <div class="comparison-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="20%">悩み</th>
+                            <th width="40%">従来の申請方法</th>
+                            <th width="40%">助成金レスキューなら</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="label">費用</td>
+                            <td class="old-way">
+                                社労士手数料: 受給額の25%<br>
+                                （100万円なら25万円）
+                            </td>
+                            <td class="new-way">
+                                月額1,480円から<br>
+                                （年間でも約2万円）
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="label">情報収集</td>
+                            <td class="old-way">
+                                膨大な要綱を自分で読む<br>
+                                毎年の変更を追いきれない
+                            </td>
+                            <td class="new-way">
+                                AIが即座に最新情報を回答<br>
+                                24時間365日いつでも相談可能
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="label">可能性</td>
+                            <td class="old-way">
+                                知っている助成金しか<br>
+                                検討できない
+                            </td>
+                            <td class="new-way">
+                                100種類以上から<br>
+                                新たな可能性を発見
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 価値提案セクション -->
+    <section class="value-section section">
+        <div class="container">
+            <h2 class="section-title">助成金申請の成功は「継続的な情報収集」が9割</h2>
+            <div class="value-grid">
+                <div class="value-card">
+                    <div class="icon">💡</div>
+                    <h3>発見する喜び</h3>
+                    <p>
+                        「うちの会社、こんなにたくさんの助成金が対象だったなんて！」<br><br>
+                        キャリアアップ、業務改善、人材開発など、AIとの対話で知らなかった可能性が次々と見つかります。
+                    </p>
+                </div>
+                <div class="value-card">
+                    <div class="icon">📅</div>
+                    <h3>長期的な戦略が立てられる</h3>
+                    <p>
+                        助成金の多くは準備期間が必要です。<br><br>
+                        「来年度の新設助成金のために、今から就業規則を整える」といった戦略的な「仕込み」をAIがサポートします。
+                    </p>
+                </div>
+                <div class="value-card">
+                    <div class="icon">💰</div>
+                    <h3>圧倒的なコストパフォーマンス</h3>
+                    <p>
+                        専門家を年間顧問にする費用の1/10以下。<br><br>
+                        毎年変わる制度のキャッチアップも含めて、月々わずかな費用で利用可能です。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- ストーリーセクション -->
+    <section class="story-section section" id="story">
+        <div class="container">
+            <h2 class="section-title">開発者ストーリー</h2>
+            <div class="story-content">
+                <h3>「毎年変わる助成金、もう追いきれない...」</h3>
+                <p>
+                    私は社会保険労務士として、企業の助成金申請をサポートしてきました。
+                </p>
+                <p>
+                    しかし、毎年のように変更される要件、新設・廃止される制度、複雑化する申請手続き...
+                    正直、自分でも全てを把握しきれない時がありました。
+                </p>
+                <div class="story-highlight">
+                    <p>
+                        <strong>そこで思いついたのが、AIの活用でした。</strong><br>
+                        全ての助成金要綱をAIに学習させ、自分専用の「助成金秘書」を作成。
+                    </p>
+                </div>
+                <p>
+                    使ってみると驚きの結果が...
+                </p>
+                <ul style="margin-left: 2rem; color: #666;">
+                    <li>15-20回の質問で申請準備が完了</li>
+                    <li>作業時間が1/10に短縮</li>
+                    <li>見落としていた助成金も発見</li>
+                </ul>
+                <p style="font-size: 1.2rem; color: #E35614; font-weight: bold; margin-top: 2rem;">
+                    「これ、困っている企業さんに使ってもらえば...」
+                </p>
+                <p>
+                    そう思って一般公開したのが『助成金レスキュー』です。
+                </p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 使い方セクション -->
+    <section class="how-to-section section">
+        <div class="container">
+            <h2 class="section-title">スマホで質問、PCで書類作成<br>自分のペースで進められる6ステップ</h2>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h4>発見</h4>
+                    <p>無料診断で、あなたの会社に合う助成金を見つける</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h4>質問</h4>
+                    <p>専門AIに、条件やスケジュールを対話形式で確認（約20ターン）</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h4>計画</h4>
+                    <p>AIが提案するタイムスケジュールを把握</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <h4>準備</h4>
+                    <p>必要書類のリストをAIに作ってもらう</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">5</div>
+                    <h4>作成</h4>
+                    <p>公式サイトから書類をダウンロードし記入（PC/手書きOK）</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">6</div>
+                    <h4>申請</h4>
+                    <p>支給申請の際も同じようにAIに質問して準備</p>
+                </div>
+            </div>
+            <div class="guide-link">
+                💡 <strong>なぜ20ターンで十分なの？</strong><br>
+                効率的な質問の仕方をまとめた<a href="/guide">「活用ガイド」</a>をご用意しています
+            </div>
+        </div>
+    </section>
+    
+    <!-- 料金プランセクション -->
+    <section class="pricing-section section">
+        <div class="container">
+            <h2 class="section-title">あなたの利用スタイルに合わせた料金プラン</h2>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <div class="plan-name">Light</div>
+                    <div class="plan-price">¥1,480<small>/月</small></div>
+                    <div class="plan-count">20回/月</div>
+                    <div class="plan-description">
+                        継続的な情報収集に最適<br>
+                        毎月の制度変更をチェック
+                    </div>
+                    <button class="plan-button" onclick="location.href='/auth'">このプランで始める</button>
+                </div>
+                <div class="pricing-card featured">
+                    <div class="plan-name">Regular</div>
+                    <div class="plan-price">¥3,300<small>/月</small></div>
+                    <div class="plan-count">50回/月</div>
+                    <div class="plan-description">
+                        本格的な申請準備に<br>
+                        計画申請〜支給申請まで対応
+                    </div>
+                    <button class="plan-button" onclick="location.href='/auth'">このプランで始める</button>
+                </div>
+                <div class="pricing-card">
+                    <div class="plan-name">Heavy</div>
+                    <div class="plan-price">¥5,500<small>/月</small></div>
+                    <div class="plan-count">90回/月</div>
+                    <div class="plan-description">
+                        複数の助成金を並行検討<br>
+                        詳細な相談も余裕を持って
+                    </div>
+                    <button class="plan-button" onclick="location.href='/auth'">このプランで始める</button>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- サポート体制セクション -->
+    <section class="support-section section">
+        <div class="container">
+            <h2 class="section-title">AIだけでは不安な時も、専門家がいるから安心</h2>
+            <div class="support-content">
+                <div class="support-items">
+                    <div class="support-item">
+                        <div class="icon">📝</div>
+                        <h4>書類作成サポート</h4>
+                        <p>就業規則や賃金台帳の作成が必要になった場合も、専門家によるサポートサービスを安価でご利用いただけます</p>
+                    </div>
+                    <div class="support-item">
+                        <div class="icon">💬</div>
+                        <h4>Zoom相談</h4>
+                        <p>どうしても直接相談したい時は、Zoomでの社労士相談を予約可能です</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 最終CTAセクション -->
+    <section class="final-cta">
+        <div class="container">
+            <h2>さあ、あなたの会社に眠っている可能性を見つけましょう</h2>
+            <a href="/diagnosis" class="btn-white">無料で診断を始める</a>
+        </div>
+    </section>
+    
+    <!-- フッター -->
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="/terms">利用規約</a>
+                <a href="/privacy">プライバシーポリシー</a>
+                <a href="/company">運営者情報</a>
+                <a href="/contact">お問い合わせ</a>
+            </div>
+            <p>&copy; 2024 助成金レスキュー. All rights reserved.</p>
+        </div>
+    </footer>
+    
+    <script>
+        // スムーススクロール
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+        
+        // フェードインアニメーション
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in-up');
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        document.querySelectorAll('.value-card, .step-card, .pricing-card').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
