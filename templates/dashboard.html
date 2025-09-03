@@ -2193,19 +2193,56 @@
             // PC版の会話履歴タブをアクティブに
             switchLeftTab('conversations');
             
-            // モバイルで左パネルを表示（一時的）
+            // モバイルで左パネルを50%幅で表示
             const leftPanel = document.querySelector('.left-panel');
             if (window.innerWidth <= 768) {
                 leftPanel.style.display = 'block';
                 leftPanel.style.position = 'fixed';
-                leftPanel.style.top = '60px';
+                leftPanel.style.top = '0';
                 leftPanel.style.left = '0';
-                leftPanel.style.width = '100%';
-                leftPanel.style.height = 'calc(100vh - 60px)';
+                leftPanel.style.width = '50%';
+                leftPanel.style.height = '100vh';
                 leftPanel.style.zIndex = '9000';
+                leftPanel.style.boxShadow = '2px 0 10px rgba(0,0,0,0.1)';
+                leftPanel.style.backgroundColor = 'white';
+                
+                // 半透明オーバーレイを追加
+                const overlay = document.createElement('div');
+                overlay.id = 'conversationOverlay';
+                overlay.style.position = 'fixed';
+                overlay.style.top = '0';
+                overlay.style.left = '50%';
+                overlay.style.width = '50%';
+                overlay.style.height = '100vh';
+                overlay.style.backgroundColor = 'rgba(0,0,0,0.2)';
+                overlay.style.zIndex = '8999';
+                overlay.onclick = closeMobileConversations;
+                document.body.appendChild(overlay);
             }
             
             closeMobileMenu();
+        }
+
+        // モバイルで会話履歴パネルを閉じる
+        function closeMobileConversations() {
+            const leftPanel = document.querySelector('.left-panel');
+            const overlay = document.getElementById('conversationOverlay');
+            
+            if (leftPanel) {
+                leftPanel.style.display = 'none';
+                leftPanel.style.position = '';
+                leftPanel.style.top = '';
+                leftPanel.style.left = '';
+                leftPanel.style.width = '';
+                leftPanel.style.height = '';
+                leftPanel.style.zIndex = '';
+                leftPanel.style.boxShadow = '';
+                leftPanel.style.backgroundColor = '';
+            }
+            
+            if (overlay) {
+                overlay.remove();
+            }
         }
 
         // モバイルで診断結果を表示
