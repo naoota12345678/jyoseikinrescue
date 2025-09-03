@@ -37,6 +37,27 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .back-button {
+            background: #E35614;
+            color: white;
+            border: 2px solid #E35614;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-button:hover {
+            background: #D14510;
+            border-color: #D14510;
         }
         
         .main-title {
@@ -238,6 +259,7 @@
             <div class="logo">
                 <img src="/static/logo.png" class="logo-image" alt="助成金レスキュー">
             </div>
+            <a href="/" class="back-button">← トップに戻る</a>
         </div>
     </div>
     
