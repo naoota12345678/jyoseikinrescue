@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>助成金レスキュー 活用ガイド</title>
+    <link rel="icon" type="image/png" href="/static/logo.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Hiragino Kaku Gothic Pro', 'ヒラギノ角ゴ Pro', 'Yu Gothic Medium', '游ゴシック Medium', YuGothic, '游ゴシック体', 'Meiryo', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f4eddc 0%, #fff 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #E35614;
+        }
+
+        .logo img {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: #E35614;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #d94d12;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #E35614;
+            border: 2px solid #E35614;
+        }
+
+        .btn-secondary:hover {
+            background: #E35614;
+            color: white;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .guide-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .guide-title {
+            font-size: 2.2rem;
+            color: #E35614;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        .guide-subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .intro {
+            background: #fff9f6;
+            padding: 1.5rem;
+            border-left: 4px solid #E35614;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .flow-diagram {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 2rem 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .flow-diagram h3 {
+            color: #E35614;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .flow-code {
+            background: #f5f5f5;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            white-space: pre-line;
+            color: #333;
+        }
+
+        .step {
+            background: white;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .step-title {
+            color: #E35614;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #f4eddc;
+        }
+
+        .step-content {
+            line-height: 1.8;
+        }
+
+        .example-box {
+            background: #f0f8ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .example-title {
+            color: #0066cc;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .example-title::before {
+            content: "✅";
+            margin-right: 0.5rem;
+        }
+
+        .example-questions {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 0.5rem;
+        }
+
+        .example-questions code {
+            background: #e9ecef;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            display: block;
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+        }
+
+        .tip-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .tip-title {
+            color: #d68910;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .tip-title::before {
+            content: "💡";
+            margin-right: 0.5rem;
+        }
+
+        .warning-box {
+            background: #fff2f2;
+            border: 1px solid #ffb3b3;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .warning-title {
+            color: #c0392b;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .warning-title::before {
+            content: "⚠️";
+            margin-right: 0.5rem;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, #E35614, #ff6b35);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin: 3rem 0;
+        }
+
+        .cta-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-button {
+            background: white;
+            color: #E35614;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .guide-title {
+                font-size: 1.8rem;
+            }
+
+            .step {
+                padding: 1.5rem;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="/" class="logo">
+                <img src="/static/logo.png" alt="助成金レスキュー">
+                <h1>助成金レスキュー</h1>
+            </a>
+            <nav class="nav-buttons">
+                <a href="/dashboard" class="btn btn-secondary">ダッシュボード</a>
+                <a href="/landing" class="btn btn-primary">無料診断</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="guide-header">
+            <h1 class="guide-title">助成金レスキュー 活用ガイド</h1>
+            <p class="guide-subtitle">〜 AIを最高のパートナーにして、助成金申請を成功させる方法 〜</p>
+        </div>
+
+        <div class="intro">
+            <p>助成金レスキューへようこそ！<br>
+            このガイドは、あなたがAIエージェントの能力を最大限に引き出し、スムーズに助成金申請を完了させるための「取扱説明書」です。助成金の申請は<strong>「①計画申請 → ②支給申請」</strong>という2つの大きなステップで進みます。この流れに沿って、AIの賢い使い方を見ていきましょう。</p>
+        </div>
+
+        <div class="flow-diagram">
+            <h3>全体の流れ（イメージ図）</h3>
+            <div class="flow-code">[あなた]　　　　 [AIエージェント]
+　┃
+┏━【STEP 0】無料診断で可能性を発見
+┃
+┣━【STEP 1】AIに「条件とスケジュール」を質問  <--★改訂点
+┃　　　　　　 　 ┗ 🤖 条件や期限などを回答
+┃
+┣━【STEP 2】AIに「計画申請の必要書類」を質問
+┃　　　　　　 　 ┗ 🤖 書類リストと内容を回答
+┃
+┣━【STEP 3】AIに「書類の書き方」を質問
+┃　　　　　　 　 ┗ 🤖 項目ごとの書き方を回答
+┃
+┣━【STEP 4】計画申請の書類を提出
+┃
+┣━━（計画の実施期間）━━
+┃
+┗━【STEP 5】支給申請もAIと二人三脚で完了！</div>
+        </div>
+
+        <section class="step">
+            <h2 class="step-title">【STEP 1】最重要！ AIに「条件とスケジュール」を確認しよう</h2>
+            <div class="step-content">
+                <p>無料診断で申請したい助成金が決まったら、ここからが本番です。</p>
+                
+                <div class="warning-box">
+                    <div class="warning-title">重要なポイント</div>
+                    <p><strong>助成金申請で絶対に外せないのがスケジュールです。</strong> どんなに条件が合っていても、期限を1日でも過ぎれば申請は受理されません。まずはじめに「そもそも自社が対象か？」と同時に<strong>「いつまでに何をすべきか？」</strong>を必ず確認しましょう。</p>
+                </div>
+
+                <div class="example-box">
+                    <div class="example-title">こんな風に聞いてみよう！</div>
+                    <div class="example-questions">
+                        <code>「この助成金の申請スケジュールを教えてください。計画申請の締切はいつですか？」</code>
+                        <code>「〇〇助成金の対象となる企業の条件を教えてください」</code>
+                        <code>「うちの会社は従業員〇名で、〇〇業ですが、この助成金に当てはまりますか？」</code>
+                    </div>
+                </div>
+
+                <p>AIが、申請の全体像（タイムライン）と、あなたの会社が条件に合致するかを客観的に判断してくれます。</p>
+            </div>
+        </section>
+
+        <section class="step">
+            <h2 class="step-title">【STEP 2】何が必要？「計画申請の書類」をリストアップしよう</h2>
+            <div class="step-content">
+                <p>条件とスケジュールをクリアできるとわかったら、次は必要書類の準備です。</p>
+
+                <div class="example-box">
+                    <div class="example-title">こんな風に聞いてみよう！</div>
+                    <div class="example-questions">
+                        <code>「キャリアアップ助成金（正社員化コース）の計画申請に必要な書類をすべて教えてください」</code>
+                    </div>
+                </div>
+
+                <p>AIがリストを返してくれます。そのリストを見ながら、</p>
+                <ol>
+                    <li><strong>自社にその書類があるか確認</strong>しましょう。（就業規則、賃金台帳など）</li>
+                    <li>もし書類がなかったり、内容に自信がなかったりする場合は、<strong>無理せず専門家サービス（有料オプション）の利用をご検討ください。</strong></li>
+                    <li>申請書の様式は、メニューの<strong>「申請書類」ボタン</strong>から公式サイトにリンクしています。必要なものをダウンロードしましょう。</li>
+                </ol>
+            </div>
+        </section>
+
+        <section class="step">
+            <h2 class="step-title">【STEP 3】どう書くの？ AIと「書類の書き方」を相談しよう</h2>
+            <div class="step-content">
+                <p>白紙の申請書を前に固まってしまう...。そんな時こそAIの出番です。</p>
+
+                <div class="example-box">
+                    <div class="example-title">こんな風に聞いてみよう！</div>
+                    <div class="example-questions">
+                        <code>「キャリアアップ計画書の『対象労働者』の欄には、何を書けばいいですか？」</code>
+                        <code>「就業規則の変更届の書き方で、注意するポイントはありますか？」</code>
+                    </div>
+                </div>
+
+                <div class="tip-box">
+                    <div class="tip-title">遠慮は無用！</div>
+                    <p><strong>相手はAIなので、ためらう必要は一切ありません。</strong> 「こんな初歩的なことを聞いたら恥ずかしいかな…」という心配は無用です。納得できるまで、何度でも質問してください。</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="step">
+            <h2 class="step-title">【STEP 4】いざ提出！「計画申請」を完了させよう</h2>
+            <div class="step-content">
+                <p>書類がすべて揃ったら、いよいよ提出です。提出前は、AIとの<strong>「履歴」</strong>を見返して、聞き漏らしたことがないか最終チェックすると万全です。</p>
+            </div>
+        </section>
+
+        <section class="step">
+            <h2 class="step-title">【STEP 5】最後の仕上げ！「支給申請」も同じ流れで進めよう</h2>
+            <div class="step-content">
+                <p>計画申請が受理され、計画通りに実施が終わったら、最後のステップ「支給申請」です。進め方は計画申請と全く同じです。</p>
+
+                <div class="example-box">
+                    <div class="example-title">こんな風に聞いてみよう！</div>
+                    <div class="example-questions">
+                        <code>「〇〇助成金の支給申請に必要な書類をすべて教えてください」</code>
+                        <code>「支給申請で提出する賃金台帳で、チェックされるポイントはどこですか？」</code>
+                    </div>
+                </div>
+
+                <p>AIの助けを借りて、最後まで走り抜けましょう！</p>
+            </div>
+        </section>
+
+        <div class="tip-box">
+            <div class="tip-title">成功率をさらに高めるためのプロのヒント</div>
+            <p>AIは国の定める「公式ルール（要綱）」のプロフェッショナルです。しかし、助成金の実務では、担当窓口によって少しだけ運用が異なるケースも稀にあります。</p>
+            <p><strong>例：</strong> 公式ルールでは「見積もりは2社分」でも、地域によっては「念のため3社分用意してください」と言われることがあります。</p>
+            <p>そんな時は、AIの回答をベースにしながら、最終的には管轄の労働局に確認を取ることをお勧めします。AIが教えてくれた知識があれば、担当者との会話もスムーズに進みます。</p>
+        </div>
+
+        <div class="cta-section">
+            <h2 class="cta-title">さあ、AIと一緒に助成金申請を成功させましょう！</h2>
+            <p>このガイドが、あなたの会社が次の一歩を踏み出すための一助となれば幸いです。</p>
+            <a href="/dashboard" class="cta-button">今すぐ無料診断をはじめる</a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 助成金レスキュー. All rights reserved.</p>
+    </footer>
+</body>
+</html>
