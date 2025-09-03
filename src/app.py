@@ -1505,6 +1505,11 @@ def landing_page():
     """新しいランディングページ"""
     return render_template('landing_page.html')
 
+@app.route('/landing2')
+def landing_page_2():
+    """新しいランディングページ v2"""
+    return render_template('landing_page.html')
+
 @app.route('/terms')
 def terms():
     """利用規約ページ"""
