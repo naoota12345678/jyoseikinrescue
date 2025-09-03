@@ -2038,6 +2038,78 @@
             // コンテンツの切り替え
             document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
             document.getElementById(tabName + 'Content').style.display = 'block';
+            
+            // 診断結果タブが選択された時にデータを読み込み
+            if (tabName === 'diagnosis') {
+                loadDiagnosisResults();
+            }
+        }
+        
+        // 診断結果を読み込んで表示
+        function loadDiagnosisResults() {
+            const diagnosisResultsList = document.getElementById('diagnosisResultsList');
+            const aiResults = JSON.parse(localStorage.getItem('aiDiagnosisResults') || '[]');
+            
+            // 診断結果のみをフィルタ
+            const diagnosisResults = aiResults.filter(item => item.type === 'diagnosis');
+            
+            if (diagnosisResults.length === 0) {
+                diagnosisResultsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <div class="empty-state-text">まだ診断結果がありません</div>
+                        <div class="empty-state-desc">無料診断を実行してみましょう</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 診断結果を表示
+            diagnosisResultsList.innerHTML = diagnosisResults.map(item => {
+                const date = new Date(item.timestamp).toLocaleDateString('ja-JP');
+                const time = new Date(item.timestamp).toLocaleTimeString('ja-JP', {hour: '2-digit', minute: '2-digit'});
+                
+                return `
+                    <div class="diagnosis-item" onclick="showDiagnosisDetail('${item.timestamp}')">
+                        <div class="diagnosis-meta">
+                            <span class="diagnosis-date">${date} ${time}</span>
+                        </div>
+                        <div class="diagnosis-summary">
+                            ${item.summary} (${item.content ? item.content.length : 0}件の助成金)
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // 診断結果の詳細を表示
+        function showDiagnosisDetail(timestamp) {
+            const aiResults = JSON.parse(localStorage.getItem('aiDiagnosisResults') || '[]');
+            const diagnosisItem = aiResults.find(item => item.timestamp === timestamp && item.type === 'diagnosis');
+            
+            if (!diagnosisItem || !diagnosisItem.content) return;
+            
+            const chatMessages = document.getElementById('integratedChatMessages');
+            
+            const resultsHtml = diagnosisItem.content.map(result => `
+                <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem;">
+                    <h4 style="color: #667eea; margin-bottom: 1rem;">${result.name}</h4>
+                    <div style="white-space: pre-line; margin-bottom: 1rem;">${result.description}</div>
+                    <p style="color: #E35614; font-weight: bold; margin-bottom: 0.5rem;">💰 支給額: ${result.amount}</p>
+                    <p><strong>対象要件:</strong> ${result.eligibility}</p>
+                </div>
+            `).join('');
+            
+            chatMessages.innerHTML = `
+                <div class="message assistant-message">
+                    <div class="message-content">
+                        <h3 style="margin-bottom: 1rem;">🎯 診断結果 (${new Date(timestamp).toLocaleDateString('ja-JP')})</h3>
+                        ${resultsHtml}
+                    </div>
+                </div>
+            `;
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
         // ドロップダウン表示切り替え
