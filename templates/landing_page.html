@@ -591,10 +591,21 @@
             
             .header-content {
                 padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .logo {
+                justify-content: center;
+            }
+            
+            .logo span {
+                display: none; /* モバイルでテキストを非表示 */
             }
             
             .nav-buttons {
                 gap: 0.5rem;
+                justify-content: center;
             }
             
             .btn-secondary {
@@ -635,7 +646,7 @@
         <div class="header-content">
             <div class="logo">
                 <img src="/static/logo.png" alt="助成金レスキュー">
-                助成金レスキュー
+                <span>助成金レスキュー</span>
             </div>
             <div class="nav-buttons">
                 <a href="/auth" class="btn-secondary">ログイン</a>
