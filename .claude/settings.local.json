@@ -28,7 +28,8 @@
       "Bash(gcloud logging read:*)",
       "Bash(firebase deploy:*)",
       "Read(C:\\Users\\naoot\\Downloads/**)",
-      "Bash(copy:*)"
+      "Bash(copy:*)",
+      "WebFetch(domain:shindan.jyoseikin.jp)"
     ],
     "deny": [],
     "ask": [],
