@@ -1046,6 +1046,7 @@ def save_temp_diagnosis():
 
 @app.route('/api/agent/chat', methods=['POST'])
 @require_auth
+@check_usage_limit
 def agent_chat():
     """AIエージェントとのチャット"""
     try:
