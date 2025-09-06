@@ -424,6 +424,35 @@
             min-width: 250px;
         }
 
+        .agent-subcourses-menu {
+            position: absolute;
+            top: 0;
+            left: 100%;
+            margin-left: 8px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1002;
+            overflow: hidden;
+            min-width: 220px;
+        }
+
+        .agent-with-subcourses {
+            position: relative;
+        }
+
+        .agent-dropdown-item.disabled {
+            color: #9ca3af;
+            cursor: not-allowed;
+            background: #f9fafb;
+        }
+
+        .agent-dropdown-item.disabled:hover {
+            background: #f9fafb;
+            color: #9ca3af;
+        }
+
         .chat-container {
             flex: 1;
             display: flex;
@@ -1107,8 +1136,9 @@
                             キャリアアップ助成金専門エージェント
                             <span class="course-arrow">▶</span>
                         </div>
-                        <div class="agent-dropdown-item" onclick="selectIntegratedAgent('jinzai-kaihatsu')">
+                        <div class="agent-dropdown-item agent-with-courses" onclick="showCoursesForAgent('jinzai-kaihatsu')">
                             人材開発支援助成金専門エージェント
+                            <span class="course-arrow">▶</span>
                         </div>
                         <div class="agent-dropdown-item" onclick="selectIntegratedAgent('65sai-cho')">
                             65歳超雇用推進助成金専門エージェント
@@ -1155,6 +1185,66 @@
                         </div>
                         <div class="agent-dropdown-item" onclick="selectIntegratedAgent('career-up_tanshuku')">
                             短時間労働者労働時間延長コース
+                        </div>
+                    </div>
+
+                    <!-- 人材開発支援助成金のコース選択サブメニュー -->
+                    <div id="jinzaiKaihatsuCoursesMenu" class="agent-courses-menu" style="display: none;">
+                        <div class="agent-dropdown-item agent-with-subcourses" onclick="showSubcoursesForCourse('jinzai-kaihatsu_jinzai-ikusei')">
+                            人材育成支援コース
+                            <span class="course-arrow">▶</span>
+                        </div>
+                        <div class="agent-dropdown-item" onclick="selectIntegratedAgent('jinzai-kaihatsu_kyoiku-kyuka')">
+                            教育訓練休暇等付与コース
+                        </div>
+                        <div class="agent-dropdown-item agent-with-subcourses" onclick="showSubcoursesForCourse('jinzai-kaihatsu_toushi')">
+                            人への投資促進コース
+                            <span class="course-arrow">▶</span>
+                        </div>
+                        <div class="agent-dropdown-item disabled" title="準備中">
+                            事業展開等リスキリング支援コース
+                            <span style="font-size: 0.8rem; color: #999;">（準備中）</span>
+                        </div>
+                        <div class="agent-dropdown-item disabled" title="準備中">
+                            建設労働者認定訓練コース
+                            <span style="font-size: 0.8rem; color: #999;">（準備中）</span>
+                        </div>
+                        <div class="agent-dropdown-item disabled" title="準備中">
+                            建設労働者技能実習コース
+                            <span style="font-size: 0.8rem; color: #999;">（準備中）</span>
+                        </div>
+                        <div class="agent-dropdown-item disabled" title="準備中">
+                            障害者職業能力開発コース
+                            <span style="font-size: 0.8rem; color: #999;">（準備中）</span>
+                        </div>
+                    </div>
+
+                    <!-- 人材育成支援コースのサブコース選択メニュー -->
+                    <div id="jinzaiIkuseiSubcoursesMenu" class="agent-subcourses-menu" style="display: none;">
+                        <div class="agent-dropdown-item" onclick="selectIntegratedAgent('jinzai-kaihatsu_jinzai-ikusei_kunren')">
+                            人材育成訓練
+                        </div>
+                        <div class="agent-dropdown-item" onclick="selectIntegratedAgent('jinzai-kaihatsu_jinzai-ikusei_nintei')">
+                            認定実習併用職業訓練
+                        </div>
+                        <div class="agent-dropdown-item" onclick="selectIntegratedAgent('jinzai-kaihatsu_jinzai-ikusei_yuki')">
+                            有期実習型訓練
+                        </div>
+                    </div>
+
+                    <!-- 人への投資促進コースのサブコース選択メニュー -->
+                    <div id="jinzaiToushiSubcoursesMenu" class="agent-subcourses-menu" style="display: none;">
+                        <div class="agent-dropdown-item" onclick="selectIntegratedAgent('jinzai-kaihatsu_toushi_teigaku')">
+                            定額制訓練
+                        </div>
+                        <div class="agent-dropdown-item" onclick="selectIntegratedAgent('jinzai-kaihatsu_toushi_jihatsu')">
+                            自発的職業能力開発訓練
+                        </div>
+                        <div class="agent-dropdown-item" onclick="selectIntegratedAgent('jinzai-kaihatsu_toushi_digital')">
+                            高度デジタル人材等訓練
+                        </div>
+                        <div class="agent-dropdown-item" onclick="selectIntegratedAgent('jinzai-kaihatsu_toushi_it')">
+                            情報技術分野認定実習併用職業訓練
                         </div>
                     </div>
                 </div>
@@ -1785,6 +1875,11 @@
                 'career-up_shoyo': 'キャリアアップ助成金（賞与・退職金制度導入コース）',
                 'career-up_shahoken': 'キャリアアップ助成金（社会保険適用時処遇改善コース）',
                 'career-up_tanshuku': 'キャリアアップ助成金（短時間労働者労働時間延長支援コース）',
+                'jinzai-kaihatsu_kyoiku-kyuka': '人材開発支援助成金(教育訓練休暇)',
+                'jinzai-kaihatsu_toushi_teigaku': '人材開発支援助成金(定額制訓練)',
+                'jinzai-kaihatsu_toushi_jihatsu': '人材開発支援助成金(自発的訓練)',
+                'jinzai-kaihatsu_toushi_digital': '人材開発支援助成金(デジタル人材)',
+                'jinzai-kaihatsu_toushi_it': '人材開発支援助成金(IT実習)',
                 'jinzai-kaihatsu': '人材開発支援助成金',
                 '65sai-koyo': '65歳超雇用推進助成金',
                 'hataraki-kaikaku': '働き方改革推進支援助成金',
@@ -2190,12 +2285,29 @@
             if (agentId === 'career-up') {
                 const coursesMenu = document.getElementById('careerUpCoursesMenu');
                 coursesMenu.style.display = 'block';
+            } else if (agentId === 'jinzai-kaihatsu') {
+                const coursesMenu = document.getElementById('jinzaiKaihatsuCoursesMenu');
+                coursesMenu.style.display = 'block';
+            }
+        }
+
+        // 人材育成支援コースのサブコース選択を表示
+        function showSubcoursesForCourse(courseId) {
+            if (courseId === 'jinzai-kaihatsu_jinzai-ikusei') {
+                const subcoursesMenu = document.getElementById('jinzaiIkuseiSubcoursesMenu');
+                subcoursesMenu.style.display = 'block';
+            } else if (courseId === 'jinzai-kaihatsu_toushi') {
+                const subcoursesMenu = document.getElementById('jinzaiToushiSubcoursesMenu');
+                subcoursesMenu.style.display = 'block';
             }
         }
 
         // 全てのコースメニューを隠す
         function hideAllCoursesMenus() {
             document.getElementById('careerUpCoursesMenu').style.display = 'none';
+            document.getElementById('jinzaiKaihatsuCoursesMenu').style.display = 'none';
+            document.getElementById('jinzaiIkuseiSubcoursesMenu').style.display = 'none';
+            document.getElementById('jinzaiToushiSubcoursesMenu').style.display = 'none';
         }
 
         // ========================================
@@ -2388,6 +2500,14 @@
                 'career-up_shoyo': 'キャリアアップ助成金専門エージェント（諸手当制度共通化コース）',
                 'career-up_shahoken': 'キャリアアップ助成金専門エージェント（社会保険適用時処遇改善コース）',
                 'career-up_tanshuku': 'キャリアアップ助成金専門エージェント（短時間労働者労働時間延長コース）',
+                'jinzai-kaihatsu_jinzai-ikusei_kunren': '人材開発支援助成金専門エージェント（人材育成支援コース・人材育成訓練）',
+                'jinzai-kaihatsu_jinzai-ikusei_nintei': '人材開発支援助成金専門エージェント（人材育成支援コース・認定実習併用職業訓練）',
+                'jinzai-kaihatsu_jinzai-ikusei_yuki': '人材開発支援助成金専門エージェント（人材育成支援コース・有期実習型訓練）',
+                'jinzai-kaihatsu_kyoiku-kyuka': '人材開発支援助成金専門エージェント（教育訓練休暇等付与コース）',
+                'jinzai-kaihatsu_toushi_teigaku': '人材開発支援助成金専門エージェント（人への投資促進コース・定額制訓練）',
+                'jinzai-kaihatsu_toushi_jihatsu': '人材開発支援助成金専門エージェント（人への投資促進コース・自発的職業能力開発訓練）',
+                'jinzai-kaihatsu_toushi_digital': '人材開発支援助成金専門エージェント（人への投資促進コース・高度デジタル人材等訓練）',
+                'jinzai-kaihatsu_toushi_it': '人材開発支援助成金専門エージェント（人への投資促進コース・情報技術分野認定実習併用職業訓練）',
                 'jinzai-kaihatsu': '人材開発支援助成金専門エージェント',
                 '65sai-cho': '65歳超雇用推進助成金専門エージェント',
                 'hatarakikata': '働き方改革推進支援助成金専門エージェント',
@@ -2418,7 +2538,10 @@
                 'career-up_kyotsu': 'キャリアアップ助成金専門エージェント（賃金規定等共通化コース）',
                 'career-up_shoyo': 'キャリアアップ助成金専門エージェント（諸手当制度共通化コース）',
                 'career-up_shahoken': 'キャリアアップ助成金専門エージェント（社会保険適用時処遇改善コース）',
-                'career-up_tanshuku': 'キャリアアップ助成金専門エージェント（短時間労働者労働時間延長コース）'
+                'career-up_tanshuku': 'キャリアアップ助成金専門エージェント（短時間労働者労働時間延長コース）',
+                'jinzai-kaihatsu_jinzai-ikusei_kunren': '人材開発支援助成金専門エージェント（人材育成支援コース・人材育成訓練）',
+                'jinzai-kaihatsu_jinzai-ikusei_nintei': '人材開発支援助成金専門エージェント（人材育成支援コース・認定実習併用職業訓練）',
+                'jinzai-kaihatsu_jinzai-ikusei_yuki': '人材開発支援助成金専門エージェント（人材育成支援コース・有期実習型訓練）'
             };
             
             chatMessages.innerHTML = `
@@ -2596,7 +2719,15 @@
                     'career-up_kyotsu': 'キャリアアップ助成金専門エージェント（賃金規定等共通化コース）',
                     'career-up_shoyo': 'キャリアアップ助成金専門エージェント（諸手当制度共通化コース）',
                     'career-up_shahoken': 'キャリアアップ助成金専門エージェント（社会保険適用時処遇改善コース）',
-                    'career-up_tanshuku': 'キャリアアップ助成金専門エージェント（短時間労働者労働時間延長コース）'
+                    'career-up_tanshuku': 'キャリアアップ助成金専門エージェント（短時間労働者労働時間延長コース）',
+                'jinzai-kaihatsu_jinzai-ikusei_kunren': '人材開発支援助成金専門エージェント（人材育成支援コース・人材育成訓練）',
+                'jinzai-kaihatsu_jinzai-ikusei_nintei': '人材開発支援助成金専門エージェント（人材育成支援コース・認定実習併用職業訓練）',
+                'jinzai-kaihatsu_jinzai-ikusei_yuki': '人材開発支援助成金専門エージェント（人材育成支援コース・有期実習型訓練）',
+                'jinzai-kaihatsu_kyoiku-kyuka': '人材開発支援助成金専門エージェント（教育訓練休暇等付与コース）',
+                'jinzai-kaihatsu_toushi_teigaku': '人材開発支援助成金専門エージェント（人への投資促進コース・定額制訓練）',
+                'jinzai-kaihatsu_toushi_jihatsu': '人材開発支援助成金専門エージェント（人への投資促進コース・自発的職業能力開発訓練）',
+                'jinzai-kaihatsu_toushi_digital': '人材開発支援助成金専門エージェント（人への投資促進コース・高度デジタル人材等訓練）',
+                'jinzai-kaihatsu_toushi_it': '人材開発支援助成金専門エージェント（人への投資促進コース・情報技術分野認定実習併用職業訓練）'
                 };
                 
                 const token = await firebase.auth().currentUser.getIdToken();
