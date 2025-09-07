@@ -615,19 +615,50 @@
                     // 認証済みの場合はダッシュボードに
                     window.location.href = '/dashboard';
                 } else {
-                    // 未認証の場合は登録ページへ
-                    window.location.href = '/';
+                    // 未認証の場合は会員登録ページへ
+                    window.location.href = '/auth';
                 }
             } catch (error) {
-                // エラーの場合は登録ページへ
-                window.location.href = '/';
+                // エラーの場合は会員登録ページへ
+                window.location.href = '/auth';
             }
         }
         
         function goToExpertConsultation() {
-            // 専門家相談の場合（30分相談予約へ）
-            // TODO: 専門家相談予約ページへのリンク
-            alert('専門家相談の予約ページを準備中です');
+            // 専門家相談の場合（メールでお問い合わせ）
+            let subject = "助成金専門家相談のお問い合わせ";
+            let body = "助成金専門家相談をご希望です。\n\n";
+            
+            // 診断結果がある場合は含める
+            if (currentDiagnosisResults && currentDiagnosisResults.length > 0) {
+                body += "【診断結果】\n";
+                currentDiagnosisResults.forEach((result, index) => {
+                    body += `${index + 1}. ${result.name}\n`;
+                    body += `   支給額: ${result.amount}\n`;
+                    body += `   適用可能性: ${result.applicability}\n\n`;
+                });
+                body += "\n";
+            }
+            
+            // 会社情報がある場合は含める
+            if (savedCompanyInfo) {
+                body += "【会社情報】\n";
+                if (savedCompanyInfo.industry) body += `業種: ${savedCompanyInfo.industry}\n`;
+                if (savedCompanyInfo.totalEmployees) body += `従業員数: ${savedCompanyInfo.totalEmployees}名\n`;
+                if (savedCompanyInfo.minWage) body += `事業場内最低賃金: ${savedCompanyInfo.minWage}円\n`;
+                body += "\n";
+            }
+            
+            body += "【相談内容】\n";
+            body += "こちらに具体的な相談内容をご記入ください。\n\n";
+            body += "【連絡先】\n";
+            body += "お名前: \n";
+            body += "電話番号: \n";
+            body += "希望連絡時間: \n";
+            
+            // mailtoリンクを開く
+            const mailtoLink = `mailto:info@jyoseikin.jp?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.location.href = mailtoLink;
         }
         
         function goToConsultation() {
