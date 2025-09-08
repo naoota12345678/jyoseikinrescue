@@ -327,6 +327,25 @@
 - ファイル配置はユーザー、ファイルパス設定はClaude、内容読み込みは自動の流れを確認
 - プロンプトの基本理解（時系列・論理演算子）は全エージェントで共通継承される
 
+### 2025-09-08 stripe_subscription_id更新問題（根本的仕様問題） ⚠️
+**継続中の問題**: 
+- Stripe決済完了後、Firebase の `stripe_subscription_id` が自動更新されない
+- 手動でFirebaseに最新のStripe IDを設定する必要がある
+- webhook使用しない仕様のため、自動化されていない
+
+**発生パターン**:
+1. プラン購入/アップグレード
+2. 追加パック購入
+3. 全てのStripe決済後
+
+**解決手順**（毎回必要）:
+1. Stripeダッシュボード → サブスクリプション → 最新のActive状態のID確認
+2. Firebase Console → subscriptions コレクション → ユーザーのドキュメント
+3. `stripe_subscription_id` を手動で最新のIDに更新
+
+**根本原因**: webhook処理なし + 手動更新処理の不完全性
+**対処**: 毎回手動でID更新（自動化は別途開発が必要）
+
 ### 2025-09-08 Cloud Runデプロイ問題解決セッション ✅
 **問題**: 
 - Cloud Runで新しいデプロイが「Container import failed」エラーで失敗
