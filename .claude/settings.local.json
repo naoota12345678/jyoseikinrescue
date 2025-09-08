@@ -29,7 +29,10 @@
       "Bash(firebase deploy:*)",
       "Read(C:\\Users\\naoot\\Downloads/**)",
       "Bash(copy:*)",
-      "WebFetch(domain:shindan.jyoseikin.jp)"
+      "WebFetch(domain:shindan.jyoseikin.jp)",
+      "Read(C:\\Users\\naoot\\Downloads/**)",
+      "Bash(git rm:*)",
+      "Read(//c/Users/naoot/Downloads/**)"
     ],
     "deny": [],
     "ask": [],

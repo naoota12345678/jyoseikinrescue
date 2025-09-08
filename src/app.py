@@ -42,6 +42,11 @@ app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-here')
 def static_files(filename):
     return send_from_directory('../static', filename)
 
+# Google Search Console verification
+@app.route('/googlec5d4388883141aa9.html')
+def google_verification():
+    return send_from_directory('../static', 'googlec5d4388883141aa9.html')
+
 @app.route('/debug/test-auth', methods=['POST'])
 def debug_test_auth():
     """認証処理のテスト用エンドポイント"""
