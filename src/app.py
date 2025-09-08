@@ -830,9 +830,9 @@ def force_plan_update():
         
         # サブスクリプションプラン（session_idはStripe Subscription IDである必要がある）
         if plan_type in ['light', 'regular', 'heavy', 'basic']:
-            # manual_updateはStripe Subscription IDとして無効
-            if session_id == 'manual_update':
-                logger.error(f"Cannot use 'manual_update' as Stripe subscription ID for plan: {plan_type}")
+            # manual_updateやpack_purchaseはStripe Subscription IDとして無効
+            if session_id in ['manual_update', 'pack_purchase']:
+                logger.error(f"Cannot use '{session_id}' as Stripe subscription ID for plan: {plan_type}")
                 return jsonify({'error': 'サブスクリプションプランの更新には有効なStripe IDが必要です'}), 400
             
             success = subscription_service.upgrade_to_subscription_plan(user_id, plan_type, session_id)

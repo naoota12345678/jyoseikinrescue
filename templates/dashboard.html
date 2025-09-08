@@ -2092,6 +2092,20 @@
             try {
                 console.log(`Attempting manual plan update: ${planType}`);
                 
+                // URLパラメータからsession_idを取得
+                const urlParams = new URLSearchParams(window.location.search);
+                const sessionId = urlParams.get('session_id') || urlParams.get('payment_intent');
+                
+                if (!sessionId) {
+                    console.error('No session_id found in URL parameters for plan:', planType);
+                    // 追加パックの場合はsession_idなしでも許可
+                    if (!planType.startsWith('pack_')) {
+                        return false;
+                    }
+                }
+                
+                console.log('Using session_id:', sessionId || 'none (pack purchase)');
+                
                 const token = await currentUser.getIdToken();
                 const response = await fetch('/api/force-plan-update', {
                     method: 'POST',
@@ -2100,7 +2114,8 @@
                         'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        plan_type: planType
+                        plan_type: planType,
+                        session_id: sessionId || 'pack_purchase'
                     })
                 });
                 
