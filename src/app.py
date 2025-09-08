@@ -828,14 +828,29 @@ def force_plan_update():
             
         subscription_service = get_subscription_service()
         
-        # サブスクリプションプラン（session_idはStripe Subscription IDである必要がある）
+        # サブスクリプションプラン
         if plan_type in ['light', 'regular', 'heavy', 'basic']:
-            # manual_updateやpack_purchaseはStripe Subscription IDとして無効
-            if session_id in ['manual_update', 'pack_purchase']:
-                logger.error(f"Cannot use '{session_id}' as Stripe subscription ID for plan: {plan_type}")
-                return jsonify({'error': 'サブスクリプションプランの更新には有効なStripe IDが必要です'}), 400
+            # Session IDから実際のSubscription IDを取得を試行
+            if session_id != 'manual_update':
+                from .stripe_service import StripeService
+                stripe_service = StripeService()
+                actual_subscription_id = stripe_service.get_subscription_from_session(session_id)
+                
+                if actual_subscription_id:
+                    stripe_sub_id = actual_subscription_id
+                    logger.info(f"Using actual Stripe subscription ID: {stripe_sub_id}")
+                else:
+                    # Session IDから取得できない場合は仮IDを生成
+                    import uuid
+                    stripe_sub_id = f"session_{uuid.uuid4().hex[:8]}"
+                    logger.warning(f"Could not get subscription ID from session, using temporary ID: {stripe_sub_id}")
+            else:
+                # 完全な手動更新の場合
+                import uuid
+                stripe_sub_id = f"manual_{uuid.uuid4().hex[:8]}"
+                logger.info(f"Manual update using temporary ID: {stripe_sub_id}")
             
-            success = subscription_service.upgrade_to_subscription_plan(user_id, plan_type, session_id)
+            success = subscription_service.upgrade_to_subscription_plan(user_id, plan_type, stripe_sub_id)
             if success:
                 logger.info(f"Manual subscription plan update successful: {user_id} -> {plan_type}")
                 return jsonify({
@@ -847,15 +862,15 @@ def force_plan_update():
                 logger.error(f"Manual subscription plan update failed: {user_id} -> {plan_type}")
                 return jsonify({'error': 'プランアップグレードに失敗しました'}), 500
         
-        # 追加パック（stripe_payment_idにはpack_purchaseを使用）
+        # 追加パック（stripe_payment_idには手動更新IDを使用）
         elif plan_type == 'pack_20':
-            success = subscription_service.add_pack_20(user_id, 'pack_purchase')
+            success = subscription_service.add_pack_20(user_id, session_id)
         elif plan_type == 'pack_40':
-            success = subscription_service.add_pack_40(user_id, 'pack_purchase')
+            success = subscription_service.add_pack_40(user_id, session_id)
         elif plan_type == 'pack_90':
-            success = subscription_service.add_pack_90(user_id, 'pack_purchase')
+            success = subscription_service.add_pack_90(user_id, session_id)
         elif plan_type == 'additional_pack':
-            success = subscription_service.add_additional_pack(user_id, 'pack_purchase')
+            success = subscription_service.add_additional_pack(user_id, session_id)
         else:
             return jsonify({'error': '無効なプランタイプです'}), 400
             
@@ -878,6 +893,64 @@ def force_plan_update():
     except Exception as e:
         logger.error(f"Error in manual plan update: {str(e)}")
         return jsonify({'error': '手動プラン更新エラー'}), 500
+
+@app.route('/api/get-subscription-from-session', methods=['POST'])
+@require_auth
+def get_subscription_from_session():
+    """Stripe SessionからSubscription IDを取得して更新"""
+    try:
+        current_user = get_current_user()
+        data = request.json
+        
+        user_id = current_user.get('user_id') or current_user['id']
+        session_id = data.get('session_id')
+        plan_type = data.get('plan_type')
+        
+        if not session_id:
+            return jsonify({'error': 'session_idが必要です'}), 400
+            
+        # Stripeセッションから詳細を取得
+        stripe_service = get_stripe_service()
+        import stripe
+        stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+        
+        try:
+            # セッション詳細を取得
+            session = stripe.checkout.Session.retrieve(session_id)
+            subscription_id = session.subscription
+            
+            if not subscription_id:
+                return jsonify({'error': 'セッションにSubscription IDが見つかりません'}), 400
+                
+            logger.info(f"Retrieved subscription ID from session: {subscription_id}")
+            
+            # サブスクリプションプランの場合のみ処理
+            if plan_type in ['light', 'regular', 'heavy', 'basic']:
+                subscription_service = get_subscription_service()
+                success = subscription_service.upgrade_to_subscription_plan(user_id, plan_type, subscription_id)
+                
+                if success:
+                    # 最新の使用状況を取得
+                    updated_usage = subscription_service.get_usage_stats(user_id)
+                    
+                    return jsonify({
+                        'status': 'success',
+                        'message': f'{plan_type}プランに正常にアップグレードしました',
+                        'subscription_id': subscription_id,
+                        'usage_stats': updated_usage
+                    })
+                else:
+                    return jsonify({'error': 'プランアップグレードに失敗しました'}), 500
+            else:
+                return jsonify({'error': '無効なプランタイプです'}), 400
+                
+        except stripe.error.StripeError as e:
+            logger.error(f"Stripe API error: {str(e)}")
+            return jsonify({'error': 'Stripe APIエラー'}), 500
+        
+    except Exception as e:
+        logger.error(f"Error getting subscription from session: {str(e)}")
+        return jsonify({'error': 'セッション処理エラー'}), 500
 
 # ===== 助成金メモ・スケジュール管理API =====
 

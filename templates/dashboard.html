@@ -1391,7 +1391,7 @@
                     
                     if (planType) {
                         console.log('Processing payment success for plan:', planType);
-                        // webhook失敗に備えて手動でプラン更新を試行
+                        // 手動更新を実行
                         await attemptManualPlanUpdate(planType);
                         
                         // URLパラメータを削除
@@ -2086,7 +2086,7 @@
             }
         }
         
-        
+
         // Webhook失敗時の手動プラン更新
         async function attemptManualPlanUpdate(planType) {
             try {
@@ -2104,7 +2104,7 @@
                     }
                 }
                 
-                console.log('Using session_id:', sessionId || 'none (pack purchase)');
+                console.log('Using session_id:', sessionId || 'manual_update');
                 
                 const token = await currentUser.getIdToken();
                 const response = await fetch('/api/force-plan-update', {
@@ -2115,7 +2115,7 @@
                     },
                     body: JSON.stringify({
                         plan_type: planType,
-                        session_id: sessionId || 'pack_purchase'
+                        session_id: sessionId || 'manual_update'
                     })
                 });
                 

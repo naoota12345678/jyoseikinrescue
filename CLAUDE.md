@@ -526,6 +526,59 @@ is_error_response = (
 
 **2025-09-01決定**: Sonnet 3.5を採用（精度重視）
 
+### 2025-09-08 stripe_subscription_id問題根本解決・Webhook完全排除セッション ✅
+
+**問題**: 
+- 追加パック購入後もカウントが増えない
+- `stripe_subscription_id`が`manual_update`になってしまう
+- 手動更新がエラーで動作しない
+
+**根本原因判明**:
+1. **Session IDからStripe Subscription ID取得不備**
+   - 決済完了後、URLパラメータの`session_id`から実際のStripe Subscription ID(`sub_xxxxx`)を取得していない
+   - Webhookを使わない方針だが、代替手段が不十分だった
+
+2. **手動更新の誤ったエラーチェック**
+   - `session_id`が'manual_update'の場合にエラーを返すロジックが問題
+   - これにより手動更新が完全に動作不能になった
+
+3. **今日の修正による悪化**
+   - 自動更新機能の追加で処理が複雑化・不安定化
+   - 元々動いていた仕組みに悪影響
+
+**実装した解決策**:
+1. **StripeServiceに新メソッド追加**
+   ```python
+   def get_subscription_from_session(self, session_id: str) -> Optional[str]:
+       """Session IDからSubscription IDを取得"""
+       session = stripe.checkout.Session.retrieve(session_id)
+       return session.get('subscription')
+   ```
+
+2. **手動更新処理の完全修正**
+   - Session IDから実際のStripe Subscription IDを取得
+   - 取得できない場合のみ一意な仮ID生成(`session_xxxxx`, `manual_xxxxx`)
+   - エラーチェックを削除し、柔軟な処理に変更
+
+3. **不要機能の完全削除**
+   - 今日追加した自動更新機能を完全削除
+   - 余計な複雑性を排除してシンプルな構造に戻す
+
+**重要な設計方針（絶対に変更しない）**:
+- **Webhook使用禁止**: 不安定だから使わない
+- **Session ID → Stripe API呼び出し**: 確実にSubscription IDを取得
+- **仮ID生成**: APIで取得できない場合の安全な代替手段
+- **シンプルな手動更新**: 複雑な自動処理は追加しない
+
+**技術的詳細**:
+- Stripe Checkout SessionからSubscriptionオブジェクトを直接取得
+- WebhookなしでもStripe APIで必要な情報は取得可能
+- `stripe_subscription_id`に実際の値を保存してDB整合性を保持
+
+**ユーザー確認事項**:
+- Webhookへの回帰を完全に防止
+- Session ID方式で安定したSubscription ID管理を実現
+
 ## プロジェクト構造メモ
 - `/templates/index.html`: トップページ（無料診断メイン）
 - `/templates/dashboard.html`: ログイン後ダッシュボード

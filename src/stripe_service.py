@@ -276,6 +276,23 @@ class StripeService:
             logger.error(f"Customer retrieval error: {str(e)}")
             return None
     
+    def get_subscription_from_session(self, session_id: str) -> Optional[str]:
+        """Session IDからSubscription IDを取得"""
+        try:
+            session = stripe.checkout.Session.retrieve(session_id)
+            subscription_id = session.get('subscription')
+            
+            if subscription_id:
+                logger.info(f"Retrieved subscription ID {subscription_id} from session {session_id}")
+                return subscription_id
+            else:
+                logger.warning(f"No subscription found in session {session_id}")
+                return None
+                
+        except stripe.error.StripeError as e:
+            logger.error(f"Session retrieval error: {str(e)}")
+            return None
+    
     def verify_webhook_signature(self, payload: str, signature: str) -> bool:
         """Webhookの署名を検証"""
         try:
