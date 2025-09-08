@@ -1586,7 +1586,17 @@ def get_subscription_status():
                 import stripe
                 stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
                 
-                subscription = stripe.Subscription.retrieve(subscription_data['subscription_id'])
+                subscription_id = subscription_data['subscription_id']
+                
+                # 無効なsubscription_idをチェック
+                if not subscription_id or subscription_id in ['manual_update', 'none', '']:
+                    logger.warning(f"Invalid subscription_id: {subscription_id}")
+                    return jsonify({
+                        'has_subscription': False,
+                        'error': 'サブスクリプションIDが無効です'
+                    })
+                
+                subscription = stripe.Subscription.retrieve(subscription_id)
                 
                 # プラン名のマッピング
                 plan_names = {
@@ -1607,6 +1617,12 @@ def get_subscription_status():
                     'cancel_at_period_end': subscription.cancel_at_period_end
                 })
                 
+            except stripe.error.InvalidRequestError as e:
+                logger.error(f"Invalid Stripe subscription ID: {str(e)}")
+                return jsonify({
+                    'has_subscription': False,
+                    'error': 'サブスクリプションが見つかりません'
+                })
             except Exception as e:
                 logger.error(f"Error fetching Stripe subscription: {str(e)}")
                 # Stripeエラーでもローカル情報は返す
