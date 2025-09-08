@@ -627,8 +627,12 @@ def _create_subscription_checkout(plan_type: str):
                 return jsonify({'error': f'Stripe顧客作成エラー: {str(e)}'}), 500
         
         data = request.json
-        success_url = data.get('success_url', 'https://your-domain.com/success')
+        base_success_url = data.get('success_url', 'https://your-domain.com/success')
         cancel_url = data.get('cancel_url', 'https://your-domain.com/cancel')
+        
+        # success_urlにsession_idパラメータを追加
+        separator = '&' if '?' in base_success_url else '?'
+        success_url = f"{base_success_url}{separator}session_id={{CHECKOUT_SESSION_ID}}"
         
         # プランごとに適切なcheckout methodを呼び出し
         stripe_service = get_stripe_service()
