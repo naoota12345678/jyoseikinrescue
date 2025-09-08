@@ -32,7 +32,8 @@
       "WebFetch(domain:shindan.jyoseikin.jp)",
       "Read(C:\\Users\\naoot\\Downloads/**)",
       "Bash(git rm:*)",
-      "Read(//c/Users/naoot/Downloads/**)"
+      "Read(//c/Users/naoot/Downloads/**)",
+      "Bash(gcloud run deploy:*)"
     ],
     "deny": [],
     "ask": [],

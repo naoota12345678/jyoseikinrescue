@@ -348,7 +348,8 @@ class ClaudeService:
             'jinzai-kaihatsu_toushi_digital': ('人への投資促進コース（高度デジタル人材等訓練）', 'file/人材開発支援助成金/人への投資促進コース/0800 高度デジタル人材等訓練.txt'),
             'jinzai-kaihatsu_toushi_it': ('人への投資促進コース（情報技術分野認定実習併用職業訓練）', 'file/人材開発支援助成金/人への投資促進コース/0900 情報技術分野認定実習併用職業訓練.txt'),
             'jinzai-kaihatsu_toushi': ('人への投資促進コース', ''),
-            'jinzai-kaihatsu_reskilling': ('事業展開等リスキリング支援コース', ''),
+            'jinzai-kaihatsu_reskilling': ('事業展開等リスキリング支援コース', 'file/人材開発支援助成金/リスキリングコース/リスキリングコース_20250906_160343_AI_plain.txt'),
+            'reskilling': ('事業展開等リスキリング支援コース', 'file/人材開発支援助成金/リスキリングコース/リスキリングコース_20250906_160343_AI_plain.txt'),
             'jinzai-kaihatsu_kensetsu-nintei': ('建設労働者認定訓練コース', ''),
             'jinzai-kaihatsu_kensetsu-gino': ('建設労働者技能実習コース', ''),
             'jinzai-kaihatsu_shogai': ('障害者職業能力開発コース', '')
