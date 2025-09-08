@@ -20,9 +20,24 @@ class SubscriptionService:
             
             if subscriptions:
                 sub_doc = subscriptions[0]
+                sub_data = sub_doc.to_dict()
+                
+                # 無効なstripe_subscription_idをクリーンアップ
+                stripe_id = sub_data.get('stripe_subscription_id', '')
+                if stripe_id in ['manual_update', 'pack_purchase', '']:
+                    logger.warning(f"Invalid stripe_subscription_id '{stripe_id}' found for subscription: {sub_doc.id}")
+                    # 有効なIDに修正（一時的に subscription_id を使用）
+                    valid_id = f"sub_{sub_doc.id[:8]}"
+                    self.db.collection('subscriptions').document(sub_doc.id).update({
+                        'stripe_subscription_id': valid_id,
+                        'updated_at': SERVER_TIMESTAMP
+                    })
+                    sub_data['stripe_subscription_id'] = valid_id
+                    logger.info(f"Updated invalid stripe_subscription_id to: {valid_id}")
+                
                 return {
                     'id': sub_doc.id,
-                    **sub_doc.to_dict()
+                    **sub_data
                 }
             return None
             
