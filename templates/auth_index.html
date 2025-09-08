@@ -486,6 +486,12 @@
                     ログイン
                 </button>
                 
+                <div style="text-align: center; margin-top: 1rem;">
+                    <a href="#" onclick="showPasswordReset(); return false;" style="color: #667eea; text-decoration: underline; font-size: 14px;">
+                        パスワードをお忘れの方
+                    </a>
+                </div>
+                
                 <!-- 利用規約・プライバシーポリシー同意チェックボックス -->
                 <div style="margin: 1rem 0; padding: 0.75rem; background: #f8f9fa; border-radius: 8px; font-size: 14px;">
                     <label style="display: flex; align-items: flex-start; cursor: pointer; line-height: 1.5; flex-wrap: wrap;">
@@ -623,6 +629,29 @@
             </div>
         </div>
     </main>
+    
+    <!-- パスワードリセットモーダル -->
+    <div id="passwordResetModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 2rem; border-radius: 20px; max-width: 400px; width: 90%; margin: auto; position: relative; top: 50%; transform: translateY(-50%);">
+            <h3 style="color: #667eea; margin-bottom: 1rem;">🔐 パスワードリセット</h3>
+            <p style="color: #666; margin-bottom: 1.5rem; font-size: 14px;">登録されているメールアドレスを入力してください。パスワードリセット用のメールをお送りします。</p>
+            
+            <div class="form-group">
+                <input type="email" id="resetEmailInput" placeholder="メールアドレス" style="width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px;" />
+            </div>
+            
+            <div id="resetMessage" style="margin: 1rem 0; padding: 0.75rem; border-radius: 8px; display: none;"></div>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button onclick="sendPasswordReset()" style="flex: 1; padding: 0.75rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                    リセットメールを送信
+                </button>
+                <button onclick="closePasswordReset()" style="flex: 1; padding: 0.75rem; background: #f3f4f6; color: #666; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                    キャンセル
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // ===== Firebase 認証設定 =====
@@ -1092,6 +1121,56 @@
             }
         });
 
+        // パスワードリセット関連の関数
+        function showPasswordReset() {
+            document.getElementById('passwordResetModal').style.display = 'flex';
+            document.getElementById('resetEmailInput').value = '';
+            document.getElementById('resetMessage').style.display = 'none';
+        }
+        
+        function closePasswordReset() {
+            document.getElementById('passwordResetModal').style.display = 'none';
+        }
+        
+        async function sendPasswordReset() {
+            const email = document.getElementById('resetEmailInput').value;
+            const messageDiv = document.getElementById('resetMessage');
+            
+            if (!email) {
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#fee';
+                messageDiv.style.color = '#dc3545';
+                messageDiv.textContent = 'メールアドレスを入力してください';
+                return;
+            }
+            
+            try {
+                await auth.sendPasswordResetEmail(email);
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#d4edda';
+                messageDiv.style.color = '#155724';
+                messageDiv.textContent = 'パスワードリセット用のメールを送信しました。メールボックスをご確認ください。';
+                
+                // 3秒後にモーダルを閉じる
+                setTimeout(() => {
+                    closePasswordReset();
+                }, 3000);
+            } catch (error) {
+                console.error('パスワードリセットエラー:', error);
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#fee';
+                messageDiv.style.color = '#dc3545';
+                
+                if (error.code === 'auth/user-not-found') {
+                    messageDiv.textContent = 'このメールアドレスは登録されていません';
+                } else if (error.code === 'auth/invalid-email') {
+                    messageDiv.textContent = '有効なメールアドレスを入力してください';
+                } else {
+                    messageDiv.textContent = 'エラーが発生しました: ' + error.message;
+                }
+            }
+        }
+        
         // Enterキーで送信
         document.getElementById('userQuestion').addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
