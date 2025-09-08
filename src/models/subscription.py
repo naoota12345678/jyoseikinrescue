@@ -342,3 +342,47 @@ class SubscriptionService:
         except Exception as e:
             logger.error(f"Monthly usage reset error: {str(e)}")
             return False
+    
+    # ===== サブスクリプション解約機能 =====
+    
+    def get_subscription_info(self, user_id: str) -> Dict[str, Any]:
+        """サブスクリプション情報を取得（Stripe情報含む）"""
+        try:
+            subscription = self.get_user_subscription(user_id)
+            
+            if not subscription:
+                return None
+            
+            return {
+                'subscription_id': subscription.get('stripe_subscription_id'),
+                'plan_type': subscription.get('plan_type'),
+                'status': subscription.get('status'),
+                'user_id': user_id
+            }
+            
+        except Exception as e:
+            logger.error(f"Get subscription info error: {str(e)}")
+            return None
+    
+    def mark_subscription_cancelled(self, user_id: str) -> bool:
+        """サブスクリプションを解約済みとしてマーク"""
+        try:
+            subscription = self.get_user_subscription(user_id)
+            
+            if not subscription:
+                logger.warning(f"No subscription found for user: {user_id}")
+                return False
+            
+            # サブスクリプションを解約状態に更新
+            self.db.collection('subscriptions').document(subscription['id']).update({
+                'status': 'cancelled',
+                'cancelled_at': SERVER_TIMESTAMP,
+                'updated_at': SERVER_TIMESTAMP
+            })
+            
+            logger.info(f"Subscription marked as cancelled for user: {user_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Mark subscription cancelled error: {str(e)}")
+            return False

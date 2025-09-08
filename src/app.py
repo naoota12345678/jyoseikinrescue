@@ -1566,6 +1566,107 @@ def terms():
 def health():
     return jsonify({'status': 'healthy'})
 
+# ===== サブスクリプション管理API =====
+
+@app.route('/api/subscription-status', methods=['GET'])
+@require_auth
+def get_subscription_status():
+    """現在のサブスクリプション状況を取得"""
+    try:
+        current_user = get_current_user()
+        user_id = current_user.get('user_id') or current_user['id']
+        
+        # サブスクリプションサービスから情報を取得
+        subscription_service = get_subscription_service()
+        subscription_data = subscription_service.get_subscription_info(user_id)
+        
+        if subscription_data and subscription_data.get('subscription_id'):
+            # Stripeからサブスクリプション詳細を取得
+            try:
+                import stripe
+                stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+                
+                subscription = stripe.Subscription.retrieve(subscription_data['subscription_id'])
+                
+                # プラン名のマッピング
+                plan_names = {
+                    'light': 'ライトプラン',
+                    'regular': 'レギュラープラン', 
+                    'heavy': 'ヘビープラン'
+                }
+                
+                # 次回請求日を計算
+                from datetime import datetime
+                next_billing_date = datetime.fromtimestamp(subscription.current_period_end).strftime('%Y年%m月%d日')
+                
+                return jsonify({
+                    'has_subscription': True,
+                    'plan_name': plan_names.get(subscription_data.get('plan_type'), subscription_data.get('plan_type', 'プラン')),
+                    'next_billing_date': next_billing_date,
+                    'status': subscription.status,
+                    'cancel_at_period_end': subscription.cancel_at_period_end
+                })
+                
+            except Exception as e:
+                logger.error(f"Error fetching Stripe subscription: {str(e)}")
+                # Stripeエラーでもローカル情報は返す
+                return jsonify({
+                    'has_subscription': True,
+                    'plan_name': subscription_data.get('plan_type', 'プラン'),
+                    'next_billing_date': '取得できませんでした',
+                    'status': 'unknown'
+                })
+        else:
+            return jsonify({'has_subscription': False})
+            
+    except Exception as e:
+        logger.error(f"Error getting subscription status: {str(e)}")
+        return jsonify({'error': 'サブスクリプション情報の取得に失敗しました'}), 500
+
+@app.route('/api/cancel-subscription', methods=['POST'])
+@require_auth
+def cancel_subscription():
+    """サブスクリプションをキャンセル（期間終了時）"""
+    try:
+        current_user = get_current_user()
+        user_id = current_user.get('user_id') or current_user['id']
+        
+        # サブスクリプション情報を取得
+        subscription_service = get_subscription_service()
+        subscription_data = subscription_service.get_subscription_info(user_id)
+        
+        if not subscription_data or not subscription_data.get('subscription_id'):
+            return jsonify({'error': 'アクティブなサブスクリプションが見つかりません'}), 400
+        
+        # Stripeサブスクリプションを期間終了時キャンセルに設定
+        try:
+            import stripe
+            stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+            
+            subscription = stripe.Subscription.modify(
+                subscription_data['subscription_id'],
+                cancel_at_period_end=True
+            )
+            
+            # ローカルデータベースにキャンセル状態を記録
+            subscription_service.mark_subscription_cancelled(user_id)
+            
+            logger.info(f"Subscription cancelled for user {user_id}: {subscription_data['subscription_id']}")
+            
+            return jsonify({
+                'success': True,
+                'message': '解約手続きが完了しました。契約期間終了時にサービスが停止されます。',
+                'cancel_at_period_end': True
+            })
+            
+        except stripe.error.StripeError as e:
+            logger.error(f"Stripe cancellation error: {str(e)}")
+            return jsonify({'error': f'解約処理でエラーが発生しました: {str(e)}'}), 500
+            
+    except Exception as e:
+        logger.error(f"Error cancelling subscription: {str(e)}")
+        return jsonify({'error': '解約処理に失敗しました'}), 500
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
     app.run(host='0.0.0.0', port=port, debug=False)
