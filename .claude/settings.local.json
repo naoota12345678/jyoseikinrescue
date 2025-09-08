@@ -34,7 +34,8 @@
       "Bash(git rm:*)",
       "Read(//c/Users/naoot/Downloads/**)",
       "Bash(gcloud run deploy:*)",
-      "Bash(gcloud run services:*)"
+      "Bash(gcloud run services:*)",
+      "Bash(gcloud builds list:*)"
     ],
     "deny": [],
     "ask": [],

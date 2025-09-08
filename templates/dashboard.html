@@ -2124,18 +2124,18 @@
                 if (data.status === 'success') {
                     console.log('Manual plan update successful:', data);
                     
-                    // 追加パックの場合は即座に質問数を更新
+                    // APIレスポンスからusage_statsが返された場合は即座に更新
+                    if (data.usage_stats) {
+                        updateUserInterface(currentUser, data.usage_stats);
+                        console.log('Usage stats updated from API response:', data.usage_stats);
+                    }
+                    
+                    // 追加パックの場合は念のため再読み込み
                     if (planType.startsWith('pack_')) {
                         setTimeout(async () => {
                             await loadUserData();
                             console.log('Pack purchase data reloaded');
-                            
-                            // 追加で確実に更新
-                            setTimeout(async () => {
-                                await loadUserData();
-                                console.log('Secondary data reload for pack purchase');
-                            }, 1500);
-                        }, 500);
+                        }, 1000);
                     } else {
                         // 通常プランの場合
                         setTimeout(async () => {

@@ -861,10 +861,15 @@ def force_plan_update():
             
         if success:
             logger.info(f"Manual pack update successful: {user_id} -> {plan_type}")
+            
+            # 最新の使用状況を取得
+            updated_usage = subscription_service.get_usage_stats(user_id)
+            
             return jsonify({
                 'status': 'success',
                 'message': f'{plan_type}を追加しました',
-                'plan_type': plan_type
+                'plan_type': plan_type,
+                'usage_stats': updated_usage
             })
         else:
             logger.error(f"Manual pack update failed: {user_id} -> {plan_type}")
