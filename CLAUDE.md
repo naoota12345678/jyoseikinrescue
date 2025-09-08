@@ -327,6 +327,32 @@
 - ファイル配置はユーザー、ファイルパス設定はClaude、内容読み込みは自動の流れを確認
 - プロンプトの基本理解（時系列・論理演算子）は全エージェントで共通継承される
 
+### 2025-09-08 Cloud Runデプロイ問題解決セッション ✅
+**問題**: 
+- Cloud Runで新しいデプロイが「Container import failed」エラーで失敗
+- 複数回のデプロイ試行が全て失敗
+
+**根本原因**:
+- Cloud Runで`ANTHROPIC_API_KEY`環境変数が設定されていた
+- アプリケーションは`CLAUDE_API_KEY`を期待
+- **環境変数名の不一致**のみが問題
+
+**解決策**:
+```bash
+gcloud run services update jyoseikinrescue --region=asia-northeast1 \
+  --update-env-vars CLAUDE_API_KEY=<API_KEY> \
+  --remove-env-vars ANTHROPIC_API_KEY
+```
+
+**結果**: 
+- デプロイ即座に成功
+- サービス正常稼働
+
+**重要な教訓**: 
+- 環境変数の不一致は「Container import failed」エラーを引き起こす
+- 複雑な修正を試す前に、まず環境変数を確認すべき
+- CLAUDE.mdの環境変数設定記載に従うべきだった
+
 ### 2025-09-01 システム機能改善・最適化セッション（継続） ✅
 
 #### 1. 専門エージェント使用時のカウント減少機能追加 

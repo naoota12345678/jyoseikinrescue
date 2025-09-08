@@ -22,6 +22,7 @@ COPY file/ ./file/
 
 # 非root用のユーザーを作成
 RUN useradd --create-home --shell /bin/bash app
+RUN chown -R app:app /app
 USER app
 
 # ポートを公開

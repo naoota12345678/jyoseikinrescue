@@ -792,7 +792,7 @@ def stripe_webhook():
                 if plan_type in ['light', 'regular', 'heavy', 'basic']:
                     get_subscription_service().upgrade_to_subscription_plan(user_id, plan_type, session_id)
                 
-                # 追加パック
+                # 追加パック（session_idをstripe_payment_idとして使用）
                 elif plan_type == 'pack_20':
                     get_subscription_service().add_pack_20(user_id, session_id)
                 elif plan_type == 'pack_40':
@@ -847,15 +847,15 @@ def force_plan_update():
                 logger.error(f"Manual subscription plan update failed: {user_id} -> {plan_type}")
                 return jsonify({'error': 'プランアップグレードに失敗しました'}), 500
         
-        # 追加パック
+        # 追加パック（stripe_payment_idにはpack_purchaseを使用）
         elif plan_type == 'pack_20':
-            success = subscription_service.add_pack_20(user_id, session_id)
+            success = subscription_service.add_pack_20(user_id, 'pack_purchase')
         elif plan_type == 'pack_40':
-            success = subscription_service.add_pack_40(user_id, session_id)
+            success = subscription_service.add_pack_40(user_id, 'pack_purchase')
         elif plan_type == 'pack_90':
-            success = subscription_service.add_pack_90(user_id, session_id)
+            success = subscription_service.add_pack_90(user_id, 'pack_purchase')
         elif plan_type == 'additional_pack':
-            success = subscription_service.add_additional_pack(user_id, session_id)
+            success = subscription_service.add_additional_pack(user_id, 'pack_purchase')
         else:
             return jsonify({'error': '無効なプランタイプです'}), 400
             
