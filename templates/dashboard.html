@@ -1381,6 +1381,14 @@
                 
                 // Stripe決済後の処理
                 if (urlParams.get('payment') === 'success') {
+                    // URLパラメータをすべてログ出力
+                    console.log('=== Payment Success Debug ===');
+                    console.log('Full URL:', window.location.href);
+                    console.log('All URL params:', Array.from(urlParams.entries()));
+                    console.log('session_id:', urlParams.get('session_id'));
+                    console.log('plan:', urlParams.get('plan'));
+                    console.log('pack:', urlParams.get('pack'));
+                    
                     let planType = urlParams.get('plan');
                     const packType = urlParams.get('pack');
                     
@@ -2090,23 +2098,30 @@
         // Webhook失敗時の手動プラン更新
         async function attemptManualPlanUpdate(planType) {
             try {
-                console.log(`Attempting manual plan update: ${planType}`);
+                console.log(`=== attemptManualPlanUpdate Debug ===`);
+                console.log(`Plan type: ${planType}`);
                 
                 // URLパラメータからsession_idを取得
                 const urlParams = new URLSearchParams(window.location.search);
                 const sessionId = urlParams.get('session_id') || urlParams.get('payment_intent');
                 
+                console.log('Found session_id:', sessionId);
+                console.log('Is pack?', planType.startsWith('pack_'));
+                
                 if (!sessionId) {
                     console.error('No session_id found in URL parameters for plan:', planType);
                     // 追加パックの場合はsession_idなしでも許可
                     if (!planType.startsWith('pack_')) {
+                        console.error('Not a pack, returning false');
                         return false;
                     }
                 }
                 
-                console.log('Using session_id:', sessionId || 'manual_update');
+                console.log('Will use session_id:', sessionId || 'manual_update');
                 
                 const token = await currentUser.getIdToken();
+                console.log('Got ID token, calling /api/force-plan-update...');
+                
                 const response = await fetch('/api/force-plan-update', {
                     method: 'POST',
                     headers: {
@@ -2119,7 +2134,9 @@
                     })
                 });
                 
+                console.log('Response status:', response.status);
                 const data = await response.json();
+                console.log('Response data:', data);
                 
                 if (data.status === 'success') {
                     console.log('Manual plan update successful:', data);
@@ -2170,7 +2187,10 @@
                     setTimeout(() => infoMsg.remove(), 8000);
                 }
             } catch (error) {
-                console.error('Manual plan update error:', error);
+                console.error('=== Manual plan update ERROR ===');
+                console.error('Error details:', error);
+                console.error('Error message:', error.message);
+                console.error('Error stack:', error.stack);
                 // エラーでも決済完了の旨を通知
                 const fallbackMsg = document.createElement('div');
                 fallbackMsg.style.cssText = `

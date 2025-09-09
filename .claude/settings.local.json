@@ -36,7 +36,8 @@
       "Bash(gcloud run deploy:*)",
       "Bash(gcloud run services:*)",
       "Bash(gcloud builds list:*)",
-      "Bash(gcloud run revisions:*)"
+      "Bash(gcloud run revisions:*)",
+      "Bash(gcloud config get-value:*)"
     ],
     "deny": [],
     "ask": [],
