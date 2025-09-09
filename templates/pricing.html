@@ -524,6 +524,13 @@
                 const data = await response.json();
                 
                 if (data.status === 'success' && data.checkout_url) {
+                    // session IDをlocalStorageに保存（決済完了後に使用）
+                    if (data.session_id) {
+                        localStorage.setItem('stripe_session_id', data.session_id);
+                        localStorage.setItem('stripe_plan_type', planType);
+                        console.log('Saved session_id to localStorage:', data.session_id);
+                    }
+                    
                     // Stripe決済ページにリダイレクト
                     window.location.href = data.checkout_url;
                 } else {

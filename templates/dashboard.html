@@ -2101,20 +2101,31 @@
                 console.log(`=== attemptManualPlanUpdate Debug ===`);
                 console.log(`Plan type: ${planType}`);
                 
-                // URLパラメータからsession_idを取得
+                // URLパラメータまたはlocalStorageからsession_idを取得
                 const urlParams = new URLSearchParams(window.location.search);
-                const sessionId = urlParams.get('session_id') || urlParams.get('payment_intent');
+                let sessionId = urlParams.get('session_id') || urlParams.get('payment_intent');
                 
-                console.log('Found session_id:', sessionId);
+                // URLになければlocalStorageから取得
+                if (!sessionId) {
+                    sessionId = localStorage.getItem('stripe_session_id');
+                    console.log('Retrieved session_id from localStorage:', sessionId);
+                }
+                
+                console.log('Final session_id:', sessionId);
                 console.log('Is pack?', planType.startsWith('pack_'));
                 
                 if (!sessionId) {
-                    console.error('No session_id found in URL parameters for plan:', planType);
+                    console.error('No session_id found in URL parameters or localStorage for plan:', planType);
                     // 追加パックの場合はsession_idなしでも許可
                     if (!planType.startsWith('pack_')) {
                         console.error('Not a pack, returning false');
                         return false;
                     }
+                } else {
+                    // session_idが見つかった場合はlocalStorageをクリア
+                    localStorage.removeItem('stripe_session_id');
+                    localStorage.removeItem('stripe_plan_type');
+                    console.log('Cleared session_id from localStorage');
                 }
                 
                 console.log('Will use session_id:', sessionId || 'manual_update');
