@@ -168,7 +168,10 @@ class ClaudeService:
         # 文字列の前後の空白を削除
         agent_type = agent_type.strip()
         
-        if agent_type == 'gyoumukaizen':
+        if agent_type == 'hanntei':
+            # 助成金判定エージェント
+            return self._get_hanntei_prompt()
+        elif agent_type == 'gyoumukaizen':
             return self.business_improvement_prompt
         elif agent_type.startswith('career-up'):
             # キャリアアップ助成金のコース別対応
@@ -180,6 +183,41 @@ class ClaudeService:
             # その他のエージェントは既存のロジックを使用
             logger.warning(f"Unknown agent type: '{agent_type}', falling back to general prompt")
             return self._select_system_prompt(question)
+    
+    def _get_hanntei_prompt(self) -> str:
+        """助成金判定エージェント用のプロンプトを生成"""
+        try:
+            import os
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            
+            # 判定システムプロンプトファイルを読み込み
+            prompt_file = os.path.join(base_dir, 'file/助成金判定/判定システムプロンプト.txt')
+            database_file = os.path.join(base_dir, 'file/助成金判定/助成金データベース2025.txt')
+            
+            system_prompt = ""
+            database_content = ""
+            
+            if os.path.exists(prompt_file):
+                with open(prompt_file, 'r', encoding='utf-8') as f:
+                    system_prompt = f.read()
+            
+            if os.path.exists(database_file):
+                with open(database_file, 'r', encoding='utf-8') as f:
+                    database_content = f.read()
+            
+            # 共通プロンプトベースと組み合わせ
+            common_prompt = self._get_common_prompt_base()
+            
+            return f"""{common_prompt}
+
+{system_prompt}
+
+【2025年度助成金データベース】
+{database_content}
+"""
+        except Exception as e:
+            logger.error(f"Error loading hanntei prompt: {str(e)}")
+            return "助成金判定エージェントのファイルが読み込めませんでした。"
     
     def _get_jinzai_kaihatsu_prompt(self, course: str) -> str:
         """人材開発支援助成金の各コース用プロンプトを生成"""
@@ -868,6 +906,55 @@ class ClaudeService:
             formatted.append(f"事業目標: {company_info['business_goals']}")
         
         return "\n".join(formatted) if formatted else "企業情報が提供されていません"
+    
+    def chat_diagnosis_haiku(self, prompt: str, context: str = "") -> str:
+        """
+        無料診断専用のHaikuモデルによるチャット機能
+        低コストで高速な診断を実現
+        """
+        try:
+            # モックモードの場合
+            if self.mock_mode:
+                return f"""
+【助成金診断結果 - テストモード】
+
+{prompt}
+
+申し訳ございませんが、現在はテスト環境で動作中です。
+ANTHROPIC_API_KEYが設定されていないため、実際のAI診断は行えません。
+"""
+            
+            # Haikuモデルを使用
+            message = self.client.messages.create(
+                model="claude-3-haiku-20240307",  # Haikuモデルを指定
+                max_tokens=2000,  # トークン数を適切に調整
+                temperature=0.3,
+                system=context if context else "",
+                messages=[
+                    {
+                        "role": "user", 
+                        "content": prompt
+                    }
+                ]
+            )
+            
+            return message.content[0].text
+            
+        except Exception as e:
+            logger.error(f"Claude diagnosis (Haiku) error: {str(e)}")
+            error_str = str(e).lower()
+            
+            # 各種エラーパターンでユーザーフレンドリーなメッセージ
+            if 'rate' in error_str and 'limit' in error_str:
+                return "申し訳ございません。Claude側のサーバーが込み合っています。少し時間をおいて再度質問してください。"
+            elif 'timeout' in error_str:
+                return "申し訳ございません。応答に時間がかかりすぎています。少し時間をおいて再度質問してください。"
+            elif 'overloaded' in error_str:
+                return "申し訳ございません。Claude側のサーバーが混雑しています。しばらく時間をおいて再度お試しください。"
+            elif 'authentication' in error_str or 'api' in error_str and 'key' in error_str:
+                return "申し訳ございません。システムの認証に問題が発生しています。管理者にお問い合わせください。"
+            else:
+                return "申し訳ございません。Claude側で一時的な問題が発生している可能性があります。少し時間をおいて再度お試しください。"
     
     def chat(self, prompt: str, context: str = "") -> str:
         """

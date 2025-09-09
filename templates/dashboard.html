@@ -1179,8 +1179,14 @@
                         <span class="dropdown-arrow">▼</span>
                     </button>
                     <div id="agentDropdownMenu" class="agent-dropdown-menu" style="display: none;">
+                        <div class="agent-dropdown-item" onclick="selectIntegratedAgent('hanntei')" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold;">
+                            🤔 助成金判定エージェント
+                            <br>
+                            <span style="font-size: 0.8rem; opacity: 0.9;">あいまいなときはこちら！</span>
+                        </div>
+                        <div style="border-top: 1px solid #e5e7eb; margin: 8px 0;"></div>
                         <div class="agent-dropdown-item" onclick="selectIntegratedAgent('gyoumukaizen')">
-                            業務改善助成金専門エージェント
+                            業務改善助成金専門AIエージェント
                         </div>
                         <div class="agent-dropdown-item agent-with-courses" onclick="showCoursesForAgent('career-up')">
                             キャリアアップ助成金専門エージェント
@@ -2627,7 +2633,8 @@
             
             // エージェント名を更新
             const agentNames = {
-                'gyoumukaizen': '業務改善助成金専門エージェント',
+                'hanntei': '助成金判定エージェント',
+                'gyoumukaizen': '業務改善助成金専門AIエージェント',
                 'career-up_seishain': 'キャリアアップ助成金専門エージェント（正社員化コース）',
                 'career-up_chingin': 'キャリアアップ助成金専門エージェント（賃金規定等改定コース）',
                 'career-up_shogaisha': 'キャリアアップ助成金専門エージェント（障害者正社員化コース）',
@@ -2667,7 +2674,8 @@
         async function initializeIntegratedChatArea(agentId) {
             const chatMessages = document.getElementById('integratedChatMessages');
             const agentNames = {
-                'gyoumukaizen': '業務改善助成金専門エージェント',
+                'hanntei': '助成金判定エージェント',
+                'gyoumukaizen': '業務改善助成金専門AIエージェント',
                 'career-up_seishain': 'キャリアアップ助成金専門エージェント（正社員化コース）',
                 'career-up_chingin': 'キャリアアップ助成金専門エージェント（賃金規定等改定コース）',
                 'career-up_shogaisha': 'キャリアアップ助成金専門エージェント（障害者正社員化コース）',
@@ -2849,7 +2857,8 @@
         async function createIntegratedNewConversation(initialMessage) {
             try {
                 const agentNames = {
-                    'gyoumukaizen': '業務改善助成金専門エージェント',
+                    'hanntei': '助成金判定エージェント',
+                    'gyoumukaizen': '業務改善助成金専門AIエージェント',
                     'career-up_seishain': 'キャリアアップ助成金専門エージェント（正社員化コース）',
                     'career-up_chingin': 'キャリアアップ助成金専門エージェント（賃金規定等改定コース）',
                     'career-up_shogaisha': 'キャリアアップ助成金専門エージェント（障害者正社員化コース）',
@@ -3158,7 +3167,8 @@
                     
                     // エージェント名を表示
                     const agentNames = {
-                        'gyoumukaizen': '業務改善助成金専門エージェント',
+                        'hanntei': '助成金判定エージェント',
+                        'gyoumukaizen': '業務改善助成金専門AIエージェント',
                         'career-up_seishain': 'キャリアアップ助成金専門エージェント（正社員化コース）',
                         'career-up_chingin': 'キャリアアップ助成金専門エージェント（賃金規定等改定コース）',
                         'career-up_shogaisha': 'キャリアアップ助成金専門エージェント（障害者正社員化コース）',

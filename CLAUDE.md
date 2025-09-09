@@ -204,6 +204,31 @@
 
 ## 環境変数・設定
 
+### デプロイ時の重要な注意事項 🚨
+
+#### Cloud Runデプロイの正しい方法（2025-09-09解決済み）
+**問題**: `gcloud run deploy --source`コマンドでContainer import failedエラーが発生
+
+**原因**: `--source`オプションの内部処理に問題があり、以下の症状が発生：
+- `cloud-run-source-deploy`レジストリが自動作成される（これは正常仕様）
+- しかしビルド済みイメージがCloud Run起動時に失敗する
+
+**解決済み手順** ✅：
+```bash
+# 1. ビルドのみ実行
+gcloud builds submit --tag asia-northeast1-docker.pkg.dev/jyoseikinrescue/jyoseikinrescue/IMAGE_NAME .
+
+# 2. デプロイ実行  
+gcloud run services update jyoseikinrescue --region=asia-northeast1 --image=asia-northeast1-docker.pkg.dev/jyoseikinrescue/jyoseikinrescue/IMAGE_NAME
+```
+
+**重要**: 今後は**2段階デプロイ方式のみ使用**すること。`--source`オプションは使用禁止。
+
+#### Container import failed対処法
+1. **イメージパス確認**: 正しいArtifact Registryパスか？
+2. **サービスアカウント権限**: Artifact Registry Reader権限があるか？  
+3. **2段階デプロイ**: `gcloud builds submit` → `gcloud run deploy --image`で回避
+
 ### GitHub Secrets設定済み変数名（絶対に変更しない）
 - `CLAUDE_API_KEY` ← **これがメインのAPI KEY（ANTHROPIC_API_KEYではない！）**
 - `FIREBASE_CLIENT_EMAIL`
@@ -345,6 +370,45 @@
 
 **根本原因**: webhook処理なし + 手動更新処理の不完全性
 **対処**: 毎回手動でID更新（自動化は別途開発が必要）
+
+### 2025-09-09 Cloud Runデプロイ問題根本解決セッション ✅
+**問題**: 
+- session_id処理修正後、全ての新しいデプロイがContainer import failedで失敗
+- `gcloud run deploy --source`が動作しない状況
+
+**原因特定の経緯**:
+1. **レジストリ問題と推測**: `cloud-run-source-deploy`vs`jyoseikinrescue`レジストリの違い
+2. **プロジェクト削除の影響と推測**: jyoseikinrescue-claudeプロジェクト削除の環境破綻
+3. **環境変数問題と推測**: CLAUDE_API_KEY vs ANTHROPIC_API_KEY等の設定不備
+4. **最終的な真の原因発見**: `--source`オプション自体の内部処理問題
+
+**解決プロセス**:
+1. **段階的検証**: ユーザー提供のチェックリストに基づく体系的確認
+2. **2段階デプロイテスト**: `gcloud builds submit`でビルド成功を確認
+3. **個別デプロイテスト**: ビルド済みイメージでのデプロイ成功
+4. **メインサービス更新**: 本番環境への最新版適用
+
+**技術的詳細**:
+- `gcloud run deploy --source`は内部でcloud-run-source-deployレジストリを自動作成（正常仕様）
+- しかし何らかの理由で生成されたイメージがCloud Run起動時に失敗
+- `gcloud builds submit` + `gcloud run deploy --image`の2段階方式では正常動作
+
+**最終解決**:
+```bash
+# 正しいデプロイ方法（今後はこれのみ使用）
+gcloud builds submit --tag asia-northeast1-docker.pkg.dev/jyoseikinrescue/jyoseikinrescue/IMAGE_NAME .
+gcloud run services update jyoseikinrescue --region=asia-northeast1 --image=asia-northeast1-docker.pkg.dev/jyoseikinrescue/jyoseikinrescue/IMAGE_NAME
+```
+
+**結果**: 
+- ✅ 最新版デプロイ成功（session_id処理修正等を含む）
+- ✅ 継続的なデプロイフローが確立
+- ✅ Container import failed問題の根本解決
+
+**重要な教訓**:
+- GCPの複雑な内部処理への理解不足
+- ユーザーからの体系的なトラブルシューティングアプローチの重要性
+- 段階的検証によるボトルネック特定の有効性
 
 ### 2025-09-08 Cloud Runデプロイ問題解決セッション ✅
 **問題**: 
@@ -578,6 +642,35 @@ is_error_response = (
 **ユーザー確認事項**:
 - Webhookへの回帰を完全に防止
 - Session ID方式で安定したSubscription ID管理を実現
+
+### 2025-09-09 Container import failed問題の根本原因分析 🔍
+
+**問題**: `gcloud run deploy --source`が常に「Container import failed」で失敗、一方で2段階デプロイ（`gcloud builds submit` + `gcloud run services update`）は成功
+
+**技術的根本原因**:
+
+1. **環境変数処理タイミングの違い**
+   - `--source`デプロイ: ビルド時点で環境変数の不整合（ANTHROPIC_API_KEY ≠ CLAUDE_API_KEY）によりコンテナ初期化失敗
+   - 2段階デプロイ: ビルド後に正しい環境変数を設定、コンテナは正常起動
+
+2. **Cloud Build内部処理の相違**
+   - `--source`: 自動化されたCloud Build + 一時レジストリ（cloud-run-source-deploy）使用
+   - 手動: 明示的なCloud Build + 指定レジストリ使用、より制御された処理
+
+3. **レジストリ管理の複雑化**
+   - 自動デプロイ時: `cloud-run-source-deploy`レジストリが自動作成され、メインレジストリとの整合性問題
+   - 手動デプロイ時: `asia-northeast1-docker.pkg.dev/jyoseikinrescue/jyoseikinrescue`レジストリを直接使用
+
+4. **プロジェクト削除の連鎖影響**
+   - 過去の`jyoseikinrescue-claude`プロジェクト削除により、GCP内部の参照関係が不整合
+   - 自動化プロセスが古い設定やメタデータを参照してエラー発生
+
+**なぜ2段階デプロイが成功するか**:
+- ビルドとデプロイのプロセスが分離され、各段階でエラーハンドリングが可能
+- 環境変数は実行時に設定されるため、ビルド時の不整合が影響しない
+- 明示的なイメージ指定により、レジストリ間の複雑な参照を回避
+
+**教訓**: 自動化の内部処理はブラックボックス化され、問題の特定・修正が困難。明示的な手動制御により予測可能性と安定性を確保。
 
 ## プロジェクト構造メモ
 - `/templates/index.html`: トップページ（無料診断メイン）

@@ -349,7 +349,7 @@ def joseikin_diagnosis():
 投資・改善予定: {diagnosis_data.get('investments', 'なし')}
 両立支援: {diagnosis_data.get('workLifeBalance', 'なし')}
 """
-        raw_response = get_claude_service().chat(user_question, system_prompt_with_data)
+        raw_response = get_claude_service().chat_diagnosis_haiku(user_question, system_prompt_with_data)
         
         # 強制的に改行を整理
         response = _format_diagnosis_response(raw_response)
@@ -1158,8 +1158,12 @@ def agent_chat():
         
         # エージェント情報を取得（既存のものを使用）
         agent_info = {
+            'hanntei': {
+                'name': '助成金判定エージェント',
+                'system_prompt': '助成金判定エージェントとして、企業に最適な助成金を対話形式で判定・提案します。'
+            },
             'gyoumukaizen': {
-                'name': '業務改善助成金専門エージェント',
+                'name': '業務改善助成金専門AIエージェント',
                 'system_prompt': '業務改善助成金の専門エージェントとして、最新の情報を基に正確なアドバイスを提供してください。'
             },
             'career-up_seishain': {
