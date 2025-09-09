@@ -524,11 +524,23 @@
                 const data = await response.json();
                 
                 if (data.status === 'success' && data.checkout_url) {
+                    console.log('=== Pricing localStorage Debug ===');
+                    console.log('API response data:', data);
+                    console.log('session_id from API:', data.session_id);
+                    
                     // session IDをlocalStorageに保存（決済完了後に使用）
                     if (data.session_id) {
+                        console.log('Attempting to save to localStorage...');
                         localStorage.setItem('stripe_session_id', data.session_id);
                         localStorage.setItem('stripe_plan_type', planType);
                         console.log('Saved session_id to localStorage:', data.session_id);
+                        console.log('Saved plan_type to localStorage:', planType);
+                        
+                        // 保存確認
+                        const saved = localStorage.getItem('stripe_session_id');
+                        console.log('Verification - retrieved from localStorage:', saved);
+                    } else {
+                        console.error('No session_id in API response!');
                     }
                     
                     // Stripe決済ページにリダイレクト

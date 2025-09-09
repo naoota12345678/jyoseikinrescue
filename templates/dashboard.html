@@ -2105,10 +2105,20 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 let sessionId = urlParams.get('session_id') || urlParams.get('payment_intent');
                 
+                console.log('=== localStorage Debug ===');
+                console.log('All localStorage items:');
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    console.log(`${key}: ${localStorage.getItem(key)}`);
+                }
+                
                 // URLになければlocalStorageから取得
                 if (!sessionId) {
                     sessionId = localStorage.getItem('stripe_session_id');
                     console.log('Retrieved session_id from localStorage:', sessionId);
+                    console.log('localStorage stripe_plan_type:', localStorage.getItem('stripe_plan_type'));
+                } else {
+                    console.log('Found session_id in URL parameters:', sessionId);
                 }
                 
                 console.log('Final session_id:', sessionId);
