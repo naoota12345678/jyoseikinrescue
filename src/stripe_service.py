@@ -147,6 +147,7 @@ class StripeService:
     def _create_subscription_checkout(self, customer_id: str, user_id: str, success_url: str, cancel_url: str, product_id: str, plan_type: str) -> Dict[str, Any]:
         """サブスクリプションチェックアウトの共通処理"""
         try:
+            # Stripeセッションを作成
             session = stripe.checkout.Session.create(
                 customer=customer_id,
                 payment_method_types=['card'],
@@ -160,7 +161,7 @@ class StripeService:
                     'quantity': 1
                 }],
                 mode='subscription',
-                success_url=success_url,
+                success_url=success_url,  # Stripeが{CHECKOUT_SESSION_ID}を自動置換
                 cancel_url=cancel_url,
                 metadata={'user_id': user_id, 'plan_type': plan_type}
             )
@@ -213,7 +214,7 @@ class StripeService:
                     'quantity': 1
                 }],
                 mode='payment',
-                success_url=success_url,
+                success_url=success_url,  # Stripeが{CHECKOUT_SESSION_ID}を自動置換
                 cancel_url=cancel_url,
                 metadata={
                     'user_id': user_id, 
