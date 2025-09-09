@@ -18,9 +18,14 @@ class SubscriptionService:
                 .order_by('created_at', direction='DESCENDING')\
                 .limit(1).get()
             
+            logger.info(f"=== DEBUG: user_id {user_id} で検索したサブスクリプション数: {len(subscriptions)}")
+            
             if subscriptions:
                 sub_doc = subscriptions[0]
                 sub_data = sub_doc.to_dict()
+                logger.info(f"=== DEBUG: 取得されたサブスクリプション: {sub_doc.id}")
+                logger.info(f"=== DEBUG: plan_type: {sub_data.get('plan_type')}, status: {sub_data.get('status')}")
+                logger.info(f"=== DEBUG: questions_limit: {sub_data.get('questions_limit')}, questions_used: {sub_data.get('questions_used')}")
                 
                 # 無効なstripe_subscription_idをクリーンアップ（一時的に無効化）
                 # stripe_id = sub_data.get('stripe_subscription_id', '')
