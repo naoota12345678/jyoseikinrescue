@@ -37,7 +37,10 @@
       "Bash(gcloud run services:*)",
       "Bash(gcloud builds list:*)",
       "Bash(gcloud run revisions:*)",
-      "Bash(gcloud config get-value:*)"
+      "Bash(gcloud config get-value:*)",
+      "Bash(gcloud container images list:*)",
+      "Bash(gcloud artifacts repositories list:*)",
+      "Bash(gcloud artifacts docker images list:*)"
     ],
     "deny": [],
     "ask": [],
