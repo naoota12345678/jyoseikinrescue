@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>助成金診断 - 助成金診断AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: linear-gradient(135deg, #e6f4ff 0%, #f0e6ff 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 1rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .logo {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 1rem;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        #diagnosisForm {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+        
+        .question {
+            margin-bottom: 2rem;
+        }
+        
+        .question h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .options {
+            display: grid;
+            gap: 0.8rem;
+        }
+        
+        .option {
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        .option:hover {
+            border-color: #667eea;
+            background: #f7f9ff;
+        }
+        
+        .option.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .option input {
+            margin-right: 0.8rem;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 1.2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        #results {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .result-item {
+            background: #f8f9ff;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .result-item h4 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .amount {
+            color: #28a745;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="/static/logo.png" alt="ロゴ" class="logo">
+            <h1>🎯 無料助成金診断（約1分）</h1>
+            <p>質問に答えるだけで、あなたの会社が受給できる助成金がわかります</p>
+        </div>
+        
+        <form id="diagnosisForm">
+            <div class="question">
+                <h3>1. 会社の業種</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 'industry', 'manufacturing')">
+                        <input type="radio" name="industry" value="manufacturing"> 製造業
+                    </div>
+                    <div class="option" onclick="selectOption(this, 'industry', 'service')">
+                        <input type="radio" name="industry" value="service"> サービス業
+                    </div>
+                    <div class="option" onclick="selectOption(this, 'industry', 'retail')">
+                        <input type="radio" name="industry" value="retail"> 小売業・飲食業
+                    </div>
+                    <div class="option" onclick="selectOption(this, 'industry', 'construction')">
+                        <input type="radio" name="industry" value="construction"> 建設業
+                    </div>
+                    <div class="option" onclick="selectOption(this, 'industry', 'it')">
+                        <input type="radio" name="industry" value="it"> IT・情報通信業
+                    </div>
+                    <div class="option" onclick="selectOption(this, 'industry', 'other')">
+                        <input type="radio" name="industry" value="other"> その他
+                    </div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <h3>2. 従業員数</h3>
+                <div class="options">
+                    <div class="option" onclick="selectOption(this, 'employees', '1-5')">
+                        <input type="radio" name="employees" value="1-5"> 1～5人
+                    </div>
+                    <div class="option" onclick="selectOption(this, 'employees', '6-20')">
+                        <input type="radio" name="employees" value="6-20"> 6～20人
+                    </div>
+                    <div class="option" onclick="selectOption(this, 'employees', '21-50')">
+                        <input type="radio" name="employees" value="21-50"> 21～50人
+                    </div>
+                    <div class="option" onclick="selectOption(this, 'employees', '51-100')">
+                        <input type="radio" name="employees" value="51-100"> 51～100人
+                    </div>
+                    <div class="option" onclick="selectOption(this, 'employees', '101+')">
+                        <input type="radio" name="employees" value="101+"> 101人以上
+                    </div>
+                </div>
+            </div>
+            
+            <div class="question">
+                <h3>3. 現在の課題（複数選択可）</h3>
+                <div class="options">
+                    <div class="option" onclick="selectMultiple(this, 'goals')">
+                        <input type="checkbox" name="goals" value="wage"> 賃金を上げたい
+                    </div>
+                    <div class="option" onclick="selectMultiple(this, 'goals')">
+                        <input type="checkbox" name="goals" value="employment"> 正社員を増やしたい
+                    </div>
+                    <div class="option" onclick="selectMultiple(this, 'goals')">
+                        <input type="checkbox" name="goals" value="equipment"> 設備投資したい
+                    </div>
+                    <div class="option" onclick="selectMultiple(this, 'goals')">
+                        <input type="checkbox" name="goals" value="productivity"> 生産性を向上させたい
+                    </div>
+                    <div class="option" onclick="selectMultiple(this, 'goals')">
+                        <input type="checkbox" name="goals" value="training"> 人材育成をしたい
+                    </div>
+                </div>
+            </div>
+            
+            <button type="button" onclick="submitDiagnosis()" class="submit-btn">
+                診断結果を見る
+            </button>
+        </form>
+        
+        <div id="results"></div>
+    </div>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    
+    <script>
+        // Firebase設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5O19Sj91HuMBPuLwqrJOaGMzW2OGVzxE",
+            authDomain: "jyoseikinrescue.firebaseapp.com",
+            projectId: "jyoseikinrescue",
+            storageBucket: "jyoseikinrescue.appspot.com",
+            messagingSenderId: "453016168690",
+            appId: "1:453016168690:web:09bf99bb92a0e4f8af0d5e"
+        };
+        
+        // Firebase初期化
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        function selectOption(element, name, value) {
+            document.querySelectorAll(`input[name="${name}"]`).forEach(input => {
+                input.parentElement.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            element.querySelector('input').checked = true;
+        }
+        
+        function selectMultiple(element, name) {
+            element.classList.toggle('selected');
+            element.querySelector('input').checked = !element.querySelector('input').checked;
+        }
+        
+        async function submitDiagnosis() {
+            const form = document.getElementById('diagnosisForm');
+            const submitBtn = form.querySelector('.submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '診断中...';
+            
+            const industry = document.querySelector('input[name="industry"]:checked')?.value || '';
+            const employees = document.querySelector('input[name="employees"]:checked')?.value || '';
+            const goals = Array.from(document.querySelectorAll('input[name="goals"]:checked')).map(cb => cb.value);
+            
+            const data = {
+                industry: industry,
+                employees: employees,
+                goals: goals
+            };
+            
+            // 診断結果をsessionStorageに保存
+            sessionStorage.setItem('diagnosisData', JSON.stringify(data));
+            
+            try {
+                const response = await fetch('/api/diagnosis', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                displayResults(result);
+            } catch (error) {
+                console.error('診断エラー:', error);
+                alert('診断中にエラーが発生しました。もう一度お試しください。');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '診断結果を見る';
+            }
+        }
+        
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            const results = data.results || [];
+            
+            resultsDiv.innerHTML = `
+                <h2 style="color: #333; text-align: center;">✨ あなたの会社が受給できる可能性のある助成金</h2>
+                ${results.map(result => `
+                    <div class="result-item">
+                        <h4>${result.name}</h4>
+                        <div style="white-space: pre-line;">${result.description}</div>
+                        <p class="amount">💰 支給額: ${result.amount}</p>
+                        <p><strong>対象要件:</strong> ${result.eligibility}</p>
+                    </div>
+                `).join('')}
+                
+                <!-- 会員登録フォーム（診断結果表示と同時に自動表示） -->
+                <div style="margin-top: 2rem; padding: 2rem; background: #f8f9ff; border-radius: 12px; border: 2px solid #667eea;">
+                    <h3 style="color: #333; text-align: center; margin-bottom: 1.5rem;">🚀 無料会員登録</h3>
+                    <p style="text-align: center; color: #666; margin-bottom: 2rem;">診断結果を保存して5回無料で専門エージェントが使えます</p>
+                    
+                    <form id="registrationForm" style="max-width: 400px; margin: 0 auto;">
+                        <div style="margin-bottom: 1rem;">
+                            <input type="email" id="regEmail" required placeholder="メールアドレス" 
+                                   style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <input type="password" id="regPassword" required placeholder="パスワード（6文字以上）" 
+                                   style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                        </div>
+                        <div style="margin-bottom: 1.5rem;">
+                            <input type="password" id="regPasswordConfirm" required placeholder="パスワード（確認）" 
+                                   style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                        </div>
+                        
+                        <button type="submit" style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 1.1rem; margin-bottom: 1rem;">
+                            ✨ 登録して専門エージェントを使う
+                        </button>
+                        
+                        <p style="text-align: center; font-size: 0.8rem; color: #666;">
+                            すでにアカウントをお持ちの場合は<br>
+                            <a href="#" onclick="showLoginForm()" style="color: #667eea; text-decoration: underline;">こちらからログイン</a>
+                        </p>
+                    </form>
+                </div>
+                
+                <!-- ログインフォーム -->
+                <div id="loginForm" style="display: none; margin-top: 2rem; padding: 2rem; background: #fff3cd; border-radius: 12px; border: 2px solid #ffc107;">
+                    <h3 style="color: #333; text-align: center; margin-bottom: 1.5rem;">🔐 ログイン</h3>
+                    
+                    <form id="loginFormElement" style="max-width: 400px; margin: 0 auto;">
+                        <div style="margin-bottom: 1rem;">
+                            <input type="email" id="loginEmail" required placeholder="メールアドレス" 
+                                   style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                        </div>
+                        <div style="margin-bottom: 1.5rem;">
+                            <input type="password" id="loginPassword" required placeholder="パスワード" 
+                                   style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                        </div>
+                        
+                        <button type="submit" style="width: 100%; background: linear-gradient(135deg, #ffc107 0%, #ff8500 100%); color: white; padding: 1rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 1.1rem; margin-bottom: 1rem;">
+                            🚪 ログインしてダッシュボードへ
+                        </button>
+                        
+                        <p style="text-align: center; font-size: 0.8rem; color: #666;">
+                            アカウントをお持ちでない場合は<br>
+                            <a href="#" onclick="showRegistrationForm()" style="color: #ffc107; text-decoration: underline;">こちらから無料登録</a>
+                        </p>
+                    </form>
+                </div>
+            `;
+            
+            resultsDiv.style.display = 'block';
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+            
+            // フォーム送信処理を設定
+            setupFormHandlers();
+        }
+        
+        function showLoginForm() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.querySelector('#results > div:first-of-type').style.display = 'none';
+        }
+        
+        function showRegistrationForm() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.querySelector('#results > div:first-of-type').style.display = 'block';
+        }
+        
+        function setupFormHandlers() {
+            // 会員登録フォームの処理
+            const regForm = document.getElementById('registrationForm');
+            if (regForm) {
+                regForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const email = document.getElementById('regEmail').value;
+                    const password = document.getElementById('regPassword').value;
+                    const passwordConfirm = document.getElementById('regPasswordConfirm').value;
+                    
+                    if (password !== passwordConfirm) {
+                        alert('パスワードが一致しません');
+                        return;
+                    }
+                    
+                    if (password.length < 6) {
+                        alert('パスワードは6文字以上で入力してください');
+                        return;
+                    }
+                    
+                    try {
+                        // Firebase Authenticationでユーザー作成
+                        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                        const user = userCredential.user;
+                        
+                        // Firestoreにユーザー情報を保存
+                        await db.collection('users').doc(user.uid).set({
+                            email: email,
+                            created_at: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        
+                        // サブスクリプション情報を作成（5回無料）
+                        await db.collection('subscriptions').doc(user.uid).set({
+                            user_id: user.uid,
+                            status: 'trial',
+                            trial_usage: 0,
+                            total_trial_limit: 5,
+                            created_at: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        
+                        // 診断結果を保存
+                        const diagnosisData = JSON.parse(sessionStorage.getItem('diagnosisData') || '{}');
+                        if (diagnosisData.industry) {
+                            await db.collection('diagnosis_results').doc(user.uid).set({
+                                ...diagnosisData,
+                                user_id: user.uid,
+                                created_at: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        }
+                        
+                        // ダッシュボードへリダイレクト
+                        window.location.href = '/dashboard';
+                    } catch (error) {
+                        console.error('登録エラー:', error);
+                        if (error.code === 'auth/email-already-in-use') {
+                            alert('このメールアドレスは既に登録されています');
+                        } else {
+                            alert('登録に失敗しました: ' + error.message);
+                        }
+                    }
+                });
+            }
+            
+            // ログインフォームの処理
+            const loginForm = document.getElementById('loginFormElement');
+            if (loginForm) {
+                loginForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const email = document.getElementById('loginEmail').value;
+                    const password = document.getElementById('loginPassword').value;
+                    
+                    try {
+                        await auth.signInWithEmailAndPassword(email, password);
+                        
+                        // 診断結果を保存
+                        const user = auth.currentUser;
+                        const diagnosisData = JSON.parse(sessionStorage.getItem('diagnosisData') || '{}');
+                        if (user && diagnosisData.industry) {
+                            await db.collection('diagnosis_results').doc(user.uid).set({
+                                ...diagnosisData,
+                                user_id: user.uid,
+                                created_at: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        }
+                        
+                        // ダッシュボードへリダイレクト
+                        window.location.href = '/dashboard';
+                    } catch (error) {
+                        console.error('ログインエラー:', error);
+                        alert('ログインに失敗しました: ' + error.message);
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

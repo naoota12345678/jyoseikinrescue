@@ -172,6 +172,11 @@ def diagnosis():
     """助成金診断ページ（認証不要）"""
     return render_template('joseikin_diagnosis.html')
 
+@app.route('/diagnosis_simple')
+def diagnosis_simple():
+    """シンプルな助成金診断ページ（自動でフォーム表示）"""
+    return render_template('joseikin_diagnosis_simple.html')
+
 @app.route('/dashboard')
 def dashboard():
     """統合ダッシュボード（エージェント選択画面）"""

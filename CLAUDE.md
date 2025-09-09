@@ -229,6 +229,38 @@ gcloud run services update jyoseikinrescue --region=asia-northeast1 --image=asia
 2. **サービスアカウント権限**: Artifact Registry Reader権限があるか？  
 3. **2段階デプロイ**: `gcloud builds submit` → `gcloud run deploy --image`で回避
 
+#### 正しい2段階デプロイの流れ（重要！必ず守ること）
+
+**STEP 1: ビルド実行**
+```bash
+gcloud builds submit --tag asia-northeast1-docker.pkg.dev/jyoseikinrescue/jyoseikinrescue/IMAGE_NAME .
+```
+
+**STEP 2: ビルド結果から正確なイメージタグ取得**
+```bash
+gcloud builds list --limit=1 --format="value(images)"
+```
+または
+```bash
+gcloud builds list --limit=2
+```
+で最新のビルドのIMAGESカラムを確認
+
+**STEP 3: 確認したイメージタグでデプロイ**
+```bash
+gcloud run services update jyoseikinrescue --region=asia-northeast1 --image=EXACT_IMAGE_FROM_STEP2
+```
+
+**よくある失敗パターン**:
+- ❌ `--tag`で指定した名前をそのまま使用（タイムスタンプが異なる）
+- ❌ 推測でイメージ名を使用
+- ❌ `gcloud builds list`を確認せずにデプロイ
+
+**成功パターン**:
+- ✅ `gcloud builds list`で実際に作成されたイメージ名を確認
+- ✅ IMAGESカラムの値をそのまま使用
+- ✅ 一文字も変更せずに正確にコピー
+
 ### GitHub Secrets設定済み変数名（絶対に変更しない）
 - `CLAUDE_API_KEY` ← **これがメインのAPI KEY（ANTHROPIC_API_KEYではない！）**
 - `FIREBASE_CLIENT_EMAIL`
