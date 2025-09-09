@@ -1389,6 +1389,21 @@
                     console.log('plan:', urlParams.get('plan'));
                     console.log('pack:', urlParams.get('pack'));
                     
+                    // URLの変化を監視（session_idが後で消えるかもしれない）
+                    setTimeout(() => {
+                        console.log('=== URL Check after 1 second ===');
+                        console.log('Current URL:', window.location.href);
+                        const currentParams = new URLSearchParams(window.location.search);
+                        console.log('Current session_id:', currentParams.get('session_id'));
+                    }, 1000);
+                    
+                    setTimeout(() => {
+                        console.log('=== URL Check after 3 seconds ===');
+                        console.log('Current URL:', window.location.href);
+                        const currentParams = new URLSearchParams(window.location.search);
+                        console.log('Current session_id:', currentParams.get('session_id'));
+                    }, 3000);
+                    
                     let planType = urlParams.get('plan');
                     const packType = urlParams.get('pack');
                     
@@ -1399,10 +1414,15 @@
                     
                     if (planType) {
                         console.log('Processing payment success for plan:', planType);
-                        // 手動更新を実行
-                        await attemptManualPlanUpdate(planType);
                         
-                        // URLパラメータを削除
+                        // URLパラメータからsession_idを先に保存（削除される前に）
+                        const sessionIdFromUrl = urlParams.get('session_id');
+                        console.log('Preserving session_id from URL before deletion:', sessionIdFromUrl);
+                        
+                        // 手動更新を実行（session_idを渡す）
+                        await attemptManualPlanUpdate(planType, sessionIdFromUrl);
+                        
+                        // URLパラメータを削除（session_id取得後）
                         window.history.replaceState({}, document.title, window.location.pathname);
                         
                         // 追加パックか通常プランかで処理を変える
@@ -2096,14 +2116,15 @@
         
 
         // Webhook失敗時の手動プラン更新
-        async function attemptManualPlanUpdate(planType) {
+        async function attemptManualPlanUpdate(planType, sessionIdFromUrl = null) {
             try {
                 console.log(`=== attemptManualPlanUpdate Debug ===`);
                 console.log(`Plan type: ${planType}`);
+                console.log(`Session ID from URL parameter: ${sessionIdFromUrl}`);
                 
                 // URLパラメータまたはlocalStorageからsession_idを取得
                 const urlParams = new URLSearchParams(window.location.search);
-                let sessionId = urlParams.get('session_id') || urlParams.get('payment_intent');
+                let sessionId = sessionIdFromUrl || urlParams.get('session_id') || urlParams.get('payment_intent');
                 
                 console.log('=== localStorage Debug ===');
                 console.log('All localStorage items:');
@@ -3200,6 +3221,13 @@
         
         // ページ読み込み時の初期化
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('=== Dashboard Page Load Debug ===');
+            console.log('Initial URL:', window.location.href);
+            console.log('Initial search params:', window.location.search);
+            const initialParams = new URLSearchParams(window.location.search);
+            console.log('Initial session_id:', initialParams.get('session_id'));
+            console.log('Initial payment:', initialParams.get('payment'));
+            console.log('Initial plan:', initialParams.get('plan'));
             console.log('Dashboard initialized');
             
             // モバイルでチャット部分をタップした時にハンバーガーメニューを閉じる
