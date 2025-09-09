@@ -322,6 +322,15 @@
             const resultsDiv = document.getElementById('results');
             const results = data.results || [];
             
+            // 診断結果全体をsessionStorageに保存（入力データと結果両方）
+            const diagnosisData = JSON.parse(sessionStorage.getItem('diagnosisData') || '{}');
+            const fullDiagnosisData = {
+                ...diagnosisData,
+                results: results,
+                diagnosedAt: new Date().toISOString()
+            };
+            sessionStorage.setItem('fullDiagnosisData', JSON.stringify(fullDiagnosisData));
+            
             resultsDiv.innerHTML = `
                 <h2 style="color: #333; text-align: center;">✨ あなたの会社が受給できる可能性のある助成金</h2>
                 ${results.map(result => `
@@ -447,14 +456,28 @@
                             created_at: firebase.firestore.FieldValue.serverTimestamp()
                         });
                         
-                        // 診断結果を保存
-                        const diagnosisData = JSON.parse(sessionStorage.getItem('diagnosisData') || '{}');
-                        if (diagnosisData.industry) {
+                        // 診断結果（入力データ＋AIの結果）を保存
+                        const fullDiagnosisData = JSON.parse(sessionStorage.getItem('fullDiagnosisData') || '{}');
+                        if (fullDiagnosisData.industry && fullDiagnosisData.results) {
                             await db.collection('diagnosis_results').doc(user.uid).set({
-                                ...diagnosisData,
+                                ...fullDiagnosisData,
                                 user_id: user.uid,
                                 created_at: firebase.firestore.FieldValue.serverTimestamp()
                             });
+                            
+                            // メモにも自動保存
+                            if (fullDiagnosisData.results.length > 0) {
+                                const memoContent = fullDiagnosisData.results.map(r => 
+                                    `【${r.name}】\n${r.description}\n支給額: ${r.amount}\n`
+                                ).join('\n---\n');
+                                
+                                await db.collection('memos').add({
+                                    user_id: user.uid,
+                                    content: memoContent,
+                                    title: '診断結果: ' + new Date().toLocaleDateString('ja-JP'),
+                                    created_at: firebase.firestore.FieldValue.serverTimestamp()
+                                });
+                            }
                         }
                         
                         // ダッシュボードへリダイレクト
@@ -482,15 +505,29 @@
                     try {
                         await auth.signInWithEmailAndPassword(email, password);
                         
-                        // 診断結果を保存
+                        // 診断結果（入力データ＋AIの結果）を保存
                         const user = auth.currentUser;
-                        const diagnosisData = JSON.parse(sessionStorage.getItem('diagnosisData') || '{}');
-                        if (user && diagnosisData.industry) {
+                        const fullDiagnosisData = JSON.parse(sessionStorage.getItem('fullDiagnosisData') || '{}');
+                        if (user && fullDiagnosisData.industry && fullDiagnosisData.results) {
                             await db.collection('diagnosis_results').doc(user.uid).set({
-                                ...diagnosisData,
+                                ...fullDiagnosisData,
                                 user_id: user.uid,
                                 created_at: firebase.firestore.FieldValue.serverTimestamp()
                             });
+                            
+                            // メモにも自動保存
+                            if (fullDiagnosisData.results.length > 0) {
+                                const memoContent = fullDiagnosisData.results.map(r => 
+                                    `【${r.name}】\n${r.description}\n支給額: ${r.amount}\n`
+                                ).join('\n---\n');
+                                
+                                await db.collection('memos').add({
+                                    user_id: user.uid,
+                                    content: memoContent,
+                                    title: '診断結果: ' + new Date().toLocaleDateString('ja-JP'),
+                                    created_at: firebase.firestore.FieldValue.serverTimestamp()
+                                });
+                            }
                         }
                         
                         // ダッシュボードへリダイレクト
