@@ -559,10 +559,10 @@
                         <h3 style="color: #333; margin: 1.5rem 0;">次のステップをお選びください</h3>
                         
                         <div style="margin-bottom: 1.5rem;">
-                            <button onclick="saveDiagnosisAndRegister()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 1rem 2rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);">
-                                📝 無料お試し専門AI相談を始める（5回無料）
+                            <button onclick="showRegistrationForm()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 1rem 2rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);">
+                                🎯 無料で会員登録
                             </button>
-                            <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">※ 診断結果が保存され、AI相談を開始できます</p>
+                            <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">※ 5回無料で専門エージェントが使える</p>
                         </div>
                         
                         <div style="margin-bottom: 1.5rem;" id="saveToMemoSection" style="display: none;">
@@ -594,12 +594,171 @@
                             ※ AIエージェントは各助成金の詳細な要件・申請方法を即座に回答します<br>
                             ※ 複雑な組み合わせ申請は専門家サポートがお勧めです
                         </p>
+                        
+                        <!-- 会員登録フォーム -->
+                        <div id="registrationForm" style="display: none; margin-top: 2rem; padding: 2rem; background: #f8f9ff; border-radius: 12px; border: 2px solid #667eea;">
+                            <h3 style="color: #333; text-align: center; margin-bottom: 1.5rem;">🚀 無料会員登録</h3>
+                            <p style="text-align: center; color: #666; margin-bottom: 2rem;">診断結果を保存して5回無料で専門エージェントが使えます</p>
+                            
+                            <form id="diagnosisRegistrationForm" style="max-width: 400px; margin: 0 auto;">
+                                <div style="margin-bottom: 1rem;">
+                                    <input type="email" id="regEmail" required placeholder="メールアドレス" 
+                                           style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                                </div>
+                                <div style="margin-bottom: 1rem;">
+                                    <input type="password" id="regPassword" required placeholder="パスワード（6文字以上）" 
+                                           style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                                </div>
+                                <div style="margin-bottom: 1.5rem;">
+                                    <input type="password" id="regPasswordConfirm" required placeholder="パスワード（確認）" 
+                                           style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                                </div>
+                                
+                                <button type="submit" style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 1.1rem; margin-bottom: 1rem;">
+                                    ✨ 登録して専門エージェントを使う
+                                </button>
+                                
+                                <p style="text-align: center; font-size: 0.8rem; color: #666;">
+                                    すでにアカウントをお持ちの場合は<br>
+                                    <a href="#" onclick="showLoginForm()" style="color: #667eea; text-decoration: underline;">こちらからログイン</a>
+                                </p>
+                            </form>
+                        </div>
+                        
+                        <!-- ログインフォーム -->
+                        <div id="loginForm" style="display: none; margin-top: 2rem; padding: 2rem; background: #fff3cd; border-radius: 12px; border: 2px solid #ffc107;">
+                            <h3 style="color: #333; text-align: center; margin-bottom: 1.5rem;">🔐 ログイン</h3>
+                            
+                            <form id="diagnosisLoginForm" style="max-width: 400px; margin: 0 auto;">
+                                <div style="margin-bottom: 1rem;">
+                                    <input type="email" id="loginEmail" required placeholder="メールアドレス" 
+                                           style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                                </div>
+                                <div style="margin-bottom: 1.5rem;">
+                                    <input type="password" id="loginPassword" required placeholder="パスワード" 
+                                           style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                                </div>
+                                
+                                <button type="submit" style="width: 100%; background: linear-gradient(135deg, #ffc107 0%, #ff8500 100%); color: white; padding: 1rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 1.1rem; margin-bottom: 1rem;">
+                                    🚪 ログインしてダッシュボードへ
+                                </button>
+                                
+                                <p style="text-align: center; font-size: 0.8rem; color: #666;">
+                                    アカウントをお持ちでない場合は<br>
+                                    <a href="#" onclick="showRegistrationForm()" style="color: #ffc107; text-decoration: underline;">こちらから無料登録</a>
+                                </p>
+                            </form>
+                        </div>
                     </div>
                 `;
             }
             
             resultsDiv.style.display = 'block';
             resultsDiv.scrollIntoView({ behavior: 'smooth' });
+            
+            // フォーム送信処理を追加
+            setupFormHandlers();
+        }
+        
+        function setupFormHandlers() {
+            // 会員登録フォームの処理
+            const regForm = document.getElementById('diagnosisRegistrationForm');
+            if (regForm && !regForm.dataset.handlerAdded) {
+                regForm.dataset.handlerAdded = 'true';
+                regForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const email = document.getElementById('regEmail').value;
+                    const password = document.getElementById('regPassword').value;
+                    const passwordConfirm = document.getElementById('regPasswordConfirm').value;
+                    
+                    if (password !== passwordConfirm) {
+                        alert('パスワードが一致しません。');
+                        return;
+                    }
+                    
+                    if (password.length < 6) {
+                        alert('パスワードは6文字以上で入力してください。');
+                        return;
+                    }
+                    
+                    try {
+                        // Firebase Authentication で会員登録
+                        const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                        
+                        // 診断結果をアカウントに紐付けて保存
+                        await saveDiagnosisResultsForUser(userCredential.user.uid);
+                        
+                        alert('会員登録が完了しました！ダッシュボードに移動します。');
+                        window.location.href = '/dashboard';
+                        
+                    } catch (error) {
+                        console.error('Registration error:', error);
+                        alert('会員登録に失敗しました: ' + error.message);
+                    }
+                });
+            }
+            
+            // ログインフォームの処理
+            const loginForm = document.getElementById('diagnosisLoginForm');
+            if (loginForm && !loginForm.dataset.handlerAdded) {
+                loginForm.dataset.handlerAdded = 'true';
+                loginForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const email = document.getElementById('loginEmail').value;
+                    const password = document.getElementById('loginPassword').value;
+                    
+                    try {
+                        // Firebase Authentication でログイン
+                        const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+                        
+                        // 診断結果をアカウントに紐付けて保存
+                        await saveDiagnosisResultsForUser(userCredential.user.uid);
+                        
+                        alert('ログインしました！ダッシュボードに移動します。');
+                        window.location.href = '/dashboard';
+                        
+                    } catch (error) {
+                        console.error('Login error:', error);
+                        alert('ログインに失敗しました: ' + error.message);
+                    }
+                });
+            }
+        }
+        
+        // 診断結果をログインユーザーのアカウントに保存
+        async function saveDiagnosisResultsForUser(userId) {
+            const sessionData = sessionStorage.getItem('pendingDiagnosisResults');
+            if (!sessionData) return;
+            
+            try {
+                const diagnosisData = JSON.parse(sessionData);
+                
+                // 診断結果をサーバーに保存
+                const token = await firebase.auth().currentUser.getIdToken();
+                const response = await fetch('/api/diagnosis/save-temp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        results: diagnosisData.results,
+                        companyInfo: diagnosisData.companyInfo
+                    })
+                });
+                
+                if (response.ok) {
+                    // セッションデータをクリア
+                    sessionStorage.removeItem('pendingDiagnosisResults');
+                    console.log('診断結果をアカウントに保存しました');
+                } else {
+                    console.error('診断結果の保存に失敗しました');
+                }
+            } catch (error) {
+                console.error('診断結果保存エラー:', error);
+            }
         }
 
         async function goToAIConsultation() {
@@ -699,6 +858,43 @@
             });
         }
         
+        // 診断結果ページ内の会員登録フォーム表示
+        function showRegistrationForm() {
+            // 診断結果をsessionStorageに保存
+            saveDiagnosisToSession();
+            
+            // 登録フォームを表示
+            document.getElementById('registrationForm').style.display = 'block';
+            document.getElementById('loginForm').style.display = 'none';
+            
+            // フォームまでスクロール
+            document.getElementById('registrationForm').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function showLoginForm() {
+            // 診断結果をsessionStorageに保存
+            saveDiagnosisToSession();
+            
+            // ログインフォームを表示
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registrationForm').style.display = 'none';
+            
+            // フォームまでスクロール
+            document.getElementById('loginForm').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function saveDiagnosisToSession() {
+            if (currentDiagnosisResults) {
+                const diagnosisData = {
+                    results: currentDiagnosisResults,
+                    companyInfo: getCurrentCompanyInfo(),
+                    timestamp: new Date().toISOString()
+                };
+                sessionStorage.setItem('pendingDiagnosisResults', JSON.stringify(diagnosisData));
+                console.log('診断結果をsessionStorageに保存しました');
+            }
+        }
+
         async function saveDiagnosisAndRegister() {
             // 診断結果を自動保存（localStorageに保存）
             if (currentDiagnosisResults) {
