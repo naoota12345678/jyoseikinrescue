@@ -860,15 +860,34 @@
         
         // 診断結果ページ内の会員登録フォーム表示
         function showRegistrationForm() {
+            console.log('showRegistrationForm called'); // デバッグ用ログ
+            
             // 診断結果をsessionStorageに保存
             saveDiagnosisToSession();
             
-            // 登録フォームを表示
-            document.getElementById('registrationForm').style.display = 'block';
-            document.getElementById('loginForm').style.display = 'none';
+            // フォーム要素を取得
+            const regForm = document.getElementById('registrationForm');
+            const loginForm = document.getElementById('loginForm');
             
-            // フォームまでスクロール
-            document.getElementById('registrationForm').scrollIntoView({ behavior: 'smooth' });
+            console.log('Registration form element:', regForm); // デバッグ用ログ
+            console.log('Login form element:', loginForm); // デバッグ用ログ
+            
+            if (regForm) {
+                // 登録フォームを表示
+                regForm.style.display = 'block';
+                console.log('Registration form displayed'); // デバッグ用ログ
+                
+                // ログインフォームを非表示
+                if (loginForm) {
+                    loginForm.style.display = 'none';
+                }
+                
+                // フォームまでスクロール
+                regForm.scrollIntoView({ behavior: 'smooth' });
+                console.log('Scrolled to registration form'); // デバッグ用ログ
+            } else {
+                console.error('Registration form not found!'); // エラーログ
+            }
         }
         
         function showLoginForm() {
