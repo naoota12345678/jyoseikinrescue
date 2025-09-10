@@ -648,7 +648,6 @@
                         // 診断結果をアカウントに紐付けて保存
                         await saveDiagnosisResultsForUser(userCredential.user.uid);
                         
-                        alert('会員登録が完了しました！ダッシュボードに移動します。');
                         window.location.href = '/dashboard';
                         
                     } catch (error) {
@@ -675,7 +674,6 @@
                         // 診断結果をアカウントに紐付けて保存
                         await saveDiagnosisResultsForUser(userCredential.user.uid);
                         
-                        alert('ログインしました！ダッシュボードに移動します。');
                         window.location.href = '/dashboard';
                         
                     } catch (error) {
