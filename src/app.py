@@ -332,7 +332,7 @@ def joseikin_diagnosis():
 ・提供されたデータベースの情報のみを使用してください
 ・学習データは一切使用しないでください
 ・「詳細は厚生労働省にお問い合わせください」は絶対に使用しないでください
-・最後に必ず「🚀 助成金レスキューで専門サポートを受けましょう！各専門AIエージェントがさらに詳しくお答えします。」で締めくくってください"""
+・最後に必ず「🚀 助成金レスキューで専門AIエージェントで申請しましょう」で締めくくってください"""
         
         # システムプロンプトに知識ベースを追加
         system_prompt_with_data = f"{system_prompt}\n\n【2025年度助成金データベース】\n{joseikin_knowledge}"
@@ -363,11 +363,7 @@ def joseikin_diagnosis():
         # レスポンスを構造化
         applicable_grants = [{
             'name': 'AI診断結果',
-            'description': response,
-            'amount': '上記診断結果をご確認ください',
-            'eligibility': '詳細な適用要件は診断結果に記載',
-            'specialist': '該当する専門エージェント',
-            'probability': 'AI判定済み'
+            'description': response
         }]
         
         return jsonify({
