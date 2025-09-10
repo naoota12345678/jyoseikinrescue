@@ -452,15 +452,12 @@
         }
 
         .agent-subcourses-menu {
-            position: absolute;
-            top: 0;
-            left: calc(100% + 8px);
+            position: fixed;
             background: white;
             border: 1px solid #e5e7eb;
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             z-index: 1010;
-            overflow: visible;
             min-width: 220px;
             max-height: 300px;
             overflow-y: auto;
@@ -2543,15 +2540,34 @@
             
             if (courseId === 'jinzai-kaihatsu_jinzai-ikusei') {
                 const subcoursesMenu = document.getElementById('jinzaiIkuseiSubcoursesMenu');
-                console.log('人材育成支援コースのサブメニュー:', subcoursesMenu);
-                if (subcoursesMenu) {
+                const parentMenu = document.getElementById('jinzaiKaihatsuCoursesMenu');
+                if (subcoursesMenu && parentMenu) {
+                    const rect = parentMenu.getBoundingClientRect();
                     subcoursesMenu.style.display = 'block';
-                    console.log('人材育成支援コースのサブメニューを表示');
+                    subcoursesMenu.style.top = rect.top + 'px';
+                    subcoursesMenu.style.left = (rect.right + 8) + 'px';
                 }
             } else if (courseId === 'jinzai-kaihatsu_toushi') {
                 const subcoursesMenu = document.getElementById('jinzaiToushiSubcoursesMenu');
-                if (subcoursesMenu) {
+                const parentMenu = document.getElementById('jinzaiKaihatsuCoursesMenu');
+                console.log('人への投資促進コース - subcoursesMenu:', subcoursesMenu);
+                console.log('人への投資促進コース - parentMenu:', parentMenu);
+                
+                if (subcoursesMenu && parentMenu) {
+                    const rect = parentMenu.getBoundingClientRect();
+                    console.log('親メニュー位置:', rect);
+                    
                     subcoursesMenu.style.display = 'block';
+                    subcoursesMenu.style.top = rect.top + 'px';
+                    subcoursesMenu.style.left = (rect.right + 8) + 'px';
+                    
+                    console.log('サブメニュー設定:', {
+                        display: subcoursesMenu.style.display,
+                        top: subcoursesMenu.style.top,
+                        left: subcoursesMenu.style.left
+                    });
+                } else {
+                    console.error('サブメニューまたは親メニューが見つかりません');
                 }
             }
         }
