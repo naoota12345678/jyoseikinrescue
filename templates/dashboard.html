@@ -212,28 +212,24 @@
 
         /* ローディング表示スタイル */
         .thinking-message {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 18px;
+            background: none;
+            color: #667eea;
+            padding: 1rem 0;
             margin: 0.5rem 0;
             max-width: 80%;
             align-self: flex-start;
-            position: relative;
-            animation: thinking-pulse 1.5s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            font-weight: 500;
         }
 
         .thinking-spinner {
             display: inline-block;
-            margin-right: 8px;
+            margin-right: 12px;
             vertical-align: middle;
-            font-size: 20px;
+            font-size: 40px;
             animation: thinking-blink 1.5s ease-in-out infinite;
-        }
-
-        @keyframes thinking-pulse {
-            0%, 100% { opacity: 0.8; }
-            50% { opacity: 1; }
         }
 
         @keyframes thinking-blink {
