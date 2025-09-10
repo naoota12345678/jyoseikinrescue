@@ -2413,6 +2413,7 @@
                 hideAllCoursesMenus();
             }
         }
+        
 
         // ドキュメント全体のクリックイベントを監視
         document.addEventListener('click', function(event) {
@@ -2532,9 +2533,13 @@
         function showSubcoursesForCourse(courseId) {
             console.log('showSubcoursesForCourse called with:', courseId);
             
-            // まず全てのサブメニューを隠す
-            document.getElementById('jinzaiIkuseiSubcoursesMenu').style.display = 'none';
-            document.getElementById('jinzaiToushiSubcoursesMenu').style.display = 'none';
+            // 他のサブメニューを隠す
+            if (courseId !== 'jinzai-kaihatsu_jinzai-ikusei') {
+                document.getElementById('jinzaiIkuseiSubcoursesMenu').style.display = 'none';
+            }
+            if (courseId !== 'jinzai-kaihatsu_toushi') {
+                document.getElementById('jinzaiToushiSubcoursesMenu').style.display = 'none';
+            }
             
             if (courseId === 'jinzai-kaihatsu_jinzai-ikusei') {
                 const subcoursesMenu = document.getElementById('jinzaiIkuseiSubcoursesMenu');
@@ -2545,22 +2550,8 @@
                 }
             } else if (courseId === 'jinzai-kaihatsu_toushi') {
                 const subcoursesMenu = document.getElementById('jinzaiToushiSubcoursesMenu');
-                console.log('人への投資促進コースのサブメニュー:', subcoursesMenu);
                 if (subcoursesMenu) {
                     subcoursesMenu.style.display = 'block';
-                    subcoursesMenu.style.zIndex = '1010';
-                    subcoursesMenu.style.position = 'absolute';
-                    console.log('人への投資促進コースのサブメニューを表示');
-                    console.log('サブメニューのスタイル:', {
-                        display: subcoursesMenu.style.display,
-                        zIndex: subcoursesMenu.style.zIndex,
-                        position: subcoursesMenu.style.position,
-                        visibility: window.getComputedStyle(subcoursesMenu).visibility,
-                        left: window.getComputedStyle(subcoursesMenu).left,
-                        top: window.getComputedStyle(subcoursesMenu).top
-                    });
-                } else {
-                    console.error('jinzaiToushiSubcoursesMenu が見つかりません');
                 }
             }
         }
@@ -2749,9 +2740,7 @@
             integratedCurrentConversationId = null; // 新しい会話を開始
             
             // ドロップダウンメニューを閉じる
-            document.getElementById('agentDropdownMenu').style.display = 'none';
-            document.querySelector('.agent-dropdown-btn').classList.remove('active');
-            hideAllCoursesMenus();
+            closeAgentDropdown();
             
             // エージェント名を更新
             const agentNames = {
