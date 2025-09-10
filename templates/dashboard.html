@@ -223,8 +223,12 @@
             animation: thinking-pulse 1.5s ease-in-out infinite;
         }
 
-        .thinking-dots {
+        .thinking-spinner {
             display: inline-block;
+            margin-right: 8px;
+            vertical-align: middle;
+            font-size: 20px;
+            animation: thinking-blink 1.5s ease-in-out infinite;
         }
 
         @keyframes thinking-pulse {
@@ -232,11 +236,9 @@
             50% { opacity: 1; }
         }
 
-        @keyframes thinking-dots {
-            0%, 20% { transform: scale(1); }
-            40% { transform: scale(1.1); }
-            60% { transform: scale(1); }
-            80%, 100% { transform: scale(1); }
+        @keyframes thinking-blink {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
         }
         
         .agent-title {
@@ -2444,7 +2446,7 @@
             thinkingDiv.id = 'thinking-message';
             thinkingDiv.innerHTML = `
                 <div class="message-content">
-                    🤔 考え中<span class="thinking-dots">...</span>
+                    <span class="thinking-spinner">💡</span>考え中...
                 </div>
             `;
             
