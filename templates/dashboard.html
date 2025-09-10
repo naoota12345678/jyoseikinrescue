@@ -2943,6 +2943,50 @@
                     <div class="assistant-avatar">🤖</div>
                     <div class="message-content">${formatMessage(message)}</div>
                 `;
+                
+                // 申請書類誘導の判定（部分一致）
+                const shouldShowApplicationButton = (
+                    message.includes('申請様式については以下でご案内') ||
+                    message.includes('申請書類') ||
+                    message.includes('申請様式') ||
+                    message.includes('下記') ||
+                    message.includes('以下でご案内') ||
+                    message.includes('申請書') ||
+                    message.includes('ダウンロード')
+                );
+                
+                if (shouldShowApplicationButton) {
+                    // 申請書類ボタンを追加
+                    const applicationButtonDiv = document.createElement('div');
+                    applicationButtonDiv.className = 'application-forms-suggestion';
+                    applicationButtonDiv.style.cssText = `
+                        margin-top: 1rem;
+                        padding: 1rem;
+                        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+                        border: 1px solid #0ea5e9;
+                        border-radius: 12px;
+                        text-align: center;
+                    `;
+                    applicationButtonDiv.innerHTML = `
+                        <p style="margin: 0 0 0.75rem 0; color: #0c4a6e; font-size: 0.9rem;">
+                            📋 申請書類はこちらからダウンロードできます
+                        </p>
+                        <button onclick="showApplicationForms()" style="
+                            background: #0ea5e9; 
+                            color: white; 
+                            border: none; 
+                            padding: 0.75rem 1.5rem; 
+                            border-radius: 8px; 
+                            cursor: pointer; 
+                            font-weight: 600;
+                            box-shadow: 0 2px 4px rgba(14, 165, 233, 0.2);
+                            transition: all 0.2s ease;
+                        " onmouseover="this.style.background='#0284c7'" onmouseout="this.style.background='#0ea5e9'">
+                            📋 申請書類ダウンロードページへ
+                        </button>
+                    `;
+                    messageDiv.appendChild(applicationButtonDiv);
+                }
             }
             
             chatMessages.appendChild(messageDiv);
