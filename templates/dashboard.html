@@ -2528,12 +2528,28 @@
 
         // 人材育成支援コースのサブコース選択を表示
         function showSubcoursesForCourse(courseId) {
+            console.log('showSubcoursesForCourse called with:', courseId);
+            
+            // まず全てのサブメニューを隠す
+            document.getElementById('jinzaiIkuseiSubcoursesMenu').style.display = 'none';
+            document.getElementById('jinzaiToushiSubcoursesMenu').style.display = 'none';
+            
             if (courseId === 'jinzai-kaihatsu_jinzai-ikusei') {
                 const subcoursesMenu = document.getElementById('jinzaiIkuseiSubcoursesMenu');
-                subcoursesMenu.style.display = 'block';
+                console.log('人材育成支援コースのサブメニュー:', subcoursesMenu);
+                if (subcoursesMenu) {
+                    subcoursesMenu.style.display = 'block';
+                    console.log('人材育成支援コースのサブメニューを表示');
+                }
             } else if (courseId === 'jinzai-kaihatsu_toushi') {
                 const subcoursesMenu = document.getElementById('jinzaiToushiSubcoursesMenu');
-                subcoursesMenu.style.display = 'block';
+                console.log('人への投資促進コースのサブメニュー:', subcoursesMenu);
+                if (subcoursesMenu) {
+                    subcoursesMenu.style.display = 'block';
+                    console.log('人への投資促進コースのサブメニューを表示');
+                } else {
+                    console.error('jinzaiToushiSubcoursesMenu が見つかりません');
+                }
             }
         }
 
