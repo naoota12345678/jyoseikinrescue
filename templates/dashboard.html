@@ -2373,6 +2373,32 @@
             }
         }
 
+        // プルダウン外部クリックで閉じる処理
+        function closeAgentDropdown() {
+            const menu = document.getElementById('agentDropdownMenu');
+            const btn = document.querySelector('.agent-dropdown-btn');
+            
+            if (menu && btn) {
+                menu.style.display = 'none';
+                btn.classList.remove('active');
+                hideAllCoursesMenus();
+            }
+        }
+
+        // ドキュメント全体のクリックイベントを監視
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('agentDropdownMenu');
+            const btn = document.querySelector('.agent-dropdown-btn');
+            
+            // メニューが開いている時のみチェック
+            if (menu && menu.style.display === 'block') {
+                // クリックされた要素がプルダウンメニュー内またはボタンでない場合、メニューを閉じる
+                if (!menu.contains(event.target) && !btn.contains(event.target)) {
+                    closeAgentDropdown();
+                }
+            }
+        });
+
         // 申請書類ダウンロードページを表示
         function showApplicationForms() {
             const chatMessages = document.getElementById('integratedChatMessages');
