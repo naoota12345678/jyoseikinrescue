@@ -1585,18 +1585,21 @@
                 existingPrompt.remove();
             }
             
+            // trialプランもfreeとして扱う
+            const isFreePlan = (planType === 'free' || planType === 'trial');
+            
             // アップグレードプロンプトを作成
             const promptHtml = `
                 <div id="upgradePrompt" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 1000; max-width: 600px;">
                     <h2 style="color: #667eea; margin-bottom: 1rem;">使用回数の上限に達しました</h2>
                     <p style="margin-bottom: 1.5rem;">
-                        ${planType === 'free' 
+                        ${isFreePlan 
                             ? '無料プランの5回の質問回数を使い切りました。' 
                             : `${planType}プランの今月の質問回数を使い切りました。`}
                         継続してご利用いただくには、以下の選択肢からお選びください。
                     </p>
                     
-                    ${planType === 'free' ? `
+                    ${isFreePlan ? `
                         <!-- 月額プラン（初回登録） -->
                         <div style="background: #f8f9ff; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
                             <h3 style="color: #667eea; margin-bottom: 1rem;">🚀 月額プラン（お得な継続利用）</h3>
@@ -1640,8 +1643,8 @@
                         ` : ''}
                     `}
                     
-                    <button onclick="goToPricing(${planType === 'free' ? 'false' : 'true'})" style="width: 100%; background: #f4eddc; color: #333; border: none; padding: 1rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-bottom: 1rem;">
-                        ${planType === 'free' ? '💗 プラン選択ページへ' : '💗 プラン・追加パック選択ページへ'}
+                    <button onclick="goToPricing(${isFreePlan ? 'false' : 'true'})" style="width: 100%; background: #f4eddc; color: #333; border: none; padding: 1rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-bottom: 1rem;">
+                        ${isFreePlan ? '💗 プラン選択ページへ' : '💗 プラン・追加パック選択ページへ'}
                     </button>
                     <button onclick="closeUpgradePrompt()" style="width: 100%; background: #6c757d; color: white; border: none; padding: 0.8rem; border-radius: 8px; cursor: pointer;">
                         後で検討する
