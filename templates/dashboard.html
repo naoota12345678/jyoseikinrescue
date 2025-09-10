@@ -447,21 +447,20 @@
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             z-index: 1001;
-            overflow: hidden;
+            overflow: visible;
             min-width: 250px;
         }
 
         .agent-subcourses-menu {
             position: absolute;
             top: 0;
-            left: 100%;
-            margin-left: 8px;
+            left: calc(100% + 8px);
             background: white;
             border: 1px solid #e5e7eb;
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             z-index: 1010;
-            overflow: hidden;
+            overflow: visible;
             min-width: 220px;
             max-height: 300px;
             overflow-y: auto;
@@ -469,6 +468,7 @@
 
         .agent-with-subcourses {
             position: relative;
+            overflow: visible;
         }
 
         .agent-dropdown-item.disabled {
