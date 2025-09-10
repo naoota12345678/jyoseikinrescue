@@ -1707,24 +1707,14 @@ def get_subscription_status():
                 
                 # 次回請求日を計算
                 from datetime import datetime
-                # Stripeオブジェクトを辞書形式でアクセス
-                if hasattr(subscription, 'current_period_end'):
-                    period_end = subscription.current_period_end
-                else:
-                    period_end = subscription.get('current_period_end') or subscription['current_period_end']
-                
-                next_billing_date = datetime.fromtimestamp(period_end).strftime('%Y年%m月%d日')
-                
-                # statusとcancel_at_period_endも同様に取得
-                status = subscription.status if hasattr(subscription, 'status') else subscription.get('status', 'active')
-                cancel_at_period_end = subscription.cancel_at_period_end if hasattr(subscription, 'cancel_at_period_end') else subscription.get('cancel_at_period_end', False)
+                next_billing_date = datetime.fromtimestamp(subscription.current_period_end).strftime('%Y年%m月%d日')
                 
                 return jsonify({
                     'has_subscription': True,
                     'plan_name': plan_names.get(subscription_data.get('plan_type'), subscription_data.get('plan_type', 'プラン')),
                     'next_billing_date': next_billing_date,
-                    'status': status,
-                    'cancel_at_period_end': cancel_at_period_end
+                    'status': subscription.status,
+                    'cancel_at_period_end': subscription.cancel_at_period_end
                 })
                 
             except stripe.error.InvalidRequestError as e:
