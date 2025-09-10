@@ -26,8 +26,8 @@ class User:
             
             user_ref.set(user_record)
             
-            # 初回サブスクリプションも作成
-            self.create_initial_subscription(user_ref.id)
+            # 初回サブスクリプションも作成（Firebase UIDを使用）
+            self.create_initial_subscription(user_data.get('uid'))
             
             logger.info(f"User created successfully: {user_ref.id}")
             return user_ref.id

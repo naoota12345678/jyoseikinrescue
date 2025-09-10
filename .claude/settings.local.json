@@ -56,7 +56,9 @@
       "Bash(gcloud config:*)",
       "Bash(start https://jyoseikinrescue-453016168690.asia-northeast1.run.app)",
       "Bash(git show:*)",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(grep:*)",
+      "Bash(start https://console.firebase.google.com/project/jyoseikinrescue/firestore/data/~2Fsubscriptions)"
     ],
     "deny": [],
     "ask": [],
