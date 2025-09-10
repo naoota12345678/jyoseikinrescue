@@ -556,77 +556,36 @@
                     <div style="text-align: center; margin-top: 2rem; padding: 2rem; background: #f8f9ff; border-radius: 12px; border: 2px solid #667eea;">
                         <p style="color: #667eea; font-weight: 600; margin-bottom: 1rem;">💡 診断結果を保存して、詳細な相談に進むことをお勧めします</p>
                         
-                        <h3 style="color: #333; margin: 1.5rem 0;">次のステップをお選びください</h3>
+                        <h3 style="color: #333; margin: 1.5rem 0;">無料で会員登録</h3>
+                        <p style="text-align: center; color: #666; margin-bottom: 2rem;">診断結果を保存して5回無料で専門エージェントが使えます</p>
                         
-                        <div style="margin-bottom: 1.5rem;">
-                            <button onclick="showRegistrationForm()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 1rem 2rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);">
-                                🎯 無料で会員登録
-                            </button>
-                            <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">※ 5回無料で専門エージェントが使える</p>
-                        </div>
-                        
-                        <div style="margin-bottom: 1.5rem;" id="saveToMemoSection" style="display: none;">
-                            <button onclick="saveToMemoDirectly()" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; padding: 1rem 2rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);">
-                                💾 診断結果を保存してダッシュボードへ
-                            </button>
-                            <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">※ 既にログイン済みの方はこちら</p>
-                        </div>
-                        
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; max-width: 600px; margin: 0 auto;">
-                            <div style="text-align: left; padding: 1rem; background: white; border-radius: 8px;">
-                                <h4 style="color: #667eea; margin-bottom: 0.5rem;">🤖 24時間対応 AIエージェント</h4>
-                                <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">予約不要・いつでも相談可能<br>上記の各助成金専門のAIエージェントが詳しく回答</p>
-                                <button onclick="goToAIConsultation()" style="background: #f4eddc; color: #333; padding: 0.8rem 1.5rem; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; width: 100%;">
-                                    無料でAI相談を始める
-                                </button>
+                        <!-- 会員登録フォーム（直接表示） -->
+                        <form id="diagnosisRegistrationForm" style="max-width: 400px; margin: 0 auto;">
+                            <div style="margin-bottom: 1rem;">
+                                <input type="email" id="regEmail" required placeholder="メールアドレス" 
+                                       style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <input type="password" id="regPassword" required placeholder="パスワード（6文字以上）" 
+                                       style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                            </div>
+                            <div style="margin-bottom: 1.5rem;">
+                                <input type="password" id="regPasswordConfirm" required placeholder="パスワード（確認）" 
+                                       style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
                             </div>
                             
-                            <div style="text-align: left; padding: 1rem; background: white; border-radius: 8px;">
-                                <h4 style="color: #28a745; margin-bottom: 0.5rem;">👨‍💼 専門家サポート（30分相談）</h4>
-                                <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">複数助成金の組み合わせ申請<br>複雑な案件の個別相談</p>
-                                <button onclick="goToExpertConsultation()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 0.8rem 1.5rem; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; width: 100%;">
-                                    専門家相談を予約する
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <p style="font-size: 0.85rem; color: #888; margin-top: 1.5rem; font-style: italic;">
-                            ※ AIエージェントは各助成金の詳細な要件・申請方法を即座に回答します<br>
-                            ※ 複雑な組み合わせ申請は専門家サポートがお勧めです
-                        </p>
-                        
-                        <!-- 会員登録フォーム -->
-                        <div id="registrationForm" style="display: none; margin-top: 2rem; padding: 2rem; background: #f8f9ff; border-radius: 12px; border: 2px solid #667eea;">
-                            <h3 style="color: #333; text-align: center; margin-bottom: 1.5rem;">🚀 無料会員登録</h3>
-                            <p style="text-align: center; color: #666; margin-bottom: 2rem;">診断結果を保存して5回無料で専門エージェントが使えます</p>
+                            <button type="submit" style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 1.1rem; margin-bottom: 1rem;">
+                                ✨ 登録して専門エージェントを使う
+                            </button>
                             
-                            <form id="diagnosisRegistrationForm" style="max-width: 400px; margin: 0 auto;">
-                                <div style="margin-bottom: 1rem;">
-                                    <input type="email" id="regEmail" required placeholder="メールアドレス" 
-                                           style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
-                                </div>
-                                <div style="margin-bottom: 1rem;">
-                                    <input type="password" id="regPassword" required placeholder="パスワード（6文字以上）" 
-                                           style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
-                                </div>
-                                <div style="margin-bottom: 1.5rem;">
-                                    <input type="password" id="regPasswordConfirm" required placeholder="パスワード（確認）" 
-                                           style="width: 100%; padding: 0.8rem; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
-                                </div>
-                                
-                                <button type="submit" style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 1.1rem; margin-bottom: 1rem;">
-                                    ✨ 登録して専門エージェントを使う
-                                </button>
-                                
-                                <p style="text-align: center; font-size: 0.8rem; color: #666;">
-                                    すでにアカウントをお持ちの場合は<br>
-                                    <a href="#" onclick="showLoginForm()" style="color: #667eea; text-decoration: underline;">こちらからログイン</a>
-                                </p>
-                            </form>
-                        </div>
+                            <p style="text-align: center; font-size: 0.8rem; color: #666;">
+                                すでにアカウントをお持ちの場合は<br>
+                                <a href="#" onclick="showLoginForm()" style="color: #667eea; text-decoration: underline;">こちらからログイン</a>
+                            </p>
+                        </form>
                         
-                        <!-- ログインフォーム -->
-                        <div id="loginForm" style="display: none; margin-top: 2rem; padding: 2rem; background: #fff3cd; border-radius: 12px; border: 2px solid #ffc107;">
+                        <!-- ログインフォーム（切り替え用） -->
+                        <div id="loginForm" style="display: none;">
                             <h3 style="color: #333; text-align: center; margin-bottom: 1.5rem;">🔐 ログイン</h3>
                             
                             <form id="diagnosisLoginForm" style="max-width: 400px; margin: 0 auto;">
