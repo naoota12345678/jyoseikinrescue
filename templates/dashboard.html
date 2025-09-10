@@ -212,31 +212,29 @@
 
         /* ローディング表示スタイル */
         .thinking-message {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 18px;
+            background: none;
+            color: #667eea;
+            padding: 1rem 0;
             margin: 0.5rem 0;
             max-width: 80%;
             align-self: flex-start;
-            position: relative;
-            animation: thinking-pulse 1.5s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            font-weight: 500;
         }
 
-        .thinking-dots {
+        .thinking-spinner {
             display: inline-block;
+            margin-right: 12px;
+            vertical-align: middle;
+            font-size: 40px;
+            animation: thinking-blink 1.5s ease-in-out infinite;
         }
 
-        @keyframes thinking-pulse {
-            0%, 100% { opacity: 0.8; }
+        @keyframes thinking-blink {
+            0%, 100% { opacity: 0.3; }
             50% { opacity: 1; }
-        }
-
-        @keyframes thinking-dots {
-            0%, 20% { transform: scale(1); }
-            40% { transform: scale(1.1); }
-            60% { transform: scale(1); }
-            80%, 100% { transform: scale(1); }
         }
         
         .agent-title {
@@ -449,26 +447,25 @@
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             z-index: 1001;
-            overflow: hidden;
+            overflow: visible;
             min-width: 250px;
         }
 
         .agent-subcourses-menu {
-            position: absolute;
-            top: 0;
-            left: 100%;
-            margin-left: 8px;
+            position: fixed;
             background: white;
             border: 1px solid #e5e7eb;
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            z-index: 1002;
-            overflow: hidden;
+            z-index: 1010;
             min-width: 220px;
+            max-height: 300px;
+            overflow-y: auto;
         }
 
         .agent-with-subcourses {
             position: relative;
+            overflow: visible;
         }
 
         .agent-dropdown-item.disabled {
@@ -2413,6 +2410,7 @@
                 hideAllCoursesMenus();
             }
         }
+        
 
         // ドキュメント全体のクリックイベントを監視
         document.addEventListener('click', function(event) {
@@ -2444,7 +2442,7 @@
             thinkingDiv.id = 'thinking-message';
             thinkingDiv.innerHTML = `
                 <div class="message-content">
-                    🤔 考え中<span class="thinking-dots">...</span>
+                    <span class="thinking-spinner">💡</span>考え中...
                 </div>
             `;
             
@@ -2530,12 +2528,47 @@
 
         // 人材育成支援コースのサブコース選択を表示
         function showSubcoursesForCourse(courseId) {
+            console.log('showSubcoursesForCourse called with:', courseId);
+            
+            // 他のサブメニューを隠す
+            if (courseId !== 'jinzai-kaihatsu_jinzai-ikusei') {
+                document.getElementById('jinzaiIkuseiSubcoursesMenu').style.display = 'none';
+            }
+            if (courseId !== 'jinzai-kaihatsu_toushi') {
+                document.getElementById('jinzaiToushiSubcoursesMenu').style.display = 'none';
+            }
+            
             if (courseId === 'jinzai-kaihatsu_jinzai-ikusei') {
                 const subcoursesMenu = document.getElementById('jinzaiIkuseiSubcoursesMenu');
-                subcoursesMenu.style.display = 'block';
+                const parentMenu = document.getElementById('jinzaiKaihatsuCoursesMenu');
+                if (subcoursesMenu && parentMenu) {
+                    const rect = parentMenu.getBoundingClientRect();
+                    subcoursesMenu.style.display = 'block';
+                    subcoursesMenu.style.top = rect.top + 'px';
+                    subcoursesMenu.style.left = (rect.right + 8) + 'px';
+                }
             } else if (courseId === 'jinzai-kaihatsu_toushi') {
                 const subcoursesMenu = document.getElementById('jinzaiToushiSubcoursesMenu');
-                subcoursesMenu.style.display = 'block';
+                const parentMenu = document.getElementById('jinzaiKaihatsuCoursesMenu');
+                console.log('人への投資促進コース - subcoursesMenu:', subcoursesMenu);
+                console.log('人への投資促進コース - parentMenu:', parentMenu);
+                
+                if (subcoursesMenu && parentMenu) {
+                    const rect = parentMenu.getBoundingClientRect();
+                    console.log('親メニュー位置:', rect);
+                    
+                    subcoursesMenu.style.display = 'block';
+                    subcoursesMenu.style.top = rect.top + 'px';
+                    subcoursesMenu.style.left = (rect.right + 8) + 'px';
+                    
+                    console.log('サブメニュー設定:', {
+                        display: subcoursesMenu.style.display,
+                        top: subcoursesMenu.style.top,
+                        left: subcoursesMenu.style.left
+                    });
+                } else {
+                    console.error('サブメニューまたは親メニューが見つかりません');
+                }
             }
         }
 
@@ -2723,9 +2756,7 @@
             integratedCurrentConversationId = null; // 新しい会話を開始
             
             // ドロップダウンメニューを閉じる
-            document.getElementById('agentDropdownMenu').style.display = 'none';
-            document.querySelector('.agent-dropdown-btn').classList.remove('active');
-            hideAllCoursesMenus();
+            closeAgentDropdown();
             
             // エージェント名を更新
             const agentNames = {
