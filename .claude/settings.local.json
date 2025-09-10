@@ -56,7 +56,8 @@
       "Bash(gcloud config:*)",
       "Bash(start https://jyoseikinrescue-453016168690.asia-northeast1.run.app)",
       "Bash(git show:*)",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(git revert:*)"
     ],
     "deny": [],
     "ask": [],
