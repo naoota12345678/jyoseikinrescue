@@ -1698,6 +1698,14 @@ def get_subscription_status():
                 
                 subscription = stripe.Subscription.retrieve(subscription_id)
                 
+                # デバッグ: subscriptionオブジェクトの詳細を記録
+                logger.info(f"=== DEBUG: Subscription object type: {type(subscription)}")
+                logger.info(f"=== DEBUG: Subscription object keys: {subscription.keys() if hasattr(subscription, 'keys') else 'No keys method'}")
+                logger.info(f"=== DEBUG: Has current_period_end attr: {hasattr(subscription, 'current_period_end')}")
+                if hasattr(subscription, 'current_period_end'):
+                    logger.info(f"=== DEBUG: current_period_end value: {subscription.current_period_end}")
+                    logger.info(f"=== DEBUG: current_period_end type: {type(subscription.current_period_end)}")
+                
                 # プラン名のマッピング
                 plan_names = {
                     'light': 'ライトプラン',
