@@ -1688,12 +1688,27 @@ def get_subscription_status():
                 
                 subscription_id = subscription_data['subscription_id']
                 
-                # 無効なsubscription_idをチェック
-                if not subscription_id or subscription_id in ['manual_update', 'none', '']:
+                # 無効なsubscription_idをチェック（manual_updateの場合は有効なサブスクとして扱う）
+                if not subscription_id or subscription_id in ['none', '']:
                     logger.warning(f"Invalid subscription_id: {subscription_id}")
                     return jsonify({
                         'has_subscription': False,
                         'error': 'サブスクリプションIDが無効です'
+                    })
+                
+                # manual_updateの場合は手動管理のサブスクリプションとして扱う
+                if subscription_id == 'manual_update':
+                    plan_names = {
+                        'light': 'ライトプラン',
+                        'regular': 'レギュラープラン', 
+                        'heavy': 'ヘビープラン'
+                    }
+                    return jsonify({
+                        'has_subscription': True,
+                        'plan_name': plan_names.get(subscription_data.get('plan_type'), subscription_data.get('plan_type', 'プラン')),
+                        'next_billing_date': '手動管理',
+                        'status': 'active',
+                        'cancel_at_period_end': False
                     })
                 
                 subscription = stripe.Subscription.retrieve(subscription_id)
