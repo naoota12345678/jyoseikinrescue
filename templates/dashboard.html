@@ -2286,65 +2286,40 @@
         }
         
         // 診断結果を読み込んで表示
-        async function loadDiagnosisResults() {
+        function loadDiagnosisResults() {
             const diagnosisResultsList = document.getElementById('diagnosisResultsList');
+            const aiResults = JSON.parse(localStorage.getItem('aiDiagnosisResults') || '[]');
             
-            try {
-                // Firebaseトークンを取得
-                const token = await currentUser.getIdToken();
-                
-                // メモ管理システムから診断結果を取得
-                const response = await fetch('/api/memo/list', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error('診断結果の取得に失敗しました');
-                }
-                
-                const data = await response.json();
-                const diagnosisResults = data.memos || [];
-                
-                if (diagnosisResults.length === 0) {
-                    diagnosisResultsList.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-state-icon">🔍</div>
-                            <div class="empty-state-text">まだ診断結果がありません</div>
-                            <div class="empty-state-desc">無料診断を実行してみましょう</div>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                // 診断結果を表示
-                diagnosisResultsList.innerHTML = diagnosisResults.map(item => {
-                    const date = new Date(item.created_at).toLocaleDateString('ja-JP');
-                    const time = new Date(item.created_at).toLocaleTimeString('ja-JP', {hour: '2-digit', minute: '2-digit'});
-                    
-                    return `
-                        <div class="diagnosis-item" onclick="showDiagnosisMemo('${item.id}')">
-                            <div class="diagnosis-meta">
-                                <span class="diagnosis-date">${date} ${time}</span>
-                            </div>
-                            <div class="diagnosis-summary">
-                                ${item.title || '診断結果'}
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-                
-            } catch (error) {
-                console.error('診断結果読み込みエラー:', error);
+            // 診断結果のみをフィルタ
+            const diagnosisResults = aiResults.filter(item => item.type === 'diagnosis');
+            
+            if (diagnosisResults.length === 0) {
                 diagnosisResultsList.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-state-icon">❌</div>
-                        <div class="empty-state-text">診断結果の読み込みに失敗しました</div>
-                        <div class="empty-state-desc">再度お試しください</div>
+                        <div class="empty-state-icon">🔍</div>
+                        <div class="empty-state-text">まだ診断結果がありません</div>
+                        <div class="empty-state-desc">無料診断を実行してみましょう</div>
                     </div>
                 `;
+                return;
             }
+            
+            // 診断結果を表示
+            diagnosisResultsList.innerHTML = diagnosisResults.map(item => {
+                const date = new Date(item.timestamp).toLocaleDateString('ja-JP');
+                const time = new Date(item.timestamp).toLocaleTimeString('ja-JP', {hour: '2-digit', minute: '2-digit'});
+                
+                return `
+                    <div class="diagnosis-item" onclick="showDiagnosisDetail('${item.timestamp}')">
+                        <div class="diagnosis-meta">
+                            <span class="diagnosis-date">${date} ${time}</span>
+                        </div>
+                        <div class="diagnosis-summary">
+                            ${item.summary}
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
         
         // 診断結果の詳細を表示（メモ管理システム連携）
