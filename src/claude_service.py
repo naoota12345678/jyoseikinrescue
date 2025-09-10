@@ -753,10 +753,23 @@ class ClaudeService:
     def _include_form_urls(self, agent_type: str, response: str, original_question: str = "") -> str:
         """
         申請書類案内の後処理
-        「申請様式については以下でご案内します。」が含まれている場合、申請書類ボタンへの誘導を追加
+        申請様式・申請書類に関する案内文が含まれている場合、申請書類ボタンへの誘導を追加
         """
-        # プロンプト通りの枕詞が含まれている場合、申請書類ボタンの案内を追加
-        if "申請様式については以下でご案内します。" in response:
+        import re
+        
+        # より柔軟なパターンで検出（申請様式・申請書類の案内文を広く捉える）
+        patterns = [
+            r"申請様式.*については.*以下.*(?:で|でご案内)",
+            r"申請書類.*については.*以下.*(?:で|でご案内)",
+            r"様式.*については.*以下.*(?:で|でご案内)",
+            r"申請に必要な書類.*については.*以下.*(?:で|でご案内)",
+            r"ダウンロード.*については.*以下.*(?:で|でご案内)"
+        ]
+        
+        # いずれかのパターンにマッチした場合、誘導メッセージを追加
+        should_add_guidance = any(re.search(pattern, response) for pattern in patterns)
+        
+        if should_add_guidance:
             # 申請書類ボタンへの誘導メッセージを追加
             additional_message = "\n\n📋 **申請書類のダウンロード**\nこの画面上部の「申請書類」ボタンをクリックすると、各助成金の申請様式をダウンロードできます。"
             response = response + additional_message
