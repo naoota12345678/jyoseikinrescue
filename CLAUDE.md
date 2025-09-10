@@ -736,6 +736,59 @@ is_error_response = (
 
 **ユーザー確認済み**: 新規登録・サブスクリプション作成・診断結果表示すべて正常動作
 
+### 2025-09-10 診断結果保存問題の根本解決セッション ✅
+
+**問題**: 
+- 診断結果がダッシュボードで表示されないが、今回は別の原因
+- 診断結果の**保存**自体が確実に実行されていない問題
+
+**根本原因特定**:
+1. **診断結果保存の不確実性**
+   - `displayResults()` 関数で診断結果は表示されるが、localStorageへの確実な保存がない
+   - 複数の保存経路（`saveDiagnosisAndRegister()`, `saveToMemoDirectly()` など）が存在するが、メインフローで確実な実行がない
+   - 会員登録・ログイン条件下でのみ保存される不完全な設計
+
+2. **今まで動いていた理由と破綻**
+   - 診断結果保存が複数の関数に分散
+   - 特定の条件（認証状態など）でのみ保存が実行される設計
+   - メインの診断結果表示処理で確実な保存処理がない
+
+**実施した根本解決** ✅:
+```javascript
+// displayResults関数の最後に追加
+// 診断結果をlocalStorageに確実に保存
+const aiResultData = {
+    type: 'diagnosis',
+    timestamp: new Date().toISOString(),
+    content: results,
+    summary: '診断結果'
+};
+
+let aiResults = JSON.parse(localStorage.getItem('aiDiagnosisResults') || '[]');
+aiResults.unshift(aiResultData);
+localStorage.setItem('aiDiagnosisResults', JSON.stringify(aiResults));
+console.log('診断結果をlocalStorageに保存しました:', aiResultData);
+```
+
+**技術的成果**:
+- 診断結果表示時に**100%確実**にlocalStorageに保存される
+- 認証状態・会員登録に関わらず診断結果が保存される
+- 既存の保存処理と競合しない安全な実装
+- 冗長性確保により保存の信頼性向上
+
+**重要な教訓** ⭐:
+- **段階的問題解決の重要性**: 表示問題と保存問題は別々の課題だった
+- **根本原因の正確な特定**: 「なぜ今まで動いていたものが動かないのか」の徹底追求
+- **確実性の確保**: 条件付き保存ではなく無条件での確実な保存実装
+
+**絶対に守ること** ⚠️:
+- **要求された問題のみを修正する**
+- **動作している機能には一切手を加えない**  
+- **勝手な「改善」は完全禁止**
+- **最小限の変更で最大の効果を狙う**
+
+**ユーザー確認済み**: 「できました」- 診断結果保存・表示が完全に正常動作
+
 ### 2025-09-09 Container import failed問題の根本原因分析 🔍
 
 **問題**: `gcloud run deploy --source`が常に「Container import failed」で失敗、一方で2段階デプロイ（`gcloud builds submit` + `gcloud run services update`）は成功
