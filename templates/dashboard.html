@@ -209,6 +209,35 @@
         body.loading-agent #agentChatArea {
             display: block !important;
         }
+
+        /* ローディング表示スタイル */
+        .thinking-message {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 18px;
+            margin: 0.5rem 0;
+            max-width: 80%;
+            align-self: flex-start;
+            position: relative;
+            animation: thinking-pulse 1.5s ease-in-out infinite;
+        }
+
+        .thinking-dots {
+            display: inline-block;
+        }
+
+        @keyframes thinking-pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes thinking-dots {
+            0%, 20% { transform: scale(1); }
+            40% { transform: scale(1.1); }
+            60% { transform: scale(1); }
+            80%, 100% { transform: scale(1); }
+        }
         
         .agent-title {
             color: #667eea;
@@ -2399,6 +2428,38 @@
             }
         });
 
+        // ローディングメッセージを表示
+        function showThinkingMessage() {
+            const chatMessages = document.getElementById('integratedChatMessages');
+            if (!chatMessages) return;
+            
+            // 既存のローディングメッセージがあれば削除
+            const existingThinking = chatMessages.querySelector('.thinking-message');
+            if (existingThinking) {
+                existingThinking.remove();
+            }
+            
+            const thinkingDiv = document.createElement('div');
+            thinkingDiv.className = 'message assistant thinking-message';
+            thinkingDiv.id = 'thinking-message';
+            thinkingDiv.innerHTML = `
+                <div class="message-content">
+                    🤔 考え中<span class="thinking-dots">...</span>
+                </div>
+            `;
+            
+            chatMessages.appendChild(thinkingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // ローディングメッセージを削除
+        function hideThinkingMessage() {
+            const thinkingMessage = document.getElementById('thinking-message');
+            if (thinkingMessage) {
+                thinkingMessage.remove();
+            }
+        }
+
         // 申請書類ダウンロードページを表示
         function showApplicationForms() {
             const chatMessages = document.getElementById('integratedChatMessages');
@@ -2760,6 +2821,9 @@
             const sendBtn = document.getElementById('integratedSendBtn');
             sendBtn.disabled = true;
             
+            // ローディングメッセージを表示
+            showThinkingMessage();
+            
             try {
                 // 新しい会話の場合は作成
                 if (!integratedCurrentConversationId) {
@@ -2788,6 +2852,9 @@
                 if (response.ok) {
                     const data = await response.json();
                     
+                    // ローディングメッセージを削除
+                    hideThinkingMessage();
+                    
                     // conversation_idを更新（新しい会話の場合）
                     if (data.conversation_id) {
                         integratedCurrentConversationId = data.conversation_id;
@@ -2806,6 +2873,9 @@
                     // 使用回数を再読み込み（重要：dashboard.htmlの既存機能を利用）
                     await loadUserData();
                 } else {
+                    // ローディングメッセージを削除
+                    hideThinkingMessage();
+                    
                     // エラー詳細をログ出力
                     const errorText = await response.text();
                     console.error('API Error:', response.status, errorText);
@@ -2813,6 +2883,10 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
+                
+                // ローディングメッセージを削除
+                hideThinkingMessage();
+                
                 addIntegratedMessageToChat('assistant', '通信エラーが発生しました。');
             }
             
