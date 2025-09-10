@@ -460,9 +460,11 @@
             border: 1px solid #e5e7eb;
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            z-index: 1002;
+            z-index: 1010;
             overflow: hidden;
             min-width: 220px;
+            max-height: 300px;
+            overflow-y: auto;
         }
 
         .agent-with-subcourses {
@@ -2546,7 +2548,17 @@
                 console.log('人への投資促進コースのサブメニュー:', subcoursesMenu);
                 if (subcoursesMenu) {
                     subcoursesMenu.style.display = 'block';
+                    subcoursesMenu.style.zIndex = '1010';
+                    subcoursesMenu.style.position = 'absolute';
                     console.log('人への投資促進コースのサブメニューを表示');
+                    console.log('サブメニューのスタイル:', {
+                        display: subcoursesMenu.style.display,
+                        zIndex: subcoursesMenu.style.zIndex,
+                        position: subcoursesMenu.style.position,
+                        visibility: window.getComputedStyle(subcoursesMenu).visibility,
+                        left: window.getComputedStyle(subcoursesMenu).left,
+                        top: window.getComputedStyle(subcoursesMenu).top
+                    });
                 } else {
                     console.error('jinzaiToushiSubcoursesMenu が見つかりません');
                 }
