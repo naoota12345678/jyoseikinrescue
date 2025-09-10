@@ -1686,6 +1686,10 @@ def get_subscription_status():
                 import stripe
                 stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
                 
+                # デバッグ: Stripe APIバージョン確認
+                logger.info(f"=== DEBUG: Stripe API version: {stripe.api_version}")
+                logger.info(f"=== DEBUG: Stripe library version: {stripe.__version__}")
+                
                 subscription_id = subscription_data['subscription_id']
                 
                 # 無効なsubscription_idをチェック
@@ -1715,7 +1719,28 @@ def get_subscription_status():
                 
                 # 次回請求日を計算
                 from datetime import datetime
-                next_billing_date = datetime.fromtimestamp(subscription.current_period_end).strftime('%Y年%m月%d日')
+                
+                # current_period_endフィールドが存在するかチェック
+                if hasattr(subscription, 'current_period_end') and subscription.current_period_end:
+                    next_billing_date = datetime.fromtimestamp(subscription.current_period_end).strftime('%Y年%m月%d日')
+                    logger.info(f"=== DEBUG: Using current_period_end: {subscription.current_period_end}")
+                else:
+                    # current_period_endが存在しない場合の代替手段
+                    logger.warning("=== DEBUG: current_period_end not found, using alternative method")
+                    
+                    # billing_cycle_anchorまたはcreatedから計算
+                    if hasattr(subscription, 'billing_cycle_anchor') and subscription.billing_cycle_anchor:
+                        base_timestamp = subscription.billing_cycle_anchor
+                        logger.info(f"=== DEBUG: Using billing_cycle_anchor: {base_timestamp}")
+                    else:
+                        base_timestamp = subscription.created
+                        logger.info(f"=== DEBUG: Using created date: {base_timestamp}")
+                    
+                    # 30日後を計算（月額サブスクリプションの場合）
+                    from datetime import timedelta
+                    base_date = datetime.fromtimestamp(base_timestamp)
+                    next_billing_date = (base_date + timedelta(days=30)).strftime('%Y年%m月%d日')
+                    logger.info(f"=== DEBUG: Calculated next billing date: {next_billing_date}")
                 
                 return jsonify({
                     'has_subscription': True,

@@ -28,6 +28,11 @@ class StripeService:
         self.REGULAR_PLAN_PRODUCT_ID = 'prod_SujKOCieVMHURs'
         self.HEAVY_PLAN_PRODUCT_ID = 'prod_SxZnP56JdS3sAO'
         
+        # サブスクリプションプラン価格ID（正しいSubscriptionオブジェクト生成用）
+        self.LIGHT_PLAN_PRICE_ID = 'price_1S1eZFJcdIKryf6lLOaoQDuk'
+        self.REGULAR_PLAN_PRICE_ID = 'price_1Ryts6JcdIKryf6lsvgm1q98'
+        self.HEAVY_PLAN_PRICE_ID = 'price_1S1edcJcdIKryf6lhohuXrjN'
+        
         # 追加パック商品ID
         self.PACK_20_PRODUCT_ID = 'prod_SxabdJImg6JtmO'
         self.PACK_40_PRODUCT_ID = 'prod_SxachRVt6fDEBe'
@@ -147,17 +152,17 @@ class StripeService:
     def _create_subscription_checkout(self, customer_id: str, user_id: str, success_url: str, cancel_url: str, product_id: str, plan_type: str) -> Dict[str, Any]:
         """サブスクリプションチェックアウトの共通処理"""
         try:
-            # Stripeセッションを作成
+            # プラン別のPrice IDを取得
+            price_id = self._get_plan_price_id(plan_type)
+            if not price_id:
+                raise ValueError(f"Invalid plan type: {plan_type}")
+            
+            # Stripeセッションを作成（Price IDを使用）
             session = stripe.checkout.Session.create(
                 customer=customer_id,
                 payment_method_types=['card'],
                 line_items=[{
-                    'price_data': {
-                        'currency': self.CURRENCY,
-                        'product': product_id,
-                        'unit_amount': self._get_plan_price(plan_type),
-                        'recurring': {'interval': 'month'}
-                    },
+                    'price': price_id,  # Price IDを直接使用
                     'quantity': 1
                 }],
                 mode='subscription',
@@ -241,6 +246,16 @@ class StripeService:
             'heavy': self.HEAVY_PLAN_PRICE
         }
         return price_map.get(plan_type, self.REGULAR_PLAN_PRICE)
+    
+    def _get_plan_price_id(self, plan_type: str) -> str:
+        """プラン別のPrice IDを取得"""
+        price_ids = {
+            'light': self.LIGHT_PLAN_PRICE_ID,
+            'regular': self.REGULAR_PLAN_PRICE_ID,
+            'heavy': self.HEAVY_PLAN_PRICE_ID,
+            'basic': self.REGULAR_PLAN_PRICE_ID  # 後方互換性
+        }
+        return price_ids.get(plan_type, '')
     
     # ===== 後方互換性のためのメソッド =====
     
