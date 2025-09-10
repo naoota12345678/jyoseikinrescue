@@ -3333,19 +3333,26 @@
         }
 
         async function showCancellationConfirm() {
+            console.log('=== DEBUG: showCancellationConfirm called');
+            
             document.getElementById('settingsModal').style.display = 'none';
             document.getElementById('cancellationModal').style.display = 'block';
             
             // 現在のサブスクリプション情報を取得
             try {
+                console.log('=== DEBUG: About to fetch subscription status');
                 const response = await fetch('/api/subscription-status', {
                     headers: {
                         'Authorization': 'Bearer ' + await auth.currentUser.getIdToken()
                     }
                 });
                 
+                console.log('=== DEBUG: Response status:', response.status);
+                console.log('=== DEBUG: Response ok:', response.ok);
+                
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('=== DEBUG: Response data:', data);
                     const infoDiv = document.getElementById('subscriptionInfo');
                     
                     if (data.has_subscription) {
@@ -3358,9 +3365,11 @@
                         document.getElementById('confirmCancelBtn').disabled = true;
                         document.getElementById('confirmCancelBtn').style.background = '#9ca3af';
                     }
+                } else {
+                    console.error('=== DEBUG: Response not ok, text:', await response.text());
                 }
             } catch (error) {
-                console.error('Subscription info error:', error);
+                console.error('=== DEBUG: Subscription info error:', error);
                 document.getElementById('subscriptionInfo').innerHTML = '<div style="font-size: 14px; color: #dc2626;">サブスクリプション情報の取得に失敗しました。</div>';
             }
         }
