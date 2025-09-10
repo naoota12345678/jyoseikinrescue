@@ -57,6 +57,11 @@ def require_auth(f):
                         'display_name': decoded_token.get('name', '')
                     })
                     logger.info(f"User creation returned ID: {user_id}")
+                    
+                    # 初回サブスクリプションを作成
+                    user_service.create_initial_subscription(uid)
+                    logger.info(f"Initial subscription created for uid: {uid}")
+                    
                     user = user_service.get_user_by_id(user_id)
                     logger.info(f"Retrieved created user: {user is not None}")
                 except Exception as e:

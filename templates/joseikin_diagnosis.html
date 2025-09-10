@@ -645,6 +645,25 @@
                         // Firebase Authentication で会員登録
                         const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
                         
+                        // サーバー側でユーザー情報とサブスクリプションを作成
+                        const token = await userCredential.user.getIdToken();
+                        const registerResponse = await fetch('/api/auth/register', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({
+                                uid: userCredential.user.uid,
+                                email: userCredential.user.email,
+                                display_name: userCredential.user.displayName || ''
+                            })
+                        });
+                        
+                        if (!registerResponse.ok) {
+                            console.error('Server registration failed:', await registerResponse.text());
+                        }
+                        
                         // 診断結果をアカウントに紐付けて保存
                         await saveDiagnosisResultsForUser(userCredential.user.uid);
                         
