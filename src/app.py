@@ -367,6 +367,9 @@ def joseikin_diagnosis():
         response = re.sub(r'労働局.*?お問い合わせ.*?[。\n]?', '', response)
         response = re.sub(r'ハローワーク.*?お問い合わせ.*?[。\n]?', '', response)
         response = re.sub(r'詳しくは.*?ご確認ください[。\n]?', '詳しくは助成金レスキューの専門AIエージェントがサポートします。', response)
+        # 不完全な文章を削除
+        response = re.sub(r'詳細な手続きや申請方法については、最寄りの[。\n]?', '', response)
+        response = re.sub(r'詳細な.*?については、最寄りの[。\n]?', '', response)
         
         # レスポンスを構造化
         applicable_grants = [{
