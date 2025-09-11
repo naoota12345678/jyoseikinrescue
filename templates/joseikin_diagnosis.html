@@ -251,6 +251,13 @@
             border-radius: 8px;
             font-size: 1rem;
         }
+        
+        /* スマホ表示の際に矢印を非表示にするための設定 */
+        @media (max-width: 860px) {
+          .roadmap-arrow {
+            display: none !important;
+          }
+        }
     </style>
 </head>
 <body>
@@ -685,13 +692,111 @@
                         <p style="color: rgba(255,255,255,0.9); font-size: 1.1rem; margin-bottom: 0;">各専門助成金エージェントで申請できます</p>
                     </div>
                     
-                    <div style="text-align: center; margin: 1.5rem 0; padding: 1.5rem; background: #fff3cd; border: 2px solid #ffc107; border-radius: 12px;">
-                        <p style="color: #856404; font-weight: 600; margin-bottom: 0.5rem;">
-                            ⚠️ この簡易診断は各助成金の控えめな金額を表示しています
+                    <!-- ロードマップ -->
+                    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif; background-color: #f4f7f9; padding: 1.5em; border-radius: 12px; margin: 1.5rem 0;">
+
+                      <!-- タイトル -->
+                      <div style="text-align: center; margin-bottom: 2.5em;">
+                        <h2 style="font-size: 1.8em; color: #2c3e50; margin: 0 0 0.5em 0; font-weight: 600;">助成金獲得までの最短ロードマップ</h2>
+                        <p style="font-size: 1em; color: #555; margin: 0;">AIエージェントと二人三脚で、計画から受給までを賢く進めましょう。</p>
+                      </div>
+
+                      <!-- ステップ -->
+                      <div style="display: flex; justify-content: center; align-items: flex-start; text-align: center; gap: 1em; flex-wrap: wrap;">
+
+                        <!-- ステップ1 -->
+                        <div style="flex: 1; min-width: 220px; max-width: 300px; background: #fff; padding: 1.5em; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.07); border-top: 4px solid #3498db; margin-bottom: 1em;">
+                          <div style="font-size: 1.2em; font-weight: bold; color: #3498db; margin-bottom: 0.5em;">STEP 1</div>
+                          <h3 style="margin: 0 0 0.8em 0; font-size: 1.2em; color: #333;">発見 & 無料相談</h3>
+                          <p style="font-size: 0.9em; color: #666; line-height: 1.6; min-height: 110px;">まずは無料診断から。会員登録で専門エージェントへの相談が<strong style="color: #e74c3c;">5回無料</strong>になります。</p>
+                          <span style="display: inline-block; background-color: #eaf5fc; color: #3498db; padding: 0.3em 0.8em; border-radius: 15px; font-size: 0.9em; font-weight: bold;">費用：無料</span>
+                        </div>
+
+                        <!-- 矢印 (スマホでは非表示) -->
+                        <div class="roadmap-arrow" style="align-self: center; font-size: 2em; color: #bdc3c7; margin: 0 1em;">&rarr;</div>
+                        
+                        <!-- ステップ2 -->
+                        <div style="flex: 1; min-width: 220px; max-width: 300px; background: #fff; padding: 1.5em; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.07); border-top: 4px solid #f39c12; margin-bottom: 1em;">
+                          <div style="font-size: 1.2em; font-weight: bold; color: #f39c12; margin-bottom: 0.5em;">STEP 2</div>
+                          <h3 style="margin: 0 0 0.8em 0; font-size: 1.2em; color: #333;">計画 & 申請サポート</h3>
+                          <p style="font-size: 0.9em; color: #666; line-height: 1.6; min-height: 110px;">サブスク登録後は、<strong style="color: #e74c3c;">月20回</strong>まで相談可能。AIエージェントが疑問に全て答えます。相談回数が足りない月は<strong style="color: #e74c3c;">追加パッケージ</strong>のご購入も可能。また、複数申請向けに<strong style="color: #e74c3c;">月50回/90回の上位プラン</strong>もご用意しています。</p>
+                          <span style="display: inline-block; background-color: #fef5e7; color: #f39c12; padding: 0.3em 0.8em; border-radius: 15px; font-size: 0.9em; font-weight: bold;">費用：月額1,480円〜</span>
+                        </div>
+                        
+                        <!-- 矢印 (スマホでは非表示) -->
+                        <div class="roadmap-arrow" style="align-self: center; font-size: 2em; color: #bdc3c7; margin: 0 1em;">&rarr;</div>
+
+                        <!-- ステップ3 -->
+                        <div style="flex: 1; min-width: 220px; max-width: 300px; background: #fff; padding: 1.5em; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.07); border-top: 4px solid #2ecc71; margin-bottom: 1em;">
+                          <div style="font-size: 1.2em; font-weight: bold; color: #2ecc71; margin-bottom: 0.5em;">STEP 3</div>
+                          <h3 style="margin: 0 0 0.8em 0; font-size: 1.2em; color: #333;">受給開始</h3>
+                          <p style="font-size: 0.9em; color: #666; line-height: 1.6; min-height: 110px;"><strong style="color:#333; display: inline-block; white-space: nowrap;">【例：キャリアアップ助成金の場合】</strong><br>準備から約8ヶ月で1期目(40万円)、その6ヶ月後に2期目(40万円)を受給！</p>
+                          <span style="display: inline-block; background-color: #eafaf1; color: #2ecc71; padding: 0.3em 0.8em; border-radius: 15px; font-size: 0.9em; font-weight: bold;">合計80万円の例も！</span>
+                        </div>
+                      </div>
+
+                      <!-- まとめ・投資対効果 -->
+                      <div style="background: #fff; margin-top: 2.5em; padding: 2em; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.07); text-align: center;">
+                        <h3 style="margin: 0 0 1em 0; font-size: 1.4em; color: #2c3e50;">【投資シミュレーション】<br>14ヶ月間の利用でこれだけお得に！</h3>
+                        <div style="display: flex; justify-content: center; align-items: center; gap: 1.5em; flex-wrap: wrap;">
+                          <div>
+                            <div style="font-size: 1em; color: #7f8c8d;">総受給額 (例)</div>
+                            <div style="font-size: 2.2em; font-weight: bold; color: #2ecc71;">800,000<span style="font-size:0.7em;">円</span></div>
+                          </div>
+                          <div style="font-size: 1.5em; color: #7f8c8d;">-</div>
+                          <div>
+                            <div style="font-size: 1em; color: #7f8c8d;">サービス費用 (14ヶ月)</div>
+                            <div style="font-size: 2.2em; font-weight: bold; color: #e74c3c;">20,720<span style="font-size:0.7em;">円</span></div>
+                          </div>
+                          <div style="font-size: 1.5em; color: #7f8c8d;">=</div>
+                          <div>
+                            <div style="font-size: 1em; color: #7f8c8d;">あなたの純利益</div>
+                            <div style="font-size: 2.8em; font-weight: bold; color: #2980b9; background: #ecf5ff; padding: 0.1em 0.4em; border-radius: 8px;">+779,280<span style="font-size:0.6em;">円</span></div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- 高額助成金の場合の比較ブロック -->
+                      <div style="background: #eafaf1; border-left: 5px solid #2ecc71; margin-top: 2.5em; padding: 2em; border-radius: 10px; text-align: center;">
+                        <h3 style="margin: 0 0 1em 0; font-size: 1.4em; color: #2c3e50;">
+                          <span style="display: block; font-size: 0.8em; color: #16a085;">＼もし受給額が600万円なら… その差は歴然です！／</span>
+                        </h3>
+                        <div style="display: flex; justify-content: center; align-items: stretch; gap: 1.5em; flex-wrap: wrap;">
+                          <!-- 一般的な社労士報酬 -->
+                          <div style="flex: 1; min-width: 220px; background: #fff; padding: 1.5em 1em; border-radius: 8px; border: 1px solid #ddd;">
+                            <div style="font-size: 1.1em; color: #7f8c8d;">一般的な成功報酬 (25%)</div>
+                            <div style="font-size: 2.5em; font-weight: bold; color: #e74c3c; margin-top: 0.2em;">1,500,000<span style="font-size:0.6em;">円</span></div>
+                          </div>
+                          <!-- 当社サービス費用 -->
+                          <div style="flex: 1; min-width: 220px; background: #fff; padding: 1.5em 1em; border-radius: 8px; border: 1px solid #ddd;">
+                            <div style="font-size: 1.1em; color: #7f8c8d;">当サポート費用 (14ヶ月例)</div>
+                            <div style="font-size: 2.5em; font-weight: bold; color: #2980b9; margin-top: 0.2em;">20,720<span style="font-size:0.6em;">円</span></div>
+                          </div>
+                        </div>
+                        <p style="margin-top: 1.5em; margin-bottom: 0; color: #333; font-size: 1.1em; font-weight: 600;">圧倒的なコストパフォーマンスで、あなたの挑戦を全力で応援します。</p>
+                      </div>
+                      
+                      <!-- 【NEW】専門家相談オプション -->
+                      <div style="background: #fff; border: 2px dashed #3498db; margin-top: 2.5em; padding: 2em; border-radius: 10px; text-align: center;">
+                        <h3 style="margin: 0 0 1em 0; font-size: 1.4em; color: #2c3e50;">
+                          <span style="display: block; font-size: 0.8em; color: #2980b9;">＼もしもの時も万全のサポート体制／</span>
+                          専門家への直接相談オプション
+                        </h3>
+                        <p style="margin: 0 auto 1.5em auto; max-width: 600px; color: #333; line-height: 1.7;">
+                          複雑なケースやトラブルでお困りの際は、助成金に特化した社会保険労務士へ直接ご相談いただけます（予約制）。専門家による的確なアドバイスとその後の<strong style="color: #2980b9;">詳細レポート</strong>は、あなたの事業の大きな助けになります。
                         </p>
-                        <p style="color: #856404; margin: 0;">
-                            最大額を知りたい方は専門エージェントにぜひ質問してみてください
-                        </p>
+                        <div style="display: inline-block; background: #ecf5ff; padding: 0.8em 1.5em; border-radius: 8px; margin-bottom: 1em;">
+                          <div style="font-size: 1em; color: #34495e;">相談料</div>
+                          <div style="font-size: 2em; font-weight: bold; color: #2c3e50;">13,000<span style="font-size:0.6em;">円</span><span style="font-size:0.8em; font-weight:normal;"> / 30分</span></div>
+                        </div>
+                        <p style="margin-top: 1.5em; margin-bottom: 0; color: #333; font-size: 1.1em; font-weight: 600;">このオプションを利用しても、ご自身で進めても、大変お得です。</p>
+                      </div>
+
+                      <!-- 注釈 -->
+                      <div style="text-align: right; margin-top: 1.5em; font-size: 0.9em; color: #777;">
+                        ※受給額や期間は助成金の種類や申請のタイミングによって変動します。
+                      </div>
+
                     </div>
                 `;
             }
