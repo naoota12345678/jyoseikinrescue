@@ -251,13 +251,6 @@
             border-radius: 8px;
             font-size: 1rem;
         }
-        
-        /* スマホ表示の際に矢印を非表示にするための設定 */
-        @media (max-width: 860px) {
-          .roadmap-arrow {
-            display: none !important;
-          }
-        }
     </style>
 </head>
 <body>
@@ -702,35 +695,29 @@
                       </div>
 
                       <!-- ステップ -->
-                      <div style="display: flex; justify-content: center; align-items: flex-start; text-align: center; gap: 1em; flex-wrap: wrap;">
+                      <div style="display: flex; flex-direction: column; gap: 1.5em; max-width: 600px; margin: 0 auto;">
 
                         <!-- ステップ1 -->
-                        <div style="flex: 1; min-width: 220px; max-width: 300px; background: #fff; padding: 1.5em; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.07); border-top: 4px solid #3498db; margin-bottom: 1em;">
+                        <div style="background: #fff; padding: 1.5em; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.07); border-left: 4px solid #3498db;">
                           <div style="font-size: 1.2em; font-weight: bold; color: #3498db; margin-bottom: 0.5em;">STEP 1</div>
                           <h3 style="margin: 0 0 0.8em 0; font-size: 1.2em; color: #333;">発見 & 無料相談</h3>
-                          <p style="font-size: 0.9em; color: #666; line-height: 1.6; min-height: 110px;">まずは無料診断から。会員登録で専門エージェントへの相談が<strong style="color: #e74c3c;">5回無料</strong>になります。</p>
+                          <p style="font-size: 0.9em; color: #666; line-height: 1.6; margin-bottom: 1em;">まずは無料診断から。会員登録で専門エージェントへの相談が<strong style="color: #e74c3c;">5回無料</strong>になります。</p>
                           <span style="display: inline-block; background-color: #eaf5fc; color: #3498db; padding: 0.3em 0.8em; border-radius: 15px; font-size: 0.9em; font-weight: bold;">費用：無料</span>
                         </div>
-
-                        <!-- 矢印 (スマホでは非表示) -->
-                        <div class="roadmap-arrow" style="align-self: center; font-size: 2em; color: #bdc3c7; margin: 0 1em;">&rarr;</div>
                         
                         <!-- ステップ2 -->
-                        <div style="flex: 1; min-width: 220px; max-width: 300px; background: #fff; padding: 1.5em; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.07); border-top: 4px solid #f39c12; margin-bottom: 1em;">
+                        <div style="background: #fff; padding: 1.5em; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.07); border-left: 4px solid #f39c12;">
                           <div style="font-size: 1.2em; font-weight: bold; color: #f39c12; margin-bottom: 0.5em;">STEP 2</div>
                           <h3 style="margin: 0 0 0.8em 0; font-size: 1.2em; color: #333;">計画 & 申請サポート</h3>
-                          <p style="font-size: 0.9em; color: #666; line-height: 1.6; min-height: 110px;">サブスク登録後は、<strong style="color: #e74c3c;">月20回</strong>まで相談可能。AIエージェントが疑問に全て答えます。相談回数が足りない月は<strong style="color: #e74c3c;">追加パッケージ</strong>のご購入も可能。また、複数申請向けに<strong style="color: #e74c3c;">月50回/90回の上位プラン</strong>もご用意しています。</p>
+                          <p style="font-size: 0.9em; color: #666; line-height: 1.6; margin-bottom: 1em;">サブスク登録後は、<strong style="color: #e74c3c;">月20回</strong>まで相談可能。AIエージェントが疑問に全て答えます。相談回数が足りない月は<strong style="color: #e74c3c;">追加パッケージ</strong>のご購入も可能。また、複数申請向けに<strong style="color: #e74c3c;">月50回/90回の上位プラン</strong>もご用意しています。</p>
                           <span style="display: inline-block; background-color: #fef5e7; color: #f39c12; padding: 0.3em 0.8em; border-radius: 15px; font-size: 0.9em; font-weight: bold;">費用：月額1,480円〜</span>
                         </div>
-                        
-                        <!-- 矢印 (スマホでは非表示) -->
-                        <div class="roadmap-arrow" style="align-self: center; font-size: 2em; color: #bdc3c7; margin: 0 1em;">&rarr;</div>
 
                         <!-- ステップ3 -->
-                        <div style="flex: 1; min-width: 220px; max-width: 300px; background: #fff; padding: 1.5em; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.07); border-top: 4px solid #2ecc71; margin-bottom: 1em;">
+                        <div style="background: #fff; padding: 1.5em; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.07); border-left: 4px solid #2ecc71;">
                           <div style="font-size: 1.2em; font-weight: bold; color: #2ecc71; margin-bottom: 0.5em;">STEP 3</div>
                           <h3 style="margin: 0 0 0.8em 0; font-size: 1.2em; color: #333;">受給開始</h3>
-                          <p style="font-size: 0.9em; color: #666; line-height: 1.6; min-height: 110px;"><strong style="color:#333; display: inline-block; white-space: nowrap;">【例：キャリアアップ助成金の場合】</strong><br>準備から約8ヶ月で1期目(40万円)、その6ヶ月後に2期目(40万円)を受給！</p>
+                          <p style="font-size: 0.9em; color: #666; line-height: 1.6; margin-bottom: 1em;"><strong style="color:#333; display: inline-block; white-space: nowrap;">【例：キャリアアップ助成金の場合】</strong><br>準備から約8ヶ月で1期目(40万円)、その6ヶ月後に2期目(40万円)を受給！</p>
                           <span style="display: inline-block; background-color: #eafaf1; color: #2ecc71; padding: 0.3em 0.8em; border-radius: 15px; font-size: 0.9em; font-weight: bold;">合計80万円の例も！</span>
                         </div>
                       </div>
