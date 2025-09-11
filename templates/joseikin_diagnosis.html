@@ -286,19 +286,29 @@
                     <label>業種:</label>
                     <div class="options">
                         <div class="option" onclick="selectOption(this, 'industry', 'construction')">
-                            <input type="radio" name="industry" value="construction"> 建設業
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="radio" name="industry" value="construction"> 建設業
+                            </label>
                         </div>
                         <div class="option" onclick="selectOption(this, 'industry', 'manufacturing')">
-                            <input type="radio" name="industry" value="manufacturing"> 製造業
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="radio" name="industry" value="manufacturing"> 製造業
+                            </label>
                         </div>
                         <div class="option" onclick="selectOption(this, 'industry', 'service')">
-                            <input type="radio" name="industry" value="service"> サービス業
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="radio" name="industry" value="service"> サービス業
+                            </label>
                         </div>
                         <div class="option" onclick="selectOption(this, 'industry', 'it')">
-                            <input type="radio" name="industry" value="it"> IT・通信業
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="radio" name="industry" value="it"> IT・通信業
+                            </label>
                         </div>
                         <div class="option" onclick="selectOption(this, 'industry', 'other')">
-                            <input type="radio" name="industry" value="other"> その他
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="radio" name="industry" value="other"> その他
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -323,19 +333,29 @@
                     <h3>4. 労働者の年齢構成</h3>
                     <div class="options">
                         <div class="option" onclick="selectMultiple(this, 'ageGroups')">
-                            <input type="checkbox" name="ageGroups" value="young"> 35歳未満の若年者がいる
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="checkbox" name="ageGroups" value="young"> 35歳未満の若年者がいる
+                            </label>
                         </div>
                         <div class="option" onclick="selectMultiple(this, 'ageGroups')">
-                            <input type="checkbox" name="ageGroups" value="middle"> 50歳以上の中高年者がいる
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="checkbox" name="ageGroups" value="middle"> 50歳以上の中高年者がいる
+                            </label>
                         </div>
                         <div class="option" onclick="selectMultiple(this, 'ageGroups')">
-                            <input type="checkbox" name="ageGroups" value="senior60"> 60～64歳の高年齢者がいる
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="checkbox" name="ageGroups" value="senior60"> 60～64歳の高年齢者がいる
+                            </label>
                         </div>
                         <div class="option" onclick="selectMultiple(this, 'ageGroups')">
-                            <input type="checkbox" name="ageGroups" value="senior65"> 65歳以上の高齢者がいる
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="checkbox" name="ageGroups" value="senior65"> 65歳以上の高齢者がいる
+                            </label>
                         </div>
                         <div class="option" onclick="selectMultiple(this, 'ageGroups')">
-                            <input type="checkbox" name="ageGroups" value="seniorHire"> 65歳以上の継続雇用制度がある・検討中
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="checkbox" name="ageGroups" value="seniorHire"> 65歳以上の継続雇用制度がある・検討中
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -344,16 +364,24 @@
                     <h3>5. 特別な配慮が必要な労働者</h3>
                     <div class="options">
                         <div class="option" onclick="selectMultiple(this, 'specialNeeds')">
-                            <input type="checkbox" name="specialNeeds" value="disability"> 障害者雇用がある・予定がある
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="checkbox" name="specialNeeds" value="disability"> 障害者雇用がある・予定がある
+                            </label>
                         </div>
                         <div class="option" onclick="selectMultiple(this, 'specialNeeds')">
-                            <input type="checkbox" name="specialNeeds" value="female"> 女性労働者の活躍推進
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="checkbox" name="specialNeeds" value="female"> 女性労働者の活躍推進
+                            </label>
                         </div>
                         <div class="option" onclick="selectMultiple(this, 'specialNeeds')">
-                            <input type="checkbox" name="specialNeeds" value="foreign"> 外国人労働者がいる
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="checkbox" name="specialNeeds" value="foreign"> 外国人労働者がいる
+                            </label>
                         </div>
                         <div class="option" onclick="selectMultiple(this, 'specialNeeds')">
-                            <input type="checkbox" name="specialNeeds" value="singleParent"> 母子・父子家庭の労働者がいる
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="checkbox" name="specialNeeds" value="singleParent"> 母子・父子家庭の労働者がいる
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -362,13 +390,19 @@
                     <h3>6. 現在の経営状況</h3>
                     <div class="options">
                         <div class="option" onclick="selectOption(this, 'businessSituation', 'declining')">
-                            <input type="radio" name="businessSituation" value="declining"> 売上減少・事業縮小している
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="radio" name="businessSituation" value="declining"> 売上減少・事業縮小している
+                            </label>
                         </div>
                         <div class="option" onclick="selectOption(this, 'businessSituation', 'stable')">
-                            <input type="radio" name="businessSituation" value="stable"> 安定している
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="radio" name="businessSituation" value="stable"> 安定している
+                            </label>
                         </div>
                         <div class="option" onclick="selectOption(this, 'businessSituation', 'growing')">
-                            <input type="radio" name="businessSituation" value="growing"> 成長・拡大している
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="radio" name="businessSituation" value="growing"> 成長・拡大している
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -380,13 +414,19 @@
                     
                     <div class="options">
                         <div class="option" onclick="selectMultiple(this, 'wageImprovement')">
-                            <input type="checkbox" name="wageImprovement" value="raise"> 賃金引上げを検討している
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="checkbox" name="wageImprovement" value="raise"> 賃金引上げを検討している
+                            </label>
                         </div>
                         <div class="option" onclick="selectMultiple(this, 'wageImprovement')">
-                            <input type="checkbox" name="wageImprovement" value="regularization"> 非正規を正社員化したい
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="checkbox" name="wageImprovement" value="regularization"> 非正規を正社員化したい
+                            </label>
                         </div>
                         <div class="option" onclick="selectMultiple(this, 'wageImprovement')">
-                            <input type="checkbox" name="wageImprovement" value="bonus"> 賞与・退職金制度を導入したい
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="checkbox" name="wageImprovement" value="bonus"> 賞与・退職金制度を導入したい
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -395,19 +435,29 @@
                     <h3>8. 投資・改善の予定</h3>
                     <div class="options">
                         <div class="option" onclick="selectMultiple(this, 'investments')">
-                            <input type="checkbox" name="investments" value="equipment"> 設備投資・機器導入
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="checkbox" name="investments" value="equipment"> 設備投資・機器導入
+                            </label>
                         </div>
                         <div class="option" onclick="selectMultiple(this, 'investments')">
-                            <input type="checkbox" name="investments" value="training"> 職業訓練・研修実施
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="checkbox" name="investments" value="training"> 職業訓練・研修実施
+                            </label>
                         </div>
                         <div class="option" onclick="selectMultiple(this, 'investments')">
-                            <input type="checkbox" name="investments" value="it"> IT化・DX推進
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="checkbox" name="investments" value="it"> IT化・DX推進
+                            </label>
                         </div>
                         <div class="option" onclick="selectMultiple(this, 'investments')">
-                            <input type="checkbox" name="investments" value="workStyle"> 働き方改革（テレワーク等）
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="checkbox" name="investments" value="workStyle"> 働き方改革（テレワーク等）
+                            </label>
                         </div>
                         <div class="option" onclick="selectMultiple(this, 'investments')">
-                            <input type="checkbox" name="investments" value="safety"> 安全衛生対策
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="checkbox" name="investments" value="safety"> 安全衛生対策
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -416,16 +466,24 @@
                     <h3>9. 両立支援・職場環境</h3>
                     <div class="options">
                         <div class="option" onclick="selectMultiple(this, 'workLifeBalance')">
-                            <input type="checkbox" name="workLifeBalance" value="childcare"> 育児支援制度を充実させたい
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="checkbox" name="workLifeBalance" value="childcare"> 育児支援制度を充実させたい
+                            </label>
                         </div>
                         <div class="option" onclick="selectMultiple(this, 'workLifeBalance')">
-                            <input type="checkbox" name="workLifeBalance" value="eldercare"> 介護支援制度を充実させたい
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="checkbox" name="workLifeBalance" value="eldercare"> 介護支援制度を充実させたい
+                            </label>
                         </div>
                         <div class="option" onclick="selectMultiple(this, 'workLifeBalance')">
-                            <input type="checkbox" name="workLifeBalance" value="health"> 健康経営を推進したい
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="checkbox" name="workLifeBalance" value="health"> 健康経営を推進したい
+                            </label>
                         </div>
                         <div class="option" onclick="selectMultiple(this, 'workLifeBalance')">
-                            <input type="checkbox" name="workLifeBalance" value="smoking"> 受動喫煙防止対策が必要
+                            <label style="display: block; width: 100%; cursor: pointer; margin: 0;">
+                                <input type="checkbox" name="workLifeBalance" value="smoking"> 受動喫煙防止対策が必要
+                            </label>
                         </div>
                     </div>
                 </div>
