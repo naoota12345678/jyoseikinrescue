@@ -103,7 +103,9 @@ def check_usage_limit(f):
                 }), 401
             
             # user_idフィールドを使用（ドキュメントIDではなく）
+            logger.info(f"=== DEBUG: current_user contents: {g.current_user}")
             user_id = g.current_user.get('user_id') or g.current_user.get('uid') or g.current_user['id']
+            logger.info(f"=== DEBUG: Determined user_id: {user_id}")
             subscription_service = SubscriptionService(firebase_service)
             
             # 使用状況を確認
