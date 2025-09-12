@@ -2535,12 +2535,23 @@
         function showSubcoursesForCourse(courseId, event) {
             console.log('showSubcoursesForCourse called with:', courseId, event);
             
+            // イベント伝播を停止
+            if (event) {
+                event.stopPropagation();
+            }
+            
             // 他のサブメニューを隠す
             if (courseId !== 'jinzai-kaihatsu_jinzai-ikusei') {
-                document.getElementById('jinzaiIkuseiSubcoursesMenu').style.display = 'none';
+                const ikuseiMenu = document.getElementById('jinzaiIkuseiSubcoursesMenu');
+                if (ikuseiMenu) {
+                    ikuseiMenu.style.display = 'none';
+                }
             }
             if (courseId !== 'jinzai-kaihatsu_toushi') {
-                document.getElementById('jinzaiToushiSubcoursesMenu').style.display = 'none';
+                const toushiMenu = document.getElementById('jinzaiToushiSubcoursesMenu');
+                if (toushiMenu) {
+                    toushiMenu.style.display = 'none';
+                }
             }
             
             if (courseId === 'jinzai-kaihatsu_jinzai-ikusei') {
@@ -2566,17 +2577,34 @@
                     const rect = clickedItem ? clickedItem.getBoundingClientRect() : parentMenu.getBoundingClientRect();
                     console.log('項目位置:', rect);
                     
+                    // サブメニューを表示
                     subcoursesMenu.style.display = 'block';
+                    subcoursesMenu.style.position = 'fixed';
                     subcoursesMenu.style.top = rect.top + 'px';
                     subcoursesMenu.style.left = (rect.right + 8) + 'px';
+                    subcoursesMenu.style.zIndex = '10000';
                     
                     console.log('サブメニュー設定:', {
                         display: subcoursesMenu.style.display,
+                        position: subcoursesMenu.style.position,
                         top: subcoursesMenu.style.top,
-                        left: subcoursesMenu.style.left
+                        left: subcoursesMenu.style.left,
+                        zIndex: subcoursesMenu.style.zIndex,
+                        element: subcoursesMenu
+                    });
+                    
+                    // サブメニューが実際に表示されているか確認
+                    const computedStyle = window.getComputedStyle(subcoursesMenu);
+                    console.log('計算されたスタイル:', {
+                        display: computedStyle.display,
+                        visibility: computedStyle.visibility,
+                        opacity: computedStyle.opacity
                     });
                 } else {
-                    console.error('サブメニューまたは親メニューが見つかりません');
+                    console.error('サブメニューまたは親メニューが見つかりません', {
+                        subcoursesMenu: subcoursesMenu,
+                        parentMenu: parentMenu
+                    });
                 }
             }
         }
