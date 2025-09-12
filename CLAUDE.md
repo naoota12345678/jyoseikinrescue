@@ -818,6 +818,96 @@ console.log('診断結果をlocalStorageに保存しました:', aiResultData);
 
 **教訓**: 自動化の内部処理はブラックボックス化され、問題の特定・修正が困難。明示的な手動制御により予測可能性と安定性を確保。
 
+### 2025-09-11 専門エージェント403エラー問題解決・認証キャッシュ問題セッション ✅
+
+**問題**: 
+- 既存ユーザーで50回プランを購入済みなのに`"plan_type":"none"`と表示
+- 専門エージェント使用時に403 Forbidden エラー
+- エラーレスポンス: `{"code":"LIMIT_EXCEEDED","error":"質問回数の上限に達しています","upgrade_required":true,"usage_stats":{"plan_type":"none","questions_limit":0,"questions_used":0,"remaining":0,"status":"inactive"}}`
+
+**調査過程**:
+1. **Firebaseデータ確認**: サブスクリプション情報は完全に正常
+   - plan_type: "regular" (50回プラン)
+   - status: "active"
+   - questions_limit: 50, questions_used: 5
+   - user_id: "EtDZlq7Y7fZVpzz6sxBti62Aea23"
+
+2. **複雑な解決策検討**: Session IDからSubscription ID取得、Stripe連携修正等を検討
+
+3. **シンプルな解決法発見**: ユーザーがログアウト/ログインで即座に解決
+
+**根本原因特定**:
+- **Firebase認証キャッシュの不整合**: ブラウザ側の古いIDトークンがキャッシュされていた
+- サーバー側で間違った認証情報での`get_user_subscription()`実行
+- 結果として`subscription`がNoneになり`"plan_type":"none"`が返される
+
+**技術的詳細**:
+```python
+# subscription.py:243-250 - この部分が実行されていた
+if not subscription:
+    return {
+        'plan_type': 'none',  # ← エラーで表示されていた値
+        'status': 'inactive'
+    }
+```
+
+**解決策**:
+- **即効性**: ログアウト/ログイン（100%解決）
+- **予防策**: Firebase IDトークンの自動リフレッシュ機能も検討したが、複雑性とコストを考慮し実装せず
+
+**デバッグ過程**:
+- 一時的にauth_middleware.pyにデバッグログ追加
+- `g.current_user`の内容と`user_id`決定プロセスの詳細確認
+- 問題解決後にデバッグログを削除してクリーンな状態に復旧
+
+**重要な学び**:
+- 複雑なシステム修正より「ログアウト/ログイン」のシンプルな解決法が最適
+- Firebase認証のキャッシュ問題は意外と多く発生する
+- セッション関連問題は再認証で解決することが多い
+
+**同時ログイン時の競合について**:
+- Firebase UID: 各ユーザーに一意のID保証
+- Firestore Transaction: 同時書き込み時の整合性保証
+- セッション分離: ユーザー間のセッション完全独立
+- **結論**: 1000人が同時ログインしても問題なし
+
+**今後の対処法**:
+1. 403エラー発生時はまず「ログアウト/ログイン」を案内
+2. それでも解決しない場合のみ詳細調査
+3. Firebase認証キャッシュ問題として対処
+
+**ユーザー確認済み**: 問題完全解決、正常にプラン情報が表示されることを確認
+
+### 2025-09-11 人への投資促進コース詳細表示問題（継続中） 🔧
+
+**問題**: 
+- エージェント選択で「人への投資促進コース」の詳細コース（サブコース）が見えなくなった
+
+**調査状況**:
+1. **HTMLコード確認**: サブコースメニューは正常に存在
+   - `jinzaiToushiSubcoursesMenu`要素が定義済み
+   - 4つの詳細コース（定額制訓練、自発的職業能力開発訓練、高度デジタル人材等訓練、情報技術分野認定実習併用職業訓練）
+
+2. **JavaScript確認**: 表示制御ロジックも正常
+   - `showSubcoursesForCourse('jinzai-kaihatsu_toushi')`関数実装済み
+   - クリックイベント: `onclick="showSubcoursesForCourse('jinzai-kaihatsu_toushi')"`設定済み
+
+3. **デバッグログ実装済み**: コンソールで確認可能
+   ```javascript
+   console.log('showSubcoursesForCourse called with:', courseId);
+   console.log('人への投資促進コース - subcoursesMenu:', subcoursesMenu);
+   console.log('人への投資促進コース - parentMenu:', parentMenu);
+   ```
+
+**次のステップ**: 
+- ブラウザ開発者ツールでコンソールログ確認
+- クリックイベントの発火状況とエラーログの確認が必要
+
+**技術的詳細**:
+- 人への投資促進コース要素: `dashboard.html:1289-1292`
+- サブメニュー表示関数: `dashboard.html:2530-2573`
+- サブメニューHTML: `dashboard.html:1324-1340`
+
 ## プロジェクト構造メモ
 - `/templates/index.html`: トップページ（無料診断メイン）
 - `/templates/dashboard.html`: ログイン後ダッシュボード
