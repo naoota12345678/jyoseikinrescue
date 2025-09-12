@@ -878,35 +878,54 @@ if not subscription:
 
 **ユーザー確認済み**: 問題完全解決、正常にプラン情報が表示されることを確認
 
-### 2025-09-11 人への投資促進コース詳細表示問題（継続中） 🔧
+### 2025-09-12 人への投資促進コース詳細表示問題解決セッション ✅
 
 **問題**: 
 - エージェント選択で「人への投資促進コース」の詳細コース（サブコース）が見えなくなった
+- クリックしてもサブメニューが表示されない
 
-**調査状況**:
-1. **HTMLコード確認**: サブコースメニューは正常に存在
-   - `jinzaiToushiSubcoursesMenu`要素が定義済み
-   - 4つの詳細コース（定額制訓練、自発的職業能力開発訓練、高度デジタル人材等訓練、情報技術分野認定実習併用職業訓練）
+**根本原因**:
+1. **イベント伝播の問題**: クリックイベントが親要素に伝播してメニューが即座に閉じていた
+2. **z-indexの不足**: サブメニューのz-indexが不十分で他の要素の下に隠れていた
+3. **DOM要素の存在確認不足**: エラー時にundefinedアクセスでJavaScriptエラーが発生
 
-2. **JavaScript確認**: 表示制御ロジックも正常
-   - `showSubcoursesForCourse('jinzai-kaihatsu_toushi')`関数実装済み
-   - クリックイベント: `onclick="showSubcoursesForCourse('jinzai-kaihatsu_toushi')"`設定済み
-
-3. **デバッグログ実装済み**: コンソールで確認可能
+**実装した解決策**:
+1. **イベント伝播停止**
    ```javascript
-   console.log('showSubcoursesForCourse called with:', courseId);
-   console.log('人への投資促進コース - subcoursesMenu:', subcoursesMenu);
-   console.log('人への投資促進コース - parentMenu:', parentMenu);
+   if (event) {
+       event.stopPropagation();
+   }
    ```
 
-**次のステップ**: 
-- ブラウザ開発者ツールでコンソールログ確認
-- クリックイベントの発火状況とエラーログの確認が必要
+2. **z-index設定強化**
+   - CSSに`z-index: 9999`追加
+   - JavaScriptでも動的に`z-index: 10000`設定
+
+3. **要素存在チェック追加**
+   ```javascript
+   const toushiMenu = document.getElementById('jinzaiToushiSubcoursesMenu');
+   if (toushiMenu) {
+       toushiMenu.style.display = 'none';
+   }
+   ```
+
+4. **onclick属性にeventパラメータ追加**
+   ```html
+   onclick="showSubcoursesForCourse('jinzai-kaihatsu_toushi', event)"
+   ```
 
 **技術的詳細**:
 - 人への投資促進コース要素: `dashboard.html:1289-1292`
-- サブメニュー表示関数: `dashboard.html:2530-2573`
-- サブメニューHTML: `dashboard.html:1324-1340`
+- サブメニュー表示関数: `dashboard.html:2535-2610`
+- サブメニューHTML: `dashboard.html:1325-1338`
+- 修正箇所: イベント処理、z-index、要素チェック
+
+**結果**: 
+- ✅ サブメニューが正常に表示される
+- ✅ 4つの詳細コース（定額制訓練、自発的職業能力開発訓練、高度デジタル人材等訓練、情報技術分野認定実習併用職業訓練）が選択可能
+- ✅ favicon.ico 404エラーは機能に影響なし（無視して問題なし）
+
+**ユーザー確認済み**: 「うまくいきました」
 
 ## プロジェクト構造メモ
 - `/templates/index.html`: トップページ（無料診断メイン）
