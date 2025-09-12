@@ -2533,7 +2533,6 @@
 
         // 人材育成支援コースのサブコース選択を表示
         function showSubcoursesForCourse(courseId, event) {
-            console.log('showSubcoursesForCourse called with:', courseId, event);
             
             // イベント伝播を停止
             if (event) {
@@ -2568,14 +2567,11 @@
             } else if (courseId === 'jinzai-kaihatsu_toushi') {
                 const subcoursesMenu = document.getElementById('jinzaiToushiSubcoursesMenu');
                 const parentMenu = document.getElementById('jinzaiKaihatsuCoursesMenu');
-                console.log('人への投資促進コース - subcoursesMenu:', subcoursesMenu);
-                console.log('人への投資促進コース - parentMenu:', parentMenu);
                 
                 if (subcoursesMenu && parentMenu) {
                     // 「人への投資促進コース」項目を直接取得
                     const clickedItem = event ? event.currentTarget : document.querySelector('[onclick*="jinzai-kaihatsu_toushi"]');
                     const rect = clickedItem ? clickedItem.getBoundingClientRect() : parentMenu.getBoundingClientRect();
-                    console.log('項目位置:', rect);
                     
                     // サブメニューを表示
                     subcoursesMenu.style.display = 'block';
@@ -2583,28 +2579,6 @@
                     subcoursesMenu.style.top = rect.top + 'px';
                     subcoursesMenu.style.left = (rect.right + 8) + 'px';
                     subcoursesMenu.style.zIndex = '10000';
-                    
-                    console.log('サブメニュー設定:', {
-                        display: subcoursesMenu.style.display,
-                        position: subcoursesMenu.style.position,
-                        top: subcoursesMenu.style.top,
-                        left: subcoursesMenu.style.left,
-                        zIndex: subcoursesMenu.style.zIndex,
-                        element: subcoursesMenu
-                    });
-                    
-                    // サブメニューが実際に表示されているか確認
-                    const computedStyle = window.getComputedStyle(subcoursesMenu);
-                    console.log('計算されたスタイル:', {
-                        display: computedStyle.display,
-                        visibility: computedStyle.visibility,
-                        opacity: computedStyle.opacity
-                    });
-                } else {
-                    console.error('サブメニューまたは親メニューが見つかりません', {
-                        subcoursesMenu: subcoursesMenu,
-                        parentMenu: parentMenu
-                    });
                 }
             }
         }
