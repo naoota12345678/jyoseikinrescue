@@ -384,7 +384,7 @@
             <div class="logo">
                 <img src="/static/logo.png" class="logo-image" alt="助成金レスキュー">
             </div>
-            <a href="/" class="back-button">← 戻る</a>
+            <a href="/diagnosis" class="back-button">← 診断フォームに戻る</a>
         </div>
     </div>
     
@@ -791,12 +791,29 @@
             if (results.length === 0) {
                 resultsList.innerHTML = '<p>申し訳ございません。現在の条件では該当する助成金が見つかりませんでした。条件を見直すか、個別相談をご利用ください。</p>';
             } else {
-                resultsList.innerHTML = results.map(result => `
-                    <div class="result-item">
-                        <h4>${result.name}</h4>
-                        <div style="white-space: pre-line;">${result.description}</div>
-                    </div>
-                `).join('') + `
+                resultsList.innerHTML = results.map(result => {
+                    // undefinedが含まれる行を削除（支給額: undefined、対象要件: undefined のみ削除）
+                    let cleanDescription = result.description;
+                    if (cleanDescription) {
+                        // 支給額: undefined と 対象要件: undefined の行のみを削除
+                        cleanDescription = cleanDescription.split('\n')
+                            .filter(line => {
+                                // 「支給額: undefined」または「対象要件: undefined」を含む行を削除
+                                return !(line.includes('支給額: undefined') || 
+                                       line.includes('対象要件: undefined') ||
+                                       (line.includes('💰') && line.includes('undefined')) ||
+                                       (line.includes('対象要件') && line.includes('undefined')));
+                            })
+                            .join('\n');
+                    }
+                    
+                    return `
+                        <div class="result-item">
+                            <h4>${result.name}</h4>
+                            <div style="white-space: pre-line;">${cleanDescription}</div>
+                        </div>
+                    `;
+                }).join('') + `
                     <div style="text-align: center; margin-top: 2rem; padding: 2rem; background: #f8f9ff; border-radius: 12px; border: 2px solid #667eea;">
                         <p style="color: #667eea; font-weight: 600; margin-bottom: 1rem;">💡 診断結果が保存されます</p>
                         
