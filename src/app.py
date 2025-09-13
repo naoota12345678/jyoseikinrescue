@@ -317,6 +317,45 @@ def joseikin_diagnosis():
         data = request.json
         diagnosis_data = data.get('diagnosis_data', {})
         
+        # データの前処理と解釈
+        # 業種を日本語に変換
+        industry_map = {
+            'construction': '建設業',
+            'manufacturing': '製造業',
+            'service': 'サービス業',
+            'it': 'IT・通信業',
+            'retail': '小売業・飲食業',
+            'other': 'その他'
+        }
+        industry = diagnosis_data.get('industry', '')
+        industry_ja = industry_map.get(industry, industry) if industry else 'なし'
+        
+        # 従業員数を解釈
+        total_employees = diagnosis_data.get('totalEmployees', 'なし')
+        is_small_business = False
+        if total_employees != 'なし' and str(total_employees).isdigit():
+            emp_count = int(total_employees)
+            is_small_business = emp_count <= 100  # 中小企業の判定
+        
+        # 両立支援の内容を解釈
+        work_life_balance = diagnosis_data.get('workLifeBalance', 'なし')
+        needs_smoking_prevention = False
+        if work_life_balance and isinstance(work_life_balance, (list, str)):
+            if isinstance(work_life_balance, str):
+                needs_smoking_prevention = 'smoking' in work_life_balance
+            else:
+                needs_smoking_prevention = 'smoking' in work_life_balance
+        
+        # 賃金関連の判定
+        min_wage = diagnosis_data.get('minWage', 'なし')
+        needs_wage_improvement = False
+        if min_wage != 'なし' and str(min_wage).isdigit():
+            wage = int(min_wage)
+            needs_wage_improvement = wage < 1100  # 低賃金の場合
+        
+        # デバッグログ（本番環境では削除推奨）
+        logger.info(f"診断データ解釈結果: 業種={industry_ja}, 従業員数={total_employees}, 中小企業={is_small_business}, 受動喫煙対策={needs_smoking_prevention}, 賃金改善必要={needs_wage_improvement}")
+        
         # 正しい診断用データを読み込み
         try:
             with open('2025_jyoseikin_kaniyoryo2_20250831_185114_AI_plain.txt', 'r', encoding='utf-8') as f:
@@ -384,18 +423,19 @@ def joseikin_diagnosis():
 各助成金について、💰支給額、✅主な要件、📋申請の流れの3点を必ず明記してください。
 
 【企業情報】
-業種: {diagnosis_data.get('industry', 'なし')}
-従業員数: {diagnosis_data.get('totalEmployees', 'なし')}
+業種: {industry_ja}
+従業員数: {total_employees}人
+企業規模: {'中小企業' if is_small_business else '大企業' if total_employees != 'なし' else '不明'}
 雇用保険被保険者数: {diagnosis_data.get('insuredEmployees', 'なし')}
 有期契約労働者数: {diagnosis_data.get('temporaryEmployees', 'なし')}
 短時間労働者数: {diagnosis_data.get('partTimeEmployees', 'なし')}
 年齢構成: {diagnosis_data.get('ageGroups', 'なし')}
 特別配慮労働者: {diagnosis_data.get('specialNeeds', 'なし')}
 経営状況: {diagnosis_data.get('businessSituation', 'なし')}
-事業場内最低賃金: {diagnosis_data.get('minWage', 'なし')}円/時
+事業場内最低賃金: {min_wage}円/時{'（改善が必要）' if needs_wage_improvement else ''}
 賃金・処遇改善: {diagnosis_data.get('wageImprovement', 'なし')}
 投資・改善予定: {diagnosis_data.get('investments', 'なし')}
-両立支援: {diagnosis_data.get('workLifeBalance', 'なし')}
+両立支援: {work_life_balance}{'（受動喫煙防止対策を含む）' if needs_smoking_prevention else ''}
 
 【重要】
 - 業務改善助成金とキャリアアップ助成金を優先的に検討し、該当する場合は必ず上位に提案してください
