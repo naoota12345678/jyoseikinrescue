@@ -1318,12 +1318,34 @@ ${result.description}`
         
         function getCurrentCompanyInfo() {
             // フォームから現在の企業情報を取得
-            return {
-                industry: document.querySelector('input[name="industry"]:checked')?.value || '',
-                employees: document.querySelector('input[name="totalEmployees"]')?.value || '',
-                situation: document.querySelector('input[name="businessSituation"]:checked')?.value || '',
-                goals: Array.from(document.querySelectorAll('input[name="investments"]:checked')).map(cb => cb.value)
+            console.log('getCurrentCompanyInfo実行中...');
+            
+            const industry = document.querySelector('input[name="industry"]:checked')?.value || '';
+            const employees = document.querySelector('input[name="totalEmployees"]')?.value || '';
+            const situation = document.querySelector('input[name="businessSituation"]:checked')?.value || '';
+            
+            // 複数選択項目を統合（goals相当）
+            const investments = Array.from(document.querySelectorAll('input[name="investments"]:checked')).map(cb => cb.value);
+            const wageImprovement = Array.from(document.querySelectorAll('input[name="wageImprovement"]:checked')).map(cb => cb.value);
+            const workLifeBalance = Array.from(document.querySelectorAll('input[name="workLifeBalance"]:checked')).map(cb => cb.value);
+            const goals = [...investments, ...wageImprovement, ...workLifeBalance];
+            
+            const result = {
+                industry,
+                employees,
+                situation,
+                goals
             };
+            
+            console.log('getCurrentCompanyInfo結果:', result);
+            console.log('個別確認:', {
+                industryElement: document.querySelector('input[name="industry"]:checked'),
+                situationElement: document.querySelector('input[name="businessSituation"]:checked'),
+                investmentsChecked: document.querySelectorAll('input[name="investments"]:checked').length,
+                wageImprovementChecked: document.querySelectorAll('input[name="wageImprovement"]:checked').length
+            });
+            
+            return result;
         }
         
         // ボタンの表示を更新
