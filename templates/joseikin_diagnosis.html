@@ -608,6 +608,8 @@
 
     <script>
         function selectOption(element, name, value) {
+            console.log('selectOption called:', {element, name, value});
+            
             // 同じname属性の他の選択肢を非選択状態に
             document.querySelectorAll(`input[name="${name}"]`).forEach(input => {
                 input.closest('.option').classList.remove('selected');
@@ -616,19 +618,49 @@
             
             // 選択された項目を選択状態に
             element.classList.add('selected');
-            element.querySelector('input').checked = true;
+            const input = element.querySelector('input');
+            input.checked = true;
+            input.value = value; // 値も明示的に設定
+            
+            console.log('selectOption result:', {
+                inputChecked: input.checked,
+                inputValue: input.value,
+                formValue: document.querySelector(`input[name="${name}"]:checked`)?.value
+            });
         }
 
         function selectMultiple(element, name) {
+            console.log('selectMultiple called:', {element, name});
+            
             const input = element.querySelector('input');
             input.checked = !input.checked;
             element.classList.toggle('selected');
+            
+            console.log('selectMultiple result:', {
+                inputChecked: input.checked,
+                inputValue: input.value,
+                allChecked: Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(i => i.value)
+            });
         }
 
         async function diagnose() {
             // 診断実行前に会社情報を保存
             savedCompanyInfo = getCurrentCompanyInfo();
             console.log('診断開始時の会社情報を保存:', savedCompanyInfo);
+            
+            // 入力必須項目のバリデーション
+            const industry = document.querySelector('input[name="industry"]:checked');
+            const totalEmployees = document.querySelector('input[name="totalEmployees"]').value;
+            
+            if (!industry) {
+                alert('業種を選択してください');
+                return;
+            }
+            
+            if (!totalEmployees || totalEmployees === '') {
+                alert('従業員数を入力してください');
+                return;
+            }
             
             const formData = new FormData(document.getElementById('diagnosisForm'));
             const data = {};
@@ -645,6 +677,15 @@
                     data[key] = value;
                 }
             }
+            
+            console.log('フォームデータ収集結果:', data);
+            console.log('FormData entries:', [...formData.entries()]);
+            console.log('個別チェック:', {
+                industry: document.querySelector('input[name="industry"]:checked')?.value,
+                totalEmployees: document.querySelector('input[name="totalEmployees"]')?.value,
+                businessSituation: document.querySelector('input[name="businessSituation"]:checked')?.value,
+                ageGroups: Array.from(document.querySelectorAll('input[name="ageGroups"]:checked')).map(i => i.value)
+            });
 
             // ローディング表示
             displayLoading();
@@ -1278,10 +1319,10 @@ ${result.description}`
         function getCurrentCompanyInfo() {
             // フォームから現在の企業情報を取得
             return {
-                industry: document.getElementById('industry')?.value || '',
-                employees: document.getElementById('employees')?.value || '',
-                situation: document.getElementById('situation')?.value || '',
-                goals: Array.from(document.querySelectorAll('input[name="goals"]:checked')).map(cb => cb.value)
+                industry: document.querySelector('input[name="industry"]:checked')?.value || '',
+                employees: document.querySelector('input[name="totalEmployees"]')?.value || '',
+                situation: document.querySelector('input[name="businessSituation"]:checked')?.value || '',
+                goals: Array.from(document.querySelectorAll('input[name="investments"]:checked')).map(cb => cb.value)
             };
         }
         
