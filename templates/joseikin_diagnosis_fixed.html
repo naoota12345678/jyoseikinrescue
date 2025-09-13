@@ -193,6 +193,114 @@
             border-radius: 8px;
             font-size: 1rem;
         }
+        
+        /* モバイル用スタイル */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 0 15px;
+            }
+            
+            .logo-image {
+                height: 8rem;
+                max-width: 100%;
+            }
+            
+            .back-button {
+                position: static;
+                margin-top: 1rem;
+                padding: 0.6rem 1.2rem;
+                font-size: 0.9rem;
+            }
+            
+            .main-title {
+                font-size: 2.5rem;
+                margin: 1.5rem 0 0.5rem 0;
+            }
+            
+            .main-subtitle {
+                font-size: 1.1rem;
+                margin-bottom: 2rem;
+                padding: 0 10px;
+            }
+            
+            .hero-section {
+                padding: 2rem 0;
+            }
+            
+            .content-wrapper {
+                padding: 1.5rem;
+                margin: 1rem 10px 2rem 10px;
+                border-radius: 15px;
+            }
+            
+            .container {
+                padding: 0 10px;
+                width: 100%;
+                overflow-x: hidden;
+            }
+            
+            .form-grid {
+                display: block;
+            }
+            
+            .form-group {
+                margin-bottom: 1.5rem;
+            }
+            
+            input[type="text"],
+            input[type="number"],
+            select,
+            textarea {
+                width: 100%;
+                font-size: 16px; /* iOSのズーム防止 */
+            }
+            
+            button {
+                width: 100%;
+                padding: 1rem;
+                font-size: 1.1rem;
+            }
+            
+            /* ヘッダーの横幅制限 */
+            .header {
+                width: 100%;
+                overflow-x: hidden;
+            }
+            
+            /* body全体の横スクロール防止 */
+            body {
+                overflow-x: hidden;
+                width: 100%;
+            }
+            
+            /* コンテンツの横幅制限 */
+            .main-content {
+                width: 100%;
+                overflow-x: hidden;
+            }
+        }
+        
+        /* さらに小さい画面用 */
+        @media (max-width: 480px) {
+            .main-title {
+                font-size: 2rem;
+            }
+            
+            .main-subtitle {
+                font-size: 1rem;
+            }
+            
+            .content-wrapper {
+                padding: 1rem;
+                margin: 1rem 5px;
+            }
+            
+            .logo-image {
+                height: 6rem;
+            }
+        }
     </style>
 </head>
 <body>
