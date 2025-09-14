@@ -302,7 +302,7 @@
 
         .main-content-integrated {
             display: grid;
-            grid-template-columns: 300px 1fr;
+            grid-template-columns: 2fr 1fr;
             gap: 20px;
             height: calc(100vh - 200px);
         }
@@ -645,6 +645,13 @@
 
         .conversation-meta-vertical {
             margin-top: 4px;
+        }
+
+        .conversation-agent-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 4px;
         }
         
         .conversation-agent {
@@ -3197,12 +3204,8 @@
                 
                 return `
                     <div class="conversation-item ${conv.id === integratedCurrentConversationId ? 'active' : ''}" onclick="loadIntegratedConversationFromDatabase('${conv.id}')">
+                        <div class="conversation-agent-name">${agentName}</div>
                         <div class="conversation-title">${conv.title}</div>
-                        <div class="conversation-preview">${conv.preview}</div>
-                        <div class="conversation-meta-vertical">
-                            <div class="conversation-time">${new Date(conv.updated_at).toLocaleString()}</div>
-                            <div class="conversation-agent">${agentName}</div>
-                        </div>
                     </div>
                 `;
             }).join('');
@@ -3253,8 +3256,23 @@
                     // 会話リストのアクティブ状態を更新
                     await loadIntegratedConversationsFromDatabase();
                     
-                    // モバイルでは会話履歴選択時にメニューを閉じずに、チャット更新のみ行う
-                    // オーバーレイタップまたはチャット部分タップで手動でメニューを閉じられる
+                    // モバイルでモーダルが表示されている場合は自動で閉じる
+                    if (window.innerWidth <= 768) {
+                        const leftPanel = document.querySelector('.left-panel');
+                        const overlay = document.querySelector('.mobile-overlay');
+                        if (leftPanel && leftPanel.style.position === 'fixed') {
+                            leftPanel.style.position = '';
+                            leftPanel.style.width = '';
+                            leftPanel.style.height = '';
+                            leftPanel.style.zIndex = '';
+                            leftPanel.style.boxShadow = '';
+                            leftPanel.style.top = '';
+                            leftPanel.style.left = '';
+                        }
+                        if (overlay) {
+                            overlay.remove();
+                        }
+                    }
                 } else {
                     console.error('Failed to load integrated conversation');
                 }
