@@ -2412,8 +2412,24 @@
                     </div>
                 </div>
             `;
-            
+
             chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // モバイルで診断履歴パネルを自動で閉じる
+            if (window.innerWidth <= 768) {
+                const leftPanel = document.querySelector('.left-panel');
+                if (leftPanel) {
+                    leftPanel.style.display = 'none';
+                    leftPanel.style.position = '';
+                    leftPanel.style.width = '';
+                    leftPanel.style.height = '';
+                    leftPanel.style.zIndex = '';
+                    leftPanel.style.boxShadow = '';
+                    leftPanel.style.top = '';
+                    leftPanel.style.left = '';
+                    leftPanel.style.backgroundColor = '';
+                }
+            }
         }
 
         // ドロップダウン表示切り替え
