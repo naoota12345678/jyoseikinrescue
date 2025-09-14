@@ -743,10 +743,19 @@
             try {
                 const result = await auth.createUserWithEmailAndPassword(email, password);
                 console.log('新規登録成功:', result.user.email);
-                
+
                 // サーバーでユーザー登録
                 await registerNewUser(result.user);
-                
+
+                // 登録完了メールを送信
+                try {
+                    await result.user.sendEmailVerification();
+                    console.log('登録完了メールを送信しました');
+                } catch (emailError) {
+                    console.error('メール送信エラー:', emailError);
+                    // エラーが発生してもアラートは表示する
+                }
+
                 alert('登録完了！無料お試し5回分が付与されました。');
             } catch (error) {
                 console.error('登録エラー:', error);

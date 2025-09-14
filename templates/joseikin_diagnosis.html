@@ -1123,10 +1123,19 @@
                         if (!registerResponse.ok) {
                             console.error('Server registration failed:', await registerResponse.text());
                         }
-                        
+
                         // 診断結果をアカウントに紐付けて保存
                         await saveDiagnosisResultsForUser(userCredential.user.uid);
-                        
+
+                        // 登録完了メールを送信
+                        try {
+                            await userCredential.user.sendEmailVerification();
+                            console.log('登録完了メールを送信しました');
+                        } catch (emailError) {
+                            console.error('メール送信エラー:', emailError);
+                            // エラーが発生してもダッシュボードには遷移する
+                        }
+
                         window.location.href = '/dashboard';
                         
                     } catch (error) {
