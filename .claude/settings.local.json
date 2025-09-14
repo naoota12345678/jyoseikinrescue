@@ -60,7 +60,10 @@
       "Bash(grep:*)",
       "Bash(start https://console.firebase.google.com/project/jyoseikinrescue/firestore/data/~2Fsubscriptions)",
       "Bash(git pull:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(start https://console.firebase.google.com/project/jyoseikinrescue/authentication/settings)",
+      "Read(//c/**)",
+      "Bash(git restore:*)"
     ],
     "deny": [],
     "ask": [],

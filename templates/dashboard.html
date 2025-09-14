@@ -463,6 +463,17 @@
             overflow-y: auto;
         }
 
+        /* モバイルでのサブメニュー位置調整 */
+        @media (max-width: 768px) {
+            .agent-subcourses-menu {
+                position: absolute !important;
+                top: 100% !important;
+                left: 0 !important;
+                max-width: calc(100vw - 40px);
+                margin-top: 5px;
+            }
+        }
+
         .agent-with-subcourses {
             position: relative;
             overflow: visible;
