@@ -650,7 +650,7 @@
                     const localResults = JSON.parse(savedResults);
                     const token = await getAuthToken();
 
-                    // ログイン済みの場合のみFirebaseに保存
+                    // ログイン済みの場合のみFirebaseに保存とクリア
                     if (token) {
                         for (const result of localResults) {
                             await fetch('/api/ai-results', {
@@ -663,16 +663,25 @@
                             });
                         }
                         console.log('LocalStorageデータをFirebaseに移行しました');
-                    }
 
-                    // 移行完了後（またはログインしていない場合）、localStorageをクリア
-                    localStorage.removeItem('aiDiagnosisResults');
-                    console.log('LocalStorageをクリアしました');
+                        // 移行完了後、ログイン済みの場合のみlocalStorageをクリア
+                        localStorage.removeItem('aiDiagnosisResults');
+                        console.log('Firebaseへの移行完了後、LocalStorageをクリアしました');
+                    } else {
+                        // ログインしていない場合はlocalStorageを保持
+                        console.log('未ログインのため、LocalStorageの診断結果を保持します');
+                    }
 
                 } catch (error) {
                     console.error('移行処理エラー:', error);
-                    // エラーが発生してもクリアは実行
-                    localStorage.removeItem('aiDiagnosisResults');
+                    // エラーが発生した場合もログイン時のみクリア
+                    const token = await getAuthToken();
+                    if (token) {
+                        localStorage.removeItem('aiDiagnosisResults');
+                        console.log('エラー発生時: ログイン済みのためLocalStorageをクリア');
+                    } else {
+                        console.log('エラー発生時: 未ログインのため診断結果を保持');
+                    }
                 }
             }
         }
