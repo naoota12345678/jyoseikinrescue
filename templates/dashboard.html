@@ -2684,15 +2684,18 @@
         function showMobileConversations() {
             // PC版の会話履歴タブをアクティブに
             switchLeftTab('conversations');
-            
-            // モバイルで左パネルを50%幅で表示
+
+            // ハンバーガーメニューを閉じる
+            closeMobileMenu();
+
+            // モバイルで左パネルを2/3幅で表示
             const leftPanel = document.querySelector('.left-panel');
             if (window.innerWidth <= 768) {
                 leftPanel.style.display = 'block';
                 leftPanel.style.position = 'fixed';
                 leftPanel.style.top = '0';
                 leftPanel.style.left = '0';
-                leftPanel.style.width = '50%';
+                leftPanel.style.width = '66.67vw';
                 leftPanel.style.height = '100vh';
                 leftPanel.style.zIndex = '9000';
                 leftPanel.style.boxShadow = '2px 0 10px rgba(0,0,0,0.1)';
@@ -2741,20 +2744,23 @@
         function showMobileDiagnosis() {
             // PC版の診断結果タブをアクティブに
             switchLeftTab('diagnosis');
-            
-            // モバイルで左パネルを表示（一時的）
+
+            // ハンバーガーメニューを閉じる
+            closeMobileMenu();
+
+            // モバイルで左パネルを2/3幅で表示
             const leftPanel = document.querySelector('.left-panel');
             if (window.innerWidth <= 768) {
                 leftPanel.style.display = 'block';
                 leftPanel.style.position = 'fixed';
-                leftPanel.style.top = '60px';
+                leftPanel.style.top = '0';
                 leftPanel.style.left = '0';
-                leftPanel.style.width = '100%';
-                leftPanel.style.height = 'calc(100vh - 60px)';
+                leftPanel.style.width = '66.67vw';
+                leftPanel.style.height = '100vh';
                 leftPanel.style.zIndex = '9000';
+                leftPanel.style.boxShadow = '2px 0 10px rgba(0,0,0,0.1)';
+                leftPanel.style.backgroundColor = 'white';
             }
-            
-            closeMobileMenu();
         }
 
         // ヘルプを表示（仮実装）
