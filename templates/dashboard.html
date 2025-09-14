@@ -3366,12 +3366,8 @@
                 
                 return `
                     <div class="conversation-item" onclick="loadConversation('${conv.id}')">
+                        <div class="conversation-agent-name">${agentName}</div>
                         <div class="conversation-title">${conv.title || 'タイトルなし'}</div>
-                        <div class="conversation-preview">${conv.preview || ''}</div>
-                        <div class="conversation-meta">
-                            <span class="conversation-agent">${agentName}</span>
-                            <span class="conversation-time">${new Date(conv.updated_at).toLocaleString()}</span>
-                        </div>
                     </div>
                 `;
             }).join('');
@@ -3452,7 +3448,12 @@
                     
                     // 現在の会話IDを保存
                     window.currentConversationId = conversationId;
-                    
+
+                    // モバイルでメニューが表示されている場合は自動で閉じる
+                    if (window.innerWidth <= 768) {
+                        closeMobileMenu();
+                    }
+
                     console.log('Conversation loaded:', conversationId);
                 }
             } catch (error) {
