@@ -2395,14 +2395,24 @@
             
             const chatMessages = document.getElementById('integratedChatMessages');
             
-            const resultsHtml = diagnosisItem.content.map(result => `
-                <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem;">
-                    <h4 style="color: #667eea; margin-bottom: 1rem;">${result.name}</h4>
-                    <div style="white-space: pre-line; margin-bottom: 1rem;">${result.description}</div>
-                    <p style="color: #E35614; font-weight: bold; margin-bottom: 0.5rem;">💰 支給額: ${result.amount}</p>
-                    <p><strong>対象要件:</strong> ${result.eligibility}</p>
-                </div>
-            `).join('');
+            const resultsHtml = diagnosisItem.content.map(result => {
+                // undefinedの場合は支給額と対象要件の行を表示しない
+                const amountHtml = result.amount && result.amount !== 'undefined'
+                    ? `<p style="color: #E35614; font-weight: bold; margin-bottom: 0.5rem;">💰 支給額: ${result.amount}</p>`
+                    : '';
+                const eligibilityHtml = result.eligibility && result.eligibility !== 'undefined'
+                    ? `<p><strong>対象要件:</strong> ${result.eligibility}</p>`
+                    : '';
+
+                return `
+                    <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem;">
+                        <h4 style="color: #667eea; margin-bottom: 1rem;">${result.name}</h4>
+                        <div style="white-space: pre-line; margin-bottom: 1rem;">${result.description}</div>
+                        ${amountHtml}
+                        ${eligibilityHtml}
+                    </div>
+                `;
+            }).join('');
             
             chatMessages.innerHTML = `
                 <div class="message assistant-message">
