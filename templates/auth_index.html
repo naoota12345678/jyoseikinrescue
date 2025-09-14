@@ -493,10 +493,7 @@
                 </div>
                 
                 <div style="text-align: center; margin-top: 1rem; color: #666; font-size: 14px;">
-                    まだアカウントをお持ちでない場合は<br>
-                    <a href="#" onclick="showRegisterForm(); return false;" style="color: #667eea; text-decoration: underline;">
-                        こちらから新規会員登録
-                    </a>
+                    まだアカウントをお持ちでない場合は下の「同意して会員登録する」ボタンをお使いください
                 </div>
                 
                 <!-- 利用規約・プライバシーポリシー同意チェックボックス -->
@@ -886,10 +883,6 @@
             document.getElementById('authSection').classList.add('hidden');
         }
         
-        function showRegisterForm() {
-            // ログイン画面と新規登録画面の切り替え
-            window.location.href = '/';
-        }
         
         function showMainContent() {
             document.getElementById('loginSection').classList.add('hidden');

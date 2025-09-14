@@ -570,6 +570,17 @@ def register():
             
             if result['success']:
                 logger.info(f"User registered successfully: {email}")
+
+                # ウェルカムメール送信（エラーが発生してもサービス継続）
+                try:
+                    from email_service import get_email_service
+                    email_service = get_email_service()
+                    email_service.send_welcome_email(email, display_name)
+                    logger.info(f"Welcome email sent to: {email}")
+                except Exception as email_error:
+                    logger.error(f"Welcome email failed (service continues): {str(email_error)}")
+                    # エラーが発生してもユーザー登録は成功として処理を続行
+
                 return jsonify({
                     'user': result['user'],
                     'status': 'success'
@@ -593,6 +604,9 @@ def register():
                 })
                 user = user_service.get_user_by_id(user_id)
                 logger.info(f"User created without Stripe: {email}")
+
+                # ウェルカムメールは既に上で送信済みなのでここでは送信しない
+
                 return jsonify({
                     'user': user,
                     'status': 'success'
