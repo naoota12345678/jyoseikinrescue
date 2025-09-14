@@ -624,9 +624,10 @@
     </div>
 
     <script>
-        // ページ読み込み時にローカルストレージをFirebaseに移行してからクリア
+        // ページ読み込み時の処理
         document.addEventListener('DOMContentLoaded', async function() {
-            await migrateLocalStorageToFirebase();
+            // 移行処理は削除 - 診断結果はlocalStorageに保持される
+            console.log('診断ページ読み込み完了');
         });
 
         async function getAuthToken() {
@@ -744,6 +745,10 @@
         }
 
         async function diagnose() {
+            // 診断実行前に古い診断結果をクリア（別アカウント問題対策）
+            localStorage.removeItem('aiDiagnosisResults');
+            console.log('古い診断結果をクリアしました');
+
             // 診断実行前に会社情報を保存
             savedCompanyInfo = getCurrentCompanyInfo();
             console.log('診断開始時の会社情報を保存:', savedCompanyInfo);
