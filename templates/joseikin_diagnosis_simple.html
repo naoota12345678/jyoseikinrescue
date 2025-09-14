@@ -479,7 +479,16 @@
                                 });
                             }
                         }
-                        
+
+                        // 登録完了メールを送信
+                        try {
+                            await userCredential.user.sendEmailVerification();
+                            console.log('登録完了メールを送信しました');
+                        } catch (emailError) {
+                            console.error('メール送信エラー:', emailError);
+                            // エラーが発生してもダッシュボードには遷移する
+                        }
+
                         // ダッシュボードへリダイレクト
                         window.location.href = '/dashboard';
                     } catch (error) {
