@@ -594,6 +594,11 @@
             max-width: 70%;
             word-wrap: break-word;
             color: #374151;
+            white-space: pre-wrap;
+        }
+
+        /* ウェルカムメッセージ専用：余分なインデントを削除 */
+        .message.assistant.welcome .message-content {
             white-space: pre-line;
         }
 
@@ -2873,7 +2878,7 @@
             };
             
             chatMessages.innerHTML = `
-                <div class="message assistant">
+                <div class="message assistant welcome">
                     <div class="assistant-avatar">🤖</div>
                     <div class="message-content">
                         こんにちは！${agentNames[agentId] || 'AIエージェント'}です。<br>
