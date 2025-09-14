@@ -917,6 +917,54 @@ if not subscription:
 **技術的詳細**:
 - 人への投資促進コース要素: `dashboard.html:1289-1292`
 - サブメニュー表示関数: `dashboard.html:2535-2610`
+
+### 2025-09-13 診断フォーム選択問題デバッグ機能追加セッション（継続中） 🔧
+
+**問題**: 
+- モバイルでフォーム選択しても診断時にformDataが空になる
+- コンソールログ: `{industry: '', employees: '', situation: '', goals: Array(0)}`
+- ユーザーは選択しているが、システムが認識していない
+
+**根本原因**:
+- 過去のモバイルタッチ対応修正で選択メカニズムが破綻
+- `selectOption()`/`selectMultiple()`関数は呼ばれるが値が保存されない可能性
+
+**実装したデバッグ機能**:
+1. **selectOption/selectMultiple関数のデバッグログ**
+   - 関数呼び出し時の引数確認
+   - input要素のchecked状態確認
+   - フォーム全体での選択状態確認
+
+2. **getCurrentCompanyInfo関数の修正**
+   ```javascript
+   // 修正前: 存在しないIDを参照
+   industry: document.getElementById('industry')?.value || '',
+   
+   // 修正後: 実際のフォーム構造に対応
+   industry: document.querySelector('input[name="industry"]:checked')?.value || '',
+   ```
+
+3. **診断実行時の詳細ログ**
+   - FormData収集結果
+   - 個別input要素の状態確認
+   - フォーム全体のデータ整合性確認
+
+**デバッグ方法**:
+1. モバイルでオプションをタップ
+2. 開発者ツール→コンソールで以下確認:
+   - `selectOption called:` ログが出力されるか
+   - input要素の`checked`状態が`true`になるか
+   - 診断時に`フォームデータ収集結果`でデータが表示されるか
+
+**次のステップ**:
+- ユーザーによる実機テスト・コンソールログ確認
+- 問題箇所の特定（タッチイベント vs DOM操作 vs FormData収集）
+- 根本原因に応じた修正実装
+
+**技術的詳細**:
+- 修正ファイル: `templates/joseikin_diagnosis.html`
+- コミット: b49b8d9 (2025-09-13)
+- 影響範囲: フォーム選択・バリデーション・データ送信
 - サブメニューHTML: `dashboard.html:1325-1338`
 - 修正箇所: イベント処理、z-index、要素チェック
 
@@ -926,6 +974,205 @@ if not subscription:
 - ✅ favicon.ico 404エラーは機能に影響なし（無視して問題なし）
 
 **ユーザー確認済み**: 「うまくいきました」
+
+### 2025-09-13 診断フォーム選択問題完全解決セッション ✅
+
+**問題**: 
+1. **モバイルでフォーム選択項目がうまくデータで引き継げない問題**
+2. **チェックボックス・ラジオボタンで□にチェックがつかない問題**
+3. **Firebase OAuth警告問題**
+
+**解決プロセス**:
+
+#### 1. Firebase OAuth警告解決 🔐
+**問題**: `shindan.jyoseikin.jp`がFirebase Consoleの認証設定に未登録
+**解決**: Firebase Console → Authentication → Settings → Authorized domains → `shindan.jyoseikin.jp`を追加
+**結果**: OAuth警告が完全に解消
+
+#### 2. フォームデータ収集問題解決 📝
+**問題**: `getCurrentCompanyInfo`関数で選択項目が空になる
+**原因**: フォーム構造とJavaScript関数の不整合
+- `situation: ''` - businessSituation が取得できない
+- `goals: Array(0)` - 複数選択項目が統合されていない
+
+**修正内容**:
+```javascript
+// 修正前
+goals: Array.from(document.querySelectorAll('input[name="investments"]:checked')).map(cb => cb.value)
+
+// 修正後
+const investments = Array.from(document.querySelectorAll('input[name="investments"]:checked')).map(cb => cb.value);
+const wageImprovement = Array.from(document.querySelectorAll('input[name="wageImprovement"]:checked')).map(cb => cb.value);
+const workLifeBalance = Array.from(document.querySelectorAll('input[name="workLifeBalance"]:checked')).map(cb => cb.value);
+const goals = [...investments, ...wageImprovement, ...workLifeBalance];
+```
+
+#### 3. チェックボックス・ラジオボタン表示問題解決 ☑️
+**問題**: モバイルでタップしても1回目にチェックマークが表示されない
+**根本原因**: **イベントバブリングによる2重イベント実行**
+- `div.option` の `onclick`
+- `label` の自動クリック処理  
+- `input` の直接クリック
+
+**技術的解決策**:
+1. **イベント伝播制御**:
+```javascript
+function selectMultiple(element, name, event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    // ...
+}
+```
+
+2. **CSS による2重イベント防止**:
+```css
+.option input[type="checkbox"],
+.option input[type="radio"] {
+    pointer-events: none;  /* input要素のクリック無効化 */
+}
+
+.option label {
+    pointer-events: none;  /* label要素のクリック無効化 */
+}
+```
+
+**最終的な成功の証拠**:
+```
+selectOption called: {element: div.option, name: 'industry', value: 'construction'}
+selectOption result: {inputChecked: true, inputValue: 'construction', formValue: 'construction'}
+selectMultiple called: {element: div.option, name: 'ageGroups'}
+selectMultiple result: {previousState: false, newState: true, inputValue: 'young', allChecked: Array(1)}
+```
+
+**重要な成功要因**:
+1. **段階的問題解決**: Firebase認証 → データ収集 → UI動作の順番で解決
+2. **根本原因の正確な特定**: イベントバブリングの技術的理解
+3. **最小限の変更**: 動作している部分には一切触れず、問題箇所のみ修正
+4. **詳細なデバッグログ**: 各段階で状態変化を可視化して問題を特定
+
+**技術的教訓**:
+- ✅ **pointer-events: none** でlabel/inputの自動イベントを無効化
+- ✅ **event.stopPropagation()** でイベント伝播を制御
+- ✅ **複数選択項目の統合** で適切なgoals配列作成
+- ✅ **段階的デバッグ** で複雑な問題を分解して解決
+
+**ユーザー確認済み**: 「うまくいったことを次に生かして」- 完全解決
+
+### 2025-09-14 モバイルメニュー会話履歴レイアウト最適化セッション ✅
+
+**問題**:
+- モバイルメニューの会話履歴で日付がエージェント名の長さではみ出る
+- 長い助成金名（「65歳超雇用推進助成金（65歳超継続雇用促進コース）」等）で表示崩れ
+
+**解決アプローチ**:
+1. **最初の試行**: HTMLを縦積みdivに変更したが、CSSが `display: flex` のままで効果なし
+2. **安全な解決策採用**: 新しいCSSクラス作成で既存機能への影響を回避
+
+**実装完了内容**:
+1. **新CSSクラス追加**: `.conversation-meta-vertical` 作成
+   - 既存の `.conversation-meta`（flexbox横並び）は完全保持
+   - 新クラスは単純な縦積み（flexbox使用せず）
+
+2. **HTMLレイアウト変更**:
+   ```html
+   <!-- 修正後 -->
+   <div class="conversation-meta-vertical">
+       <div class="conversation-time">${new Date(conv.updated_at).toLocaleString()}</div>
+       <div class="conversation-agent">${agentName}</div>
+   </div>
+   ```
+
+3. **安全性確保**:
+   - 他の `.conversation-meta` 使用箇所（3349行目等）への影響なし
+   - 段階的適用で問題時の後戻り可能
+   - デスクトップ・モバイル統一レイアウト
+
+**技術的詳細**:
+- 修正ファイル: `templates/dashboard.html`
+- 影響箇所: `updateIntegratedConversationsList()` 関数内のHTML生成部分のみ
+- CSSクラス追加: 646-648行目
+- HTML変更: 3202行目
+
+**成果**:
+- ✅ 日付のはみ出し問題解決
+- ✅ 長いエージェント名でも正常表示
+- ✅ 既存機能への悪影響なし
+- ✅ 保守性の高い安全な実装
+
+**重要な教訓**:
+- CSS修正時は既存の使用箇所を必ず確認
+- 安全性を優先して新クラス作成を選択
+- HTMLとCSSの両方を整合させる重要性
+
+**ユーザーからの要求**: 「日付をエージェント名の上に表示」→「本文2行、その下に日付、その下にエージェント名」
+**実装結果**: 要求通りの縦積みレイアウトで表示崩れを完全解決
+
+**コミット履歴**:
+- `eb4883a` 改善: モバイルメニューの会話履歴表示レイアウトを最適化
+- `02deecf` 修正: モバイルメニュー会話履歴の縦積みレイアウト実装
+
+### 2025-09-14 診断結果表示最適化セッション ✅
+
+**問題**:
+1. **戻るボタンの動作問題** - 診断結果から戻るとダッシュボードに遷移してしまう
+2. **診断結果にundefined表示** - 「💰 支給額: undefined」「対象要件: undefined」が余分に表示される
+
+**解決内容**:
+
+#### 1. 戻るボタンの改善 🔙
+**問題**: 診断結果表示後、戻るボタン(`href="/"`)でトップページに戻り、ログイン済みユーザーは意図せずダッシュボードへ遷移
+**解決**: 
+```html
+<!-- 修正前 -->
+<a href="/" class="back-button">← 戻る</a>
+
+<!-- 修正後 -->
+<a href="/diagnosis" class="back-button">← 診断フォームに戻る</a>
+```
+**効果**: 診断条件を変えて再診断したいユーザーのニーズに合致
+
+#### 2. undefined表示の精密な削除 🎯
+**問題**: サーバーAPIが`amount`と`eligibility`フィールドを返さないため、診断結果にundefinedが表示
+**根本原因**: 
+```python
+# app.py - APIレスポンス構造
+applicable_grants = [{
+    'name': 'AI診断結果',
+    'description': response  # amount, eligibilityフィールドなし
+}]
+```
+
+**解決策** - 精密なフィルタリング実装：
+```javascript
+// 特定のundefined行のみを削除
+cleanDescription = cleanDescription.split('\n')
+    .filter(line => {
+        return !(line.includes('支給額: undefined') || 
+               line.includes('対象要件: undefined') ||
+               (line.includes('💰') && line.includes('undefined')) ||
+               (line.includes('対象要件') && line.includes('undefined')));
+    })
+    .join('\n');
+```
+
+**重要な工夫**:
+- ✅ **正常な支給額は保持**: 「💰 支給額: 30万円」等は削除されない
+- ✅ **必要な情報は維持**: 助成金の詳細説明はそのまま表示
+- ✅ **不要な部分のみ削除**: undefinedを含む特定パターンのみフィルタリング
+
+**技術的詳細**:
+- 条件付きフィルタリングで必要な情報を保護
+- 行単位での処理により他の内容に影響なし
+- 4つの条件パターンで確実にundefined行を除去
+
+**ユーザビリティ向上**:
+- 診断結果がクリーンに表示
+- 再診断への導線が明確
+- 不要な情報によるノイズを排除
+
+**ユーザー確認済み**: 正常な支給額表示を維持しつつ、不要なundefined表示のみ削除成功
 
 ## プロジェクト構造メモ
 - `/templates/index.html`: トップページ（無料診断メイン）
