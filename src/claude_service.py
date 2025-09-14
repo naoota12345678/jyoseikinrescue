@@ -7,6 +7,25 @@ from forms_manager import FormsManager
 logger = logging.getLogger(__name__)
 
 class ClaudeService:
+    # ファイル内容キャッシュ（メモリ使用量削減）
+    _file_cache = {}
+
+    def _read_file_cached(self, file_path: str) -> str:
+        """キャッシュ機能付きファイル読み込み"""
+        if file_path in self._file_cache:
+            logger.info(f"Loaded from cache: {os.path.basename(file_path)}")
+            return self._file_cache[file_path]
+
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+                self._file_cache[file_path] = content
+                logger.info(f"Successfully loaded and cached: {os.path.basename(file_path)} ({len(content)} chars)")
+                return content
+        except Exception as e:
+            logger.error(f"Error reading file {file_path}: {str(e)}")
+            return ""
+
     # 共通プロンプト要素（すべてのエージェントで使用）
     COMMON_TIMELINE_UNDERSTANDING = """
 【助成金申請の時系列理解 - 最重要】
@@ -39,6 +58,34 @@ class ClaudeService:
 ・「翌日」= その日の1日後（例：3月31日の翌日 = 4月1日）
 ・「全日」= その日の0時から24時まで（例：3月31日の全日 = 3月31日の0時～24時）
 ・日付は絶対に勝手に変更しない"""
+
+    COMMON_DEADLINE_HANDLING = """
+【申請期限の厳密な計算 - 最重要】
+期限に関する質問を受けた場合は、必ず以下を確認：
+
+1. 【申請種別の確認】
+   - 計画申請なのか？支給申請なのか？
+   - 明確でない場合は「計画申請と支給申請のどちらについて確認されますか？」と質問
+
+2. 【基準日の特定】
+   - 「○○から」の○○が何を指すか厳密に確認
+   - 例：「正社員転換から6ヶ月後」→転換日が基準日
+   - 例：「賃上げ実施から」→賃上げ実施日が基準日
+
+3. 【期間計算の厳密性】
+   - 「6ヶ月経過後2ヶ月以内」= 基準日＋6ヶ月＋1日～基準日＋8ヶ月
+   - 「速やかに」= 通常1ヶ月以内（要綱で具体的期間を確認）
+   - 月数計算は日付ベースで厳密に（2024年1月15日＋6ヶ月 = 2024年7月15日）
+
+4. 【回答前の確認】
+   - 計算過程を明示
+   - 「基準日：○年○月○日、期限：○年○月○日～○年○月○日」形式で回答
+   - 不安な場合は「要綱の該当箇所を再確認いたします」と前置きしてから回答
+
+【絶対禁止事項】
+- 曖昧な期限回答
+- 基準日を確認せずに回答
+- 計画申請と支給申請を混同した回答"""
     
     def __init__(self):
         api_key = os.getenv('CLAUDE_API_KEY') or os.getenv('ANTHROPIC_API_KEY')
@@ -73,6 +120,8 @@ class ClaudeService:
 
 {self.COMMON_DATE_EXPRESSIONS}
 
+{self.COMMON_DEADLINE_HANDLING}
+
 {self.COMMON_TIMELINE_UNDERSTANDING}
 """
     
@@ -93,9 +142,19 @@ class ClaudeService:
             all_content = ""
             for file_name in files:
                 file_path = os.path.join(base_dir, file_name)
+
+                # キャッシュから取得を試行
+                if file_path in self._file_cache:
+                    content = self._file_cache[file_path]
+                    all_content += f"\n\n【{file_name}】\n{content}\n"
+                    logger.info(f"Loaded from cache: {file_name} ({len(content)} chars)")
+                    continue
+
                 try:
                     with open(file_path, 'r', encoding='utf-8') as f:
                         content = f.read()
+                        # キャッシュに保存
+                        self._file_cache[file_path] = content
                         all_content += f"\n\n【{file_name}】\n{content}\n"
                         logger.info(f"Successfully loaded file: {file_name} ({len(content)} chars)")
                 except FileNotFoundError:

@@ -63,7 +63,11 @@
       "Bash(git log:*)",
       "Bash(start https://console.firebase.google.com/project/jyoseikinrescue/authentication/settings)",
       "Read(//c/**)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(gcloud compute project-info describe:*)",
+      "Bash(gcloud run regions list:*)",
+      "Bash(gcloud firestore databases describe:*)",
+      "Bash(echo:*)"
     ],
     "deny": [],
     "ask": [],
