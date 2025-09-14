@@ -188,6 +188,9 @@ class ClaudeService:
         elif agent_type.startswith('jinzai-kaihatsu'):
             # 人材開発支援助成金の各コースに対応
             return self._get_jinzai_kaihatsu_prompt(agent_type)
+        elif agent_type == '65sai_keizoku':
+            # 65歳超雇用推進助成金（65歳超継続雇用促進コース）
+            return self._get_65sai_keizoku_prompt()
         else:
             # その他のエージェントは既存のロジックを使用
             logger.warning(f"Unknown agent type: '{agent_type}', falling back to general prompt")
@@ -387,6 +390,37 @@ class ClaudeService:
 キャリアアップ助成金に関する一般的な情報は提供できますが、詳細な要件については厚生労働省の公式サイトをご確認ください。
 """
     
+    def _get_65sai_keizoku_prompt(self) -> str:
+        """65歳超雇用推進助成金（65歳超継続雇用促進コース）のプロンプトを生成"""
+        try:
+            import os
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            file_path = os.path.join(base_dir, 'file/65歳超雇用推進助成金/65歳超継続雇用促進コース.txt')
+
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+
+            # 共通プロンプトベースを取得
+            common_base = self._get_common_prompt_base()
+
+            return f"""
+{common_base}
+
+あなたは65歳超雇用推進助成金（65歳超継続雇用促進コース）の専門エージェントです。
+
+【65歳超雇用推進助成金（65歳超継続雇用促進コース）支給要領】
+{content}
+
+必ず支給要領に基づいて正確な情報を提供し、企業の状況に応じた具体的なアドバイスを行ってください。
+定年引上げ、定年廃止、継続雇用制度の導入について、要件や支給額、申請手続きを詳しく説明してください。
+"""
+        except Exception as e:
+            logger.error(f"Error loading 65sai_keizoku file: {str(e)}")
+            return f"""
+申し訳ございません。65歳超雇用推進助成金（65歳超継続雇用促進コース）の詳細資料の読み込みに失敗しました。
+65歳超雇用推進助成金に関する一般的な情報は提供できますが、詳細な要件については厚生労働省の公式サイトをご確認ください。
+"""
+
     def _get_jinzai_kaihatsu_prompt(self, agent_type: str) -> str:
         """人材開発支援助成金のコース別プロンプトを生成"""
         course_map = {

@@ -1222,6 +1222,9 @@
                             人材開発支援助成金専門エージェント
                             <span class="course-arrow">▶</span>
                         </div>
+                        <div class="agent-dropdown-item" onclick="selectIntegratedAgent('65sai_keizoku')">
+                            65歳超雇用推進助成金（65歳超継続雇用促進コース）
+                        </div>
                         <div class="agent-dropdown-item disabled" title="準備中">
                             65歳超雇用推進助成金専門エージェント
                             <span style="font-size: 0.8rem; color: #999;">（準備中）</span>
@@ -1537,7 +1540,8 @@
             if (!usage) usage = { plan_type: 'free', questions_used: 0 };
             
             document.getElementById('userEmail').textContent = user.email;
-            
+            document.getElementById('mobileUserEmail').textContent = user.email;
+
             // 新しいプラン判定：questions_limitを優先的に使用
             const isActive = usage.status === 'active';
             const activePlans = ['light', 'regular', 'heavy', 'basic'];
@@ -1854,6 +1858,10 @@
                 'jinzai-kaihatsu': {
                     title: '🎓 人材開発支援助成金専門エージェント',
                     welcome: 'こんにちは！人材開発支援助成金の専門エージェントです。\n従業員の職業訓練や能力開発に関するご相談をお受けします。'
+                },
+                '65sai_keizoku': {
+                    title: '👴 65歳超雇用推進助成金（65歳超継続雇用促進コース）専門エージェント',
+                    welcome: 'こんにちは！65歳超雇用推進助成金（65歳超継続雇用促進コース）の専門エージェントです。\n定年引上げ、定年廃止、継続雇用制度の導入に関するご相談をお受けします。'
                 }
             };
             
@@ -2791,6 +2799,7 @@
                 'jinzai-kaihatsu_toushi_it': '人材開発支援助成金専門エージェント（人への投資促進コース・情報技術分野認定実習併用職業訓練）',
                 'jinzai-kaihatsu': '人材開発支援助成金専門エージェント',
                 '65sai-cho': '65歳超雇用推進助成金専門エージェント',
+                '65sai_keizoku': '65歳超雇用推進助成金専門エージェント（65歳超継続雇用促進コース）',
                 'hatarakikata': '働き方改革推進支援助成金専門エージェント',
                 'ryoritsu-shien': '両立支援等助成金専門エージェント',
                 'koyo-chosei': '雇用調整助成金専門エージェント',
@@ -3069,7 +3078,8 @@
                 'jinzai-kaihatsu_toushi_teigaku': '人材開発支援助成金専門エージェント（人への投資促進コース・定額制訓練）',
                 'jinzai-kaihatsu_toushi_jihatsu': '人材開発支援助成金専門エージェント（人への投資促進コース・自発的職業能力開発訓練）',
                 'jinzai-kaihatsu_toushi_digital': '人材開発支援助成金専門エージェント（人への投資促進コース・高度デジタル人材等訓練）',
-                'jinzai-kaihatsu_toushi_it': '人材開発支援助成金専門エージェント（人への投資促進コース・情報技術分野認定実習併用職業訓練）'
+                'jinzai-kaihatsu_toushi_it': '人材開発支援助成金専門エージェント（人への投資促進コース・情報技術分野認定実習併用職業訓練）',
+                '65sai_keizoku': '65歳超雇用推進助成金専門エージェント（65歳超継続雇用促進コース）'
                 };
                 
                 const token = await firebase.auth().currentUser.getIdToken();
@@ -3175,7 +3185,8 @@
                     'career-up_shoyo': 'キャリアアップ(賞与)',
                     'career-up_shahoken': 'キャリアアップ(社保)',
                     'career-up_tanshuku': 'キャリアアップ(時短)',
-                    'reskilling': '人材開発(リスキリング)'
+                    'reskilling': '人材開発(リスキリング)',
+                    '65sai_keizoku': '65歳超雇用推進助成金'
                 };
                 const agentName = agentNames[conv.agent_id] || conv.agent_name || '専門エージェント';
                 
@@ -3325,7 +3336,8 @@
                     'career-up_shoyo': 'キャリアアップ(賞与)',
                     'career-up_shahoken': 'キャリアアップ(社保)',
                     'career-up_tanshuku': 'キャリアアップ(時短)',
-                    'reskilling': '人材開発(リスキリング)'
+                    'reskilling': '人材開発(リスキリング)',
+                    '65sai_keizoku': '65歳超雇用推進助成金'
                 };
                 const agentName = agentNames[conv.agent_id] || conv.agent_name || '専門エージェント';
                 
@@ -3370,7 +3382,8 @@
                         'career-up_kyotsu': 'キャリアアップ助成金専門エージェント（賃金規定等共通化コース）',
                         'career-up_shoyo': 'キャリアアップ助成金専門エージェント（賞与・退職金制度導入コース）',
                         'career-up_shahoken': 'キャリアアップ助成金専門エージェント（社会保険適用時処遇改善コース）',
-                        'career-up_tanshuku': 'キャリアアップ助成金専門エージェント（短時間労働者労働時間延長コース）'
+                        'career-up_tanshuku': 'キャリアアップ助成金専門エージェント（短時間労働者労働時間延長コース）',
+                        '65sai_keizoku': '65歳超雇用推進助成金専門エージェント（65歳超継続雇用促進コース）'
                     };
                     const agentName = agentNames[conversation.agent_id] || conversation.agent_name;
                     document.getElementById('selectedAgentText').textContent = agentName;

@@ -624,6 +624,59 @@
     </div>
 
     <script>
+        // ページ読み込み時にローカルストレージをFirebaseに移行してからクリア
+        document.addEventListener('DOMContentLoaded', async function() {
+            await migrateLocalStorageToFirebase();
+        });
+
+        async function getAuthToken() {
+            const user = firebase.auth().currentUser;
+            if (!user) return null;
+
+            try {
+                const token = await user.getIdToken();
+                return token;
+            } catch (error) {
+                console.error('トークン取得エラー:', error);
+                return null;
+            }
+        }
+
+        async function migrateLocalStorageToFirebase() {
+            // localStorageから診断履歴・エージェント会話を取得
+            const savedResults = localStorage.getItem('aiDiagnosisResults');
+            if (savedResults) {
+                try {
+                    const localResults = JSON.parse(savedResults);
+                    const token = await getAuthToken();
+
+                    // ログイン済みの場合のみFirebaseに保存
+                    if (token) {
+                        for (const result of localResults) {
+                            await fetch('/api/ai-results', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': 'Bearer ' + token
+                                },
+                                body: JSON.stringify(result)
+                            });
+                        }
+                        console.log('LocalStorageデータをFirebaseに移行しました');
+                    }
+
+                    // 移行完了後（またはログインしていない場合）、localStorageをクリア
+                    localStorage.removeItem('aiDiagnosisResults');
+                    console.log('LocalStorageをクリアしました');
+
+                } catch (error) {
+                    console.error('移行処理エラー:', error);
+                    // エラーが発生してもクリアは実行
+                    localStorage.removeItem('aiDiagnosisResults');
+                }
+            }
+        }
+
         function selectOption(element, name, value, event) {
             console.log('selectOption called:', {element, name, value});
             
