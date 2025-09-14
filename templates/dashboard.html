@@ -1877,6 +1877,7 @@
                 agentTitle.textContent = config.title;
             }
             if (welcomeMessage) {
+                welcomeMessage.textContent = '';  // まず既存内容をクリア
                 welcomeMessage.textContent = config.welcome;
             }
             
@@ -3195,8 +3196,8 @@
                         <div class="conversation-title">${conv.title}</div>
                         <div class="conversation-preview">${conv.preview}</div>
                         <div class="conversation-meta">
-                            <span class="conversation-agent">${agentName}</span>
-                            <span class="conversation-time">${new Date(conv.updated_at).toLocaleString()}</span>
+                            <div class="conversation-time">${new Date(conv.updated_at).toLocaleString()}</div>
+                            <div class="conversation-agent">${agentName}</div>
                         </div>
                     </div>
                 `;
