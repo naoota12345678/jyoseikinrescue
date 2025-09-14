@@ -3274,11 +3274,12 @@
                     // 会話リストのアクティブ状態を更新
                     await loadIntegratedConversationsFromDatabase();
                     
-                    // モバイルでモーダルが表示されている場合は自動で閉じる
+                    // モバイルで会話履歴パネルを自動で閉じる
                     if (window.innerWidth <= 768) {
                         const leftPanel = document.querySelector('.left-panel');
                         const overlay = document.querySelector('.mobile-overlay');
-                        if (leftPanel && leftPanel.style.position === 'fixed') {
+                        if (leftPanel) {
+                            leftPanel.style.display = 'none';
                             leftPanel.style.position = '';
                             leftPanel.style.width = '';
                             leftPanel.style.height = '';
@@ -3286,6 +3287,7 @@
                             leftPanel.style.boxShadow = '';
                             leftPanel.style.top = '';
                             leftPanel.style.left = '';
+                            leftPanel.style.backgroundColor = '';
                         }
                         if (overlay) {
                             overlay.remove();
@@ -3467,9 +3469,21 @@
                     // 現在の会話IDを保存
                     window.currentConversationId = conversationId;
 
-                    // モバイルでメニューが表示されている場合は自動で閉じる
+                    // モバイルでメニューと会話履歴パネルを自動で閉じる
                     if (window.innerWidth <= 768) {
                         closeMobileMenu();
+                        const leftPanel = document.querySelector('.left-panel');
+                        if (leftPanel) {
+                            leftPanel.style.display = 'none';
+                            leftPanel.style.position = '';
+                            leftPanel.style.width = '';
+                            leftPanel.style.height = '';
+                            leftPanel.style.zIndex = '';
+                            leftPanel.style.boxShadow = '';
+                            leftPanel.style.top = '';
+                            leftPanel.style.left = '';
+                            leftPanel.style.backgroundColor = '';
+                        }
                     }
 
                     console.log('Conversation loaded:', conversationId);
