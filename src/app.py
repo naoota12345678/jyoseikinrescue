@@ -1938,6 +1938,37 @@ def cancel_subscription():
         logger.error(f"Error cancelling subscription: {str(e)}")
         return jsonify({'error': '解約処理に失敗しました'}), 500
 
+@app.route('/api/test-email', methods=['POST'])
+def test_email():
+    """メール送信テスト用エンドポイント"""
+    try:
+        data = request.json
+        test_email = data.get('email', 'rescue@jyoseikin.jp')
+
+        from email_service import get_email_service
+        email_service = get_email_service()
+
+        # テストメール送信
+        result = email_service.send_test_email(test_email)
+
+        if result:
+            return jsonify({
+                'success': True,
+                'message': f'テストメールが {test_email} に送信されました'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'メール送信に失敗しました'
+            }), 500
+
+    except Exception as e:
+        logger.error(f"Email test error: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
     app.run(host='0.0.0.0', port=port, debug=False)

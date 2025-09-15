@@ -1,6 +1,7 @@
 import os
 import smtplib
 import logging
+import requests
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Optional
@@ -9,53 +10,73 @@ logger = logging.getLogger(__name__)
 
 class EmailService:
     def __init__(self):
-        self.smtp_server = "www516.sakura.ne.jp"
+        # さくらサーバー経由での送信に切り替え
+        self.use_php_relay = True  # PHPリレー使用フラグ
+        self.php_endpoint = "https://h-office.sakura.ne.jp/api/send_mail.php"
+        self.api_key = "jyoseikin_rescue_2024_secure_key_xyz789"  # PHPスクリプトと同じキー
+
+        # SMTP設定（フォールバック用）
+        self.smtp_server = "h-office.sakura.ne.jp"
         self.smtp_port = 587
         self.username = "rescue@jyoseikin.jp"
-        self.password = os.getenv('EMAIL_PASSWORD', 'rescue3737')  # 環境変数から取得、なければデフォルト
+        self.password = os.getenv('EMAIL_PASSWORD', 'rescue3737')
+
+    def _send_via_php(self, to: str, subject: str, body: str, is_html: bool = False) -> bool:
+        """PHPスクリプト経由でメール送信"""
+        try:
+            response = requests.post(
+                self.php_endpoint,
+                json={
+                    'to': to,
+                    'subject': subject,
+                    'body': body,
+                    'is_html': is_html
+                },
+                headers={
+                    'X-API-Key': self.api_key,
+                    'Content-Type': 'application/json'
+                },
+                timeout=30
+            )
+
+            if response.status_code == 200:
+                logger.info(f"Email sent via PHP relay to: {to}")
+                return True
+            else:
+                logger.error(f"PHP relay failed: {response.status_code} - {response.text}")
+                return False
+
+        except Exception as e:
+            logger.error(f"PHP relay error: {str(e)}")
+            return False
 
     def send_welcome_email(self, user_email: str, user_name: str = "") -> bool:
         """新規登録時のウェルカムメールを送信"""
         try:
-            # メール内容作成
-            msg = MIMEMultipart('alternative')
-            msg['From'] = self.username
-            msg['To'] = user_email
-            msg['Subject'] = "【助成金レスキュー】ご登録ありがとうございます"
+            subject = "【助成金レスキュー】ご登録ありがとうございます"
 
             # テキスト版
             text_content = f"""
 {user_name if user_name else ""}様
 
-この度は助成金レスキューにご登録いただき、誠にありがとうございます。
+助成金レスキューにご登録いただき、ありがとうございます。
 
-■ 5回無料お試しが開始されました
+5回無料お試しが開始されました。
 今すぐ専門エージェントで助成金相談をお試しください。
-各助成金に特化したAIエージェントが、あなたの会社に最適なアドバイスを提供します。
 
-■ ご利用方法
-1. ログイン後、ダッシュボードから専門エージェントを選択
-2. 業務改善助成金、キャリアアップ助成金など、目的に応じて選択
-3. 具体的な相談内容を入力してご質問ください
-
-■ サービスURL
+サービスURL
 https://shindan.jyoseikin.jp/dashboard
 
-■ 主な対応助成金
-・業務改善助成金
-・キャリアアップ助成金（8コース対応）
-・人材開発支援助成金
-・65歳超雇用推進助成金
-
-何かご不明な点やご質問がございましたら、お気軽にお問い合わせください。
-助成金活用で、あなたの会社の発展をサポートいたします。
-
 助成金レスキュー運営チーム
-社会保険労務士監修
-https://shindan.jyoseikin.jp/
 rescue@jyoseikin.jp
 """
 
+            # PHPリレー経由で送信
+            if self.use_php_relay:
+                # テキスト版を送信
+                return self._send_via_php(user_email, subject, text_content, is_html=False)
+
+            # 以下はフォールバック用（SMTPが復旧した場合）
             # HTML版
             html_content = f"""
 <!DOCTYPE html>
@@ -148,15 +169,30 @@ rescue@jyoseikin.jp
     def send_test_email(self, test_email: str) -> bool:
         """テスト用メール送信"""
         try:
-            msg = MIMEText("助成金レスキューのメール送信テストです。", 'plain', 'utf-8')
+            subject = "【テスト】助成金レスキュー メール送信確認"
+            body = "助成金レスキューのメール送信テストです。"
+
+            # PHPリレー経由で送信
+            if self.use_php_relay:
+                return self._send_via_php(test_email, subject, body, is_html=False)
+
+            # 以下はフォールバック用（SMTP直接送信）
+            msg = MIMEText(body, 'plain', 'utf-8')
             msg['From'] = self.username
             msg['To'] = test_email
-            msg['Subject'] = "【テスト】助成金レスキュー メール送信確認"
+            msg['Subject'] = subject
 
-            with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
+            logger.info(f"SMTP接続開始: {self.smtp_server}:{self.smtp_port}")
+
+            server = smtplib.SMTP(self.smtp_server, self.smtp_port, timeout=30)
+            try:
+                server.ehlo()
                 server.starttls()
+                server.ehlo()
                 server.login(self.username, self.password)
                 server.send_message(msg)
+            finally:
+                server.quit()
 
             logger.info(f"Test email sent successfully to: {test_email}")
             return True
