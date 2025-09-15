@@ -32,11 +32,17 @@ if (!isset($headers['X-API-Key']) || $headers['X-API-Key'] !== $API_KEY) {
 }
 
 // POSTデータを取得
-$input = json_decode(file_get_contents('php://input'), true);
+$raw_input = file_get_contents('php://input');
+$input = json_decode($raw_input, true);
 
 if (!$input) {
     http_response_code(400);
-    echo json_encode(['error' => 'Invalid JSON']);
+    // デバッグ情報を追加
+    echo json_encode([
+        'error' => 'Invalid JSON',
+        'raw_data' => substr($raw_input, 0, 100),
+        'json_error' => json_last_error_msg()
+    ]);
     exit;
 }
 
@@ -72,10 +78,15 @@ if ($is_html) {
     $headers['Content-Type'] = 'text/plain; charset=UTF-8';
 }
 
-// ヘッダーを文字列に変換
+// ヘッダーを文字列に変換（日本語対応）
 $header_string = '';
 foreach ($headers as $key => $value) {
-    $header_string .= "$key: $value\r\n";
+    if ($key === 'From') {
+        // 送信者名を適切にエンコード
+        $header_string .= "$key: " . mb_encode_mimeheader($from_name, 'UTF-8') . " <$from>\r\n";
+    } else {
+        $header_string .= "$key: $value\r\n";
+    }
 }
 
 // 日本語対応

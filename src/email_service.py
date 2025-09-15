@@ -24,6 +24,11 @@ class EmailService:
     def _send_via_php(self, to: str, subject: str, body: str, is_html: bool = False) -> bool:
         """PHPスクリプト経由でメール送信"""
         try:
+            # デバッグ用に本文の内容をログ出力
+            logger.info(f"Sending email via PHP relay - Subject: {subject}")
+            logger.info(f"Email body length: {len(body)} characters")
+            logger.info(f"Email body preview: {body[:100]}...")
+
             response = requests.post(
                 self.php_endpoint,
                 json={
@@ -55,21 +60,14 @@ class EmailService:
         try:
             subject = "【助成金レスキュー】ご登録ありがとうございます"
 
-            # テキスト版
-            text_content = f"""
-{user_name if user_name else ""}様
-
-助成金レスキューにご登録いただき、ありがとうございます。
-
-5回無料お試しが開始されました。
-今すぐ専門エージェントで助成金相談をお試しください。
-
-サービスURL
-https://shindan.jyoseikin.jp/dashboard
-
-助成金レスキュー運営チーム
-rescue@jyoseikin.jp
-"""
+            # シンプルなテキスト版（明確な文字列連結）
+            greeting = f"{user_name}様" if user_name else "お客様"
+            text_content = greeting + "\n\n"
+            text_content += "ご登録ありがとうございます。助成金レスキューで自分に合う助成金の申請をはじめてください。\n\n"
+            text_content += "サービスURL\n"
+            text_content += "https://shindan.jyoseikin.jp/dashboard\n\n"
+            text_content += "助成金レスキュー運営チーム\n"
+            text_content += "rescue@jyoseikin.jp"
 
             # PHPリレー経由で送信
             if self.use_php_relay:
