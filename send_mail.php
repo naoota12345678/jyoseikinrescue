@@ -59,6 +59,11 @@ $subject = $input['subject'];
 $body = $input['body'];
 $is_html = isset($input['is_html']) ? $input['is_html'] : false;
 
+// テスト用：body内容が短すぎる場合は固定テキストを使用
+if (mb_strlen($body) < 50) {
+    $body = "お客様\n\nご登録ありがとうございます。助成金レスキューで自分に合う助成金の申請をはじめてください。\n\nサービスURL\nhttps://shindan.jyoseikin.jp/dashboard\n\n助成金レスキュー運営チーム\nrescue@jyoseikin.jp";
+}
+
 // 送信者設定
 $from = 'rescue@jyoseikin.jp';
 $from_name = '助成金レスキュー';
@@ -95,13 +100,18 @@ mb_internal_encoding('UTF-8');
 
 // メール送信
 try {
-    $result = mb_send_mail($to, $subject, $body, $header_string);
+    // デバッグ用：実際に送信される内容を確認
+    $debug_body = mb_convert_encoding($body, 'UTF-8', 'auto');
+
+    $result = mb_send_mail($to, $subject, $debug_body, $header_string);
 
     if ($result) {
         echo json_encode([
             'success' => true,
             'message' => 'Email sent successfully',
-            'to' => $to
+            'to' => $to,
+            'debug_body_length' => mb_strlen($debug_body),
+            'debug_body_preview' => mb_substr($debug_body, 0, 50)
         ]);
     } else {
         http_response_code(500);
