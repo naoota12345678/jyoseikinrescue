@@ -68,7 +68,8 @@
       "Bash(gcloud run regions list:*)",
       "Bash(gcloud firestore databases describe:*)",
       "Bash(echo:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(gcloud run logs read:*)"
     ],
     "deny": [],
     "ask": [],
