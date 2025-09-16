@@ -118,8 +118,8 @@ class ClaudeService:
         self.forms_manager = FormsManager()
         
         
-        # 業務改善助成金専門プロンプト
-        self.business_improvement_prompt = self._load_business_improvement_prompt()
+        # 業務改善助成金専門プロンプト（廃止予定・毎回読み込みに変更）
+        # self.business_improvement_prompt = self._load_business_improvement_prompt()
     
     def _get_common_prompt_base(self) -> str:
         """すべてのエージェントで使用する共通プロンプトを返す"""
@@ -250,7 +250,7 @@ class ClaudeService:
             # 助成金判定エージェント
             return self._get_hanntei_prompt()
         elif agent_type == 'gyoumukaizen':
-            return self.business_improvement_prompt
+            return self._get_business_improvement_prompt()
         elif agent_type.startswith('career-up'):
             # キャリアアップ助成金のコース別対応
             return self._get_career_up_prompt(agent_type)
@@ -344,6 +344,71 @@ class ClaudeService:
 質問者の企業情報を踏まえ、{course_name}について専門的で実用的なアドバイスを提供してください。
 """
     
+    def _get_business_improvement_prompt(self) -> str:
+        """業務改善助成金の詳細プロンプトをロード（毎回読み込み版）"""
+        try:
+            import os
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            logger.info(f"=== 業務改善助成金エージェント: ファイル読み込み開始 ===")
+            logger.info(f"Base directory: {base_dir}")
+
+            # 業務改善助成金フォルダ内の全ファイルを読み込み
+            files = [
+                'file/業務改善助成金/gyoumukaizen07.txt',  # 交付要綱
+                'file/業務改善助成金/gyoumukaizenmanyual.txt',  # 申請マニュアル
+                'file/業務改善助成金/業務改善助成金Ｑ＆Ａ.txt',  # Q&A
+                'file/業務改善助成金/業務改善助成金 交付申請書等の書き方と留意事項 について.txt',  # 申請書の書き方
+                'file/業務改善助成金/業務改善助成金交付要領.txt',  # 交付要領（最重要）
+                'file/業務改善助成金/最低賃金額以上かどうかを確認する方法.txt'  # 最低賃金確認方法
+            ]
+
+            all_content = ""
+            logger.info(f"Loading {len(files)} files...")
+
+            for file_name in files:
+                file_path = os.path.join(base_dir, file_name)
+                logger.info(f"Trying to load: {file_path}")
+
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                        all_content += f"\n\n【{file_name}】\n{content}\n"
+                        logger.info(f"✓ Successfully loaded: {file_name} ({len(content)} chars)")
+                except FileNotFoundError:
+                    logger.error(f"✗ File not found: {file_path}")
+                    continue
+                except Exception as e:
+                    logger.error(f"✗ Error reading file {file_path}: {str(e)}")
+                    continue
+
+            if not all_content:
+                logger.error("No files were loaded successfully")
+                return "業務改善助成金の詳細資料の読み込みに失敗しました。"
+
+            logger.info(f"Total content loaded: {len(all_content)} characters")
+
+            # 共通プロンプトベースを取得
+            common_base = self._get_common_prompt_base()
+
+            return f"""
+{common_base}
+
+あなたは業務改善助成金の専門エージェントです。
+
+{all_content}
+
+重要な指示:
+- 必ず上記の公式資料に基づいて回答してください
+- 特に交付要領ファイルに記載された申請期間情報を正確に提供してください
+- 申請様式のダウンロード方法を聞かれたら「以下でご案内します」とだけ答える
+- 企業の状況に応じた具体的なアドバイスを行ってください
+
+必ず支給要領に基づいて正確な情報を提供し、企業の状況に応じた具体的なアドバイスを行ってください。
+"""
+        except Exception as e:
+            logger.error(f"Error in _get_business_improvement_prompt: {str(e)}")
+            return "業務改善助成金の詳細資料の読み込みに失敗しました。"
+
     def _get_career_up_prompt(self, agent_type: str) -> str:
         """キャリアアップ助成金のコース別プロンプトを生成"""
         course_map = {

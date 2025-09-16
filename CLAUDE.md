@@ -63,19 +63,24 @@
 - Firebase認証設定（FIREBASE_*）
 - Stripe決済設定（STRIPE_*）
 
-### デプロイ手順（必須）
+### デプロイ手順（必須・厳守）
 ```bash
-# 1. ビルド
+# 1. ビルド（IMAGE_NAMEは具体的な名前を指定）
 gcloud builds submit --tag asia-northeast1-docker.pkg.dev/jyoseikinrescue/jyoseikinrescue/IMAGE_NAME .
 
 # 2. ビルド結果確認
 gcloud builds list --limit=1 --format="value(images)"
 
-# 3. デプロイ
+# 3. デプロイ（必ずサービス名jyoseikinrescue指定）
 gcloud run services update jyoseikinrescue --region=asia-northeast1 --image=EXACT_IMAGE_FROM_STEP2
 ```
 
-**⚠️ 重要**: `--source`オプションは使用禁止
+**🚨 絶対に守ること**:
+- **IMAGE_NAMEには具体的な名前を使用**（例：gyomukaizen-fix-20250917）
+- **`jyoseikinrescue`固定は絶対禁止**
+- **サービス名は必ず`jyoseikinrescue`を指定**
+- **`--source`オプションは使用禁止**
+- **この手順以外のデプロイ方法は禁止**
 
 ## 詳細ドキュメント 📚
 
@@ -85,6 +90,14 @@ gcloud run services update jyoseikinrescue --region=asia-northeast1 --image=EXAC
 - **運用ガイド**:
   - `operations/deployment-guide.md` - デプロイ詳細
   - `operations/troubleshooting.md` - トラブルシューティング
+
+## 🚨 重要な失敗例と教訓
+
+### 2025-09-17 デプロイ方法間違いによるURL変更問題
+**問題**: `gcloud builds submit --tag asia-northeast1-docker.pkg.dev/jyoseikinrescue/jyoseikinrescue/jyoseikinrescue`を使用
+**結果**: サービスURLが`jyoseikinrescue-453016168690`から`jyoseikinrescue-yuebabzoza-an`に変更
+**影響**: カスタムドメイン`shindan.jyoseikin.jp`が古いURLを指したまま、サイト接続不可
+**教訓**: **絶対にCLAUDE.mdの記載手順以外は使用しない**
 
 ## 最新セッション（直近3件）
 

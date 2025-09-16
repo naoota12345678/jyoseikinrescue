@@ -69,7 +69,11 @@
       "Bash(gcloud firestore databases describe:*)",
       "Bash(echo:*)",
       "Bash(mkdir:*)",
-      "Bash(gcloud run logs read:*)"
+      "Bash(gcloud run logs read:*)",
+      "Bash(gcloud run domain-mappings list:*)",
+      "Bash(gcloud beta run domain-mappings list:*)",
+      "Bash(gcloud projects list:*)",
+      "Bash(firebase hosting:sites:get:*)"
     ],
     "deny": [],
     "ask": [],
