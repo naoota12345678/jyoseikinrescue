@@ -253,10 +253,24 @@ class EmailService:
 {report_data.get('suspicious_users', '特になし')}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔧 **アクション方法**
-Firebase Console: https://console.firebase.google.com/project/jyoseikinrescue/firestore/data/~2Fusers
+🔧 **不正ユーザーのブロック手順**
 
-該当ユーザーの status を 'blocked' に設定してください。
+1️⃣ **Firebase Console を開く**
+   https://console.firebase.google.com/project/jyoseikinrescue/firestore/data/~2Fusers
+
+2️⃣ **対象ユーザーを特定**
+   • emailフィールドで検索
+   • created_atで日時絞り込み
+   • 同一IPからの複数登録を確認
+
+3️⃣ **ブロック実行**
+   • 対象ユーザーのドキュメントを選択
+   • フィールド追加: `status` : `blocked` (文字列)
+   • 保存
+
+4️⃣ **効果確認**
+   • 次回ログイン時に403エラーでアクセス拒否
+   • エラーメッセージ: "アカウントが一時的に利用停止されています"
 """
 
             return self.send_slack_notification(report_message, urgent=False)

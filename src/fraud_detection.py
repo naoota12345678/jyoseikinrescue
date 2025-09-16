@@ -8,7 +8,7 @@ import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Any
 from collections import defaultdict
-from email_service import get_email_service
+from .email_service import get_email_service
 
 logger = logging.getLogger(__name__)
 
