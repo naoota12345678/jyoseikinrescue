@@ -361,17 +361,12 @@ class ClaudeService:
                 file_path = os.path.join(base_dir, file_name)
                 logger.info(f"Trying to load: {file_path}")
 
-                try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
-                        content = f.read()
-                        all_content += f"\n\n【{file_name}】\n{content}\n"
-                        logger.info(f"✓ Successfully loaded: {file_name} ({len(content)} chars)")
-                except FileNotFoundError:
-                    logger.error(f"✗ File not found: {file_path}")
-                    continue
-                except Exception as e:
-                    logger.error(f"✗ Error reading file {file_path}: {str(e)}")
-                    continue
+                content = self._read_file_cached(file_path)
+                if content:
+                    all_content += f"\n\n【{file_name}】\n{content}\n"
+                    logger.info(f"✓ Successfully loaded: {file_name} ({len(content)} chars)")
+                else:
+                    logger.error(f"✗ Failed to load: {file_path}")
 
             if not all_content:
                 logger.error("No files were loaded successfully")
