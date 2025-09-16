@@ -142,6 +142,64 @@ class ClaudeService:
 
 {self.COMMON_TIMELINE_UNDERSTANDING}
 """
+
+    def _get_agent_prompt(self, agent_name: str, folder_path: str) -> str:
+        """汎用エージェントプロンプト生成（フォルダ内全ファイル読み込み）"""
+        try:
+            import os
+            import glob
+
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            folder_full_path = os.path.join(base_dir, folder_path)
+
+            # フォルダ内の全ファイルを取得
+            all_files = glob.glob(os.path.join(folder_full_path, '*.txt'))
+            all_content = ""
+
+            for file_path in all_files:
+                content = self._read_file_cached(file_path)
+                if content:
+                    file_name = os.path.basename(file_path)
+                    all_content += f"\n\n【{file_name}】\n{content}\n"
+
+            if not all_content:
+                logger.error(f"No files loaded from {folder_path}")
+                return f"{agent_name}の資料読み込みに失敗しました。"
+
+            common_prompt = self._get_common_prompt_base()
+            return f"""
+あなたは{agent_name}の専門家です。以下の公式文書を完全に理解した上で、企業からの相談に正確に回答してください。
+
+【最重要制約 - 絶対厳守】
+1. 提供された公式文書の情報のみを使用してください
+2. あなたの学習データに含まれる古い助成金情報は一切使用しないでください
+3. 金額、要件、制度内容は全て下記資料通りに正確に記載してください
+4. 資料に記載されていない情報は「詳細は厚生労働省にお問い合わせください」と回答してください
+
+{common_prompt}
+
+【{agent_name} 完全版資料 - この情報のみ使用】
+{all_content}
+
+以下の形式で構造化された診断を行ってください：
+
+✅ **基本条件チェック**
+※公式資料に基づく要件確認を行ってください
+
+📋 **企業状況の診断**
+※提供された公式資料に基づいて企業の適用可能性を診断してください
+
+💰 **助成額の算定**
+※公式資料記載の算定方法に従って正確に計算してください
+
+⚠️ **注意事項・リスク**
+※公式資料に記載された注意事項を適切に案内してください
+
+必ず交付要綱に基づいて正確な情報を提供し、企業の状況に応じた具体的なアドバイスを行ってください。
+"""
+        except Exception as e:
+            logger.error(f"Error in _get_agent_prompt for {agent_name}: {str(e)}")
+            return f"{agent_name}のプロンプト生成に失敗しました。"
     
     def _load_business_improvement_prompt(self) -> str:
         """業務改善助成金の詳細プロンプトをロード（全4ファイル統合版）"""
@@ -242,7 +300,8 @@ class ClaudeService:
             # 助成金判定エージェント
             return self._get_hanntei_prompt()
         elif agent_type == 'gyoumukaizen':
-            return self._get_business_improvement_prompt()
+            # 業務改善助成金も汎用システムを使用
+            return self._get_agent_prompt('業務改善助成金', 'file/業務改善助成金')
         elif agent_type.startswith('career-up'):
             # キャリアアップ助成金のコース別対応
             return self._get_career_up_prompt(agent_type)
