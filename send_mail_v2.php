@@ -90,6 +90,24 @@ try {
             'debug' => $debug_info
         ], JSON_UNESCAPED_UNICODE);
     } else {
+        // メール送信失敗ログを記録（不正検知用）
+        $client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        $log_entry = json_encode([
+            'timestamp' => date('Y-m-d H:i:s'),
+            'email' => $to,
+            'ip' => $client_ip,
+            'reason' => 'send_failure',
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown'
+        ], JSON_UNESCAPED_UNICODE) . "\n";
+
+        // ログファイルに記録（エラーでも既存処理に影響させない）
+        try {
+            file_put_contents(__DIR__ . '/logs/failed_emails.log', $log_entry, FILE_APPEND | LOCK_EX);
+        } catch (Exception $log_error) {
+            // ログ記録失敗しても既存処理には影響させない
+            error_log("Failed to write email failure log: " . $log_error->getMessage());
+        }
+
         http_response_code(500);
         echo json_encode([
             'success' => false,

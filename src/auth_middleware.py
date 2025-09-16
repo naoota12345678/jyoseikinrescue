@@ -71,6 +71,14 @@ def require_auth(f):
                         'code': 'USER_CREATION_FAILED'
                     }), 500
             
+            # 不正検知: ブロックされたユーザーのチェック
+            if user and user.get('status') == 'blocked':
+                logger.warning(f"Blocked user attempted login: {uid}")
+                return jsonify({
+                    'error': 'アカウントが一時的に利用停止されています',
+                    'code': 'ACCOUNT_BLOCKED'
+                }), 403
+
             # グローバル変数に設定
             logger.info(f"Setting current user in g: {user is not None}")
             # user_idフィールドを確実に設定

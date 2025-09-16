@@ -539,9 +539,32 @@ def register():
         uid = data.get('uid')
         email = data.get('email')
         display_name = data.get('display_name', '')
-        
+
         if not uid or not email:
             return jsonify({'error': 'UIDとメールアドレスが必要です'}), 400
+
+        # 不正検知: 使い捨てメール・無効ドメイン検知
+        email_domain = email.split('@')[1].lower() if '@' in email else ''
+
+        # 使い捨てメールドメイン
+        disposable_domains = [
+            '10minutemail.com', 'temp-mail.org', 'guerrillamail.com',
+            'mailinator.com', 'throwaway.email', 'getnada.com',
+            'maildrop.cc', 'tempmail.ninja', 'yopmail.com'
+        ]
+
+        # タイポドメイン（よくある誤字）
+        typo_domains = [
+            'gmali.com', 'yahooo.com', 'hotmial.com', 'gmai.com',
+            'yaho.com', 'hotmai.com', 'gmial.com', 'outlok.com'
+        ]
+
+        if email_domain in disposable_domains + typo_domains:
+            logger.warning(f"Blocked registration with invalid domain: {email_domain} (uid: {uid})")
+            return jsonify({
+                'error': 'このメールアドレスは使用できません。正しいメールアドレスを入力してください。',
+                'code': 'INVALID_EMAIL_DOMAIN'
+            }), 400
         
         logger.info(f"Registering new user: {email} (uid: {uid})")
         
@@ -1964,6 +1987,66 @@ def test_email():
 
     except Exception as e:
         logger.error(f"Email test error: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+# 不正検知関連エンドポイント
+@app.route('/admin/fraud-report', methods=['POST'])
+def generate_fraud_report():
+    """日次不正検知レポート生成（管理者用）"""
+    try:
+        from fraud_detection import FraudDetectionService
+
+        fraud_service = FraudDetectionService()
+        success = fraud_service.generate_daily_report()
+
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Daily fraud report sent to Slack'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Failed to send report'
+            }), 500
+
+    except Exception as e:
+        logger.error(f"Fraud report generation error: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/admin/emergency-alert', methods=['POST'])
+def send_emergency_alert():
+    """緊急アラート送信（管理者用）"""
+    try:
+        from fraud_detection import FraudDetectionService
+        data = request.json
+        message = data.get('message', '')
+
+        if not message:
+            return jsonify({'error': 'Message is required'}), 400
+
+        fraud_service = FraudDetectionService()
+        success = fraud_service.send_emergency_alert(message)
+
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Emergency alert sent to Slack'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Failed to send alert'
+            }), 500
+
+    except Exception as e:
+        logger.error(f"Emergency alert error: {str(e)}")
         return jsonify({
             'success': False,
             'error': str(e)

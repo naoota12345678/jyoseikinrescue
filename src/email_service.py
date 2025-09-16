@@ -5,6 +5,7 @@ import requests
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Optional
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -197,6 +198,71 @@ class EmailService:
 
         except Exception as e:
             logger.error(f"Failed to send test email to {test_email}: {str(e)}")
+            return False
+
+    def send_slack_notification(self, message: str, urgent: bool = False) -> bool:
+        """Slack通知送信"""
+        try:
+            webhook_url = os.getenv('SLACK_WEBHOOK_URL')
+            if not webhook_url:
+                logger.warning("SLACK_WEBHOOK_URL not configured")
+                return False
+
+            # 緊急度に応じた色分け
+            color = "danger" if urgent else "good"
+            title = "🚨 助成金レスキュー 緊急アラート" if urgent else "📊 助成金レスキュー 日次レポート"
+
+            payload = {
+                "attachments": [{
+                    "color": color,
+                    "title": title,
+                    "text": message,
+                    "footer": "助成金レスキュー不正検知システム",
+                    "ts": int(datetime.now().timestamp())
+                }]
+            }
+
+            response = requests.post(webhook_url, json=payload, timeout=10)
+
+            if response.status_code == 200:
+                logger.info(f"Slack notification sent successfully (urgent: {urgent})")
+                return True
+            else:
+                logger.error(f"Slack notification failed: {response.status_code} - {response.text}")
+                return False
+
+        except Exception as e:
+            logger.error(f"Slack notification error: {str(e)}")
+            return False
+
+    def send_fraud_report_slack(self, report_data: dict) -> bool:
+        """不正検知レポートをSlackに送信"""
+        try:
+            report_message = f"""
+📊 **不正検知日次レポート** ({report_data.get('date', 'Unknown')})
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+**📈 本日のサマリー**
+• メール送信失敗: {report_data.get('failed_emails', 0)}件
+• 使い捨てメール登録試行: {report_data.get('disposable_attempts', 0)}件
+• 同一IP複数登録: {report_data.get('duplicate_ips', 0)}件
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ **要注意ユーザー**
+
+{report_data.get('suspicious_users', '特になし')}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔧 **アクション方法**
+Firebase Console: https://console.firebase.google.com/project/jyoseikinrescue/firestore/data/~2Fusers
+
+該当ユーザーの status を 'blocked' に設定してください。
+"""
+
+            return self.send_slack_notification(report_message, urgent=False)
+
+        except Exception as e:
+            logger.error(f"Failed to send fraud report to Slack: {str(e)}")
             return False
 
 # サービスインスタンス
