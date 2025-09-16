@@ -162,27 +162,9 @@ class ClaudeService:
             all_content = ""
             for file_name in files:
                 file_path = os.path.join(base_dir, file_name)
-
-                # キャッシュから取得を試行
-                if file_path in self._file_cache:
-                    content = self._file_cache[file_path]
+                content = self._read_file_cached(file_path)
+                if content:
                     all_content += f"\n\n【{file_name}】\n{content}\n"
-                    logger.info(f"Loaded from cache: {file_name} ({len(content)} chars)")
-                    continue
-
-                try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
-                        content = f.read()
-                        # キャッシュに保存
-                        self._file_cache[file_path] = content
-                        all_content += f"\n\n【{file_name}】\n{content}\n"
-                        logger.info(f"Successfully loaded file: {file_name} ({len(content)} chars)")
-                except FileNotFoundError:
-                    logger.error(f"File not found: {file_path}")
-                    continue
-                except Exception as e:
-                    logger.error(f"Error reading file {file_path}: {str(e)}")
-                    continue
             
             if all_content:
                 common_prompt = self._get_common_prompt_base()
