@@ -840,6 +840,24 @@
             transform: translateY(-1px);
         }
 
+        /* 申請にあたってボタン（赤色） */
+        .nav-item-primary {
+            background: #E35614;
+            color: white;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 6px;
+        }
+
+        .nav-item-primary:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
         /* サイドバー内容 */
         .mobile-sidebar-header {
             padding: 20px;
@@ -1081,6 +1099,9 @@
 
             <div style="border-top: 1px solid #e5e7eb; margin: 10px 20px;"></div>
 
+            <button class="mobile-menu-item" onclick="showApplicationGuidance(); closeMobileMenu();" style="color: #E35614; font-weight: 600;">
+                📌 ご利用にあたって
+            </button>
             <button class="mobile-menu-item" onclick="showApplicationForms(); closeMobileMenu();">
                 📋 申請書類
             </button>
@@ -1149,13 +1170,14 @@
                 <div class="user-info" id="userInfo">
                     <span id="userEmail">読み込み中...</span>
                     <button onclick="showSettings()" style="padding: 0.5rem 1rem; background: #4f46e5; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 0.5rem;">⚙️ 設定</button>
-                    <button onclick="logout()" style="padding: 0.5rem 1rem; background: #E35614; color: white; border: none; border-radius: 4px; cursor: pointer;">ログアウト</button>
+                    <button onclick="logout()" style="padding: 0.5rem 1rem; background: #6b7280; color: white; border: none; border-radius: 4px; cursor: pointer;">ログアウト</button>
                 </div>
             </div>
         </div>
         <!-- ナビゲーションバー（デスクトップのみ表示） -->
         <nav class="nav-bar">
             <div class="nav-container">
+                <button onclick="showApplicationGuidance()" class="nav-item-primary">📌 ご利用にあたって</button>
                 <button onclick="showApplicationForms()" class="nav-item">📋 申請書類</button>
                 <button onclick="showExpertConsultation()" class="nav-item">👨‍💼 専門家相談</button>
                 <button onclick="showEmploymentRules()" class="nav-item">📝 就業規則</button>
@@ -2603,6 +2625,103 @@
         }
 
         // 申請書類ダウンロードページを表示
+        // 新規追加：申請にあたってページ表示
+        function showApplicationGuidance() {
+            const chatMessages = document.getElementById('integratedChatMessages');
+            if (chatMessages) {
+                chatMessages.innerHTML = `
+                    <div style="background: white; padding: 2rem; border-radius: 12px; width: 100%; box-sizing: border-box;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #E35614;">
+                            <h2 style="color: #4b5563; margin: 0;">📌 ご利用にあたって</h2>
+                            <button onclick="returnFromApplicationForms()" style="background: #E35614; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
+                                ← チャットに戻る
+                            </button>
+                        </div>
+
+                        <div style="padding: 2rem; max-width: 800px; margin: 0 auto;">
+                            <h2 style="color: #E35614; margin-bottom: 1.5rem; text-align: center;">【助成金レスキュー】初めてでも安心！助成金申請の進め方ガイド</h2>
+
+                            <p style="color: #4b5563; margin-bottom: 2rem; line-height: 1.8;">
+                                「助成金レスキュー」をご利用いただき、誠にありがとうございます。<br>
+                                当サービスは、複雑で分かりにくい助成金の申請を、専門エージェントとの対話を通じてスムーズに進めるためのAIパートナーです。このガイドを参考に、ぜひ助成金の獲得にお役立てください。
+                            </p>
+
+                            <h3 style="color: #667eea; margin-bottom: 1rem; border-bottom: 2px solid #667eea; padding-bottom: 0.5rem;">1. 助成金申請の基本的な3ステップ</h3>
+                            <p style="color: #4b5563; margin-bottom: 1rem;">多くの助成金は、以下の3つのステップで手続きが進みます。まずは全体像を把握しましょう。</p>
+
+                            <div style="background: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 1rem; margin-bottom: 1rem;">
+                                <h4 style="color: #0369a1; margin-bottom: 0.5rem;">Step 1. 事前準備</h4>
+                                <p style="color: #0c4a6e; margin: 0;">必要な書類の準備や、就業規則の整備などを行います。</p>
+                            </div>
+
+                            <div style="background: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 1rem; margin-bottom: 1rem;">
+                                <h4 style="color: #0369a1; margin-bottom: 0.5rem;">Step 2. 計画申請</h4>
+                                <p style="color: #0c4a6e; margin: 0;">これから実施する取り組みの計画書を提出します。（このステップがない助成金もあります）</p>
+                            </div>
+
+                            <div style="background: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 1rem; margin-bottom: 2rem;">
+                                <h4 style="color: #0369a1; margin-bottom: 0.5rem;">Step 3. 支給申請</h4>
+                                <p style="color: #0c4a6e; margin: 0;">計画通りに取り組みを実施した後、かかった経費などを報告し、助成金の支給を申請します。</p>
+                            </div>
+
+                            <h3 style="color: #667eea; margin-bottom: 1rem; border-bottom: 2px solid #667eea; padding-bottom: 0.5rem;">2. 専門エージェントへの「6つの質問」で申請は万全！</h3>
+                            <p style="color: #4b5563; margin-bottom: 1rem;">申請の各ステップで何を確認すればよいか分からない時もご安心ください。以下のポイントに沿って専門エージェントにご質問いただければ、必要な情報が明確になり、迷わず申請を進められます。</p>
+
+                            <div style="background: #fef3c7; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+                                <div style="margin-bottom: 1rem;">
+                                    <strong style="color: #92400e;">❓ 対象になる？</strong>
+                                    <p style="color: #713f12; margin: 0.5rem 0 0 1.5rem;">自社がその助成金の対象になるか、また対象となるための条件は？</p>
+                                </div>
+                                <div style="margin-bottom: 1rem;">
+                                    <strong style="color: #92400e;">❓ 事前準備は？</strong>
+                                    <p style="color: #713f12; margin: 0.5rem 0 0 1.5rem;">申請前に、準備しておくべきことは？</p>
+                                </div>
+                                <div style="margin-bottom: 1rem;">
+                                    <strong style="color: #92400e;">❓ スケジュールは？</strong>
+                                    <p style="color: #713f12; margin: 0.5rem 0 0 1.5rem;">申請から受給までの大まかな流れと期間は？</p>
+                                </div>
+                                <div style="margin-bottom: 1rem;">
+                                    <strong style="color: #92400e;">❓ 計画申請の書類は？</strong>
+                                    <p style="color: #713f12; margin: 0.5rem 0 0 1.5rem;">計画申請には、どのような書類が必要？</p>
+                                </div>
+                                <div style="margin-bottom: 1rem;">
+                                    <strong style="color: #92400e;">❓ 支給申請の進め方は？</strong>
+                                    <p style="color: #713f12; margin: 0.5rem 0 0 1.5rem;">計画実施後、支給申請までにすべきことは？</p>
+                                </div>
+                                <div>
+                                    <strong style="color: #92400e;">❓ 支給申請の書類は？</strong>
+                                    <p style="color: #713f12; margin: 0.5rem 0 0 1.5rem;">支給申請に必要な書類は？</p>
+                                </div>
+                            </div>
+
+                            <h3 style="color: #667eea; margin-bottom: 1rem; border-bottom: 2px solid #667eea; padding-bottom: 0.5rem;">3. 専門家のサポートが必要な助成金もお任せ</h3>
+                            <p style="color: #4b5563; margin-bottom: 1rem;">これらの助成金では、専門家への依頼費用も助成対象経費に含まれるケースが多く、安心してご活用いただけます。</p>
+
+                            <div style="background: #f5f3ff; border: 1px solid #667eea; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+                                <h4 style="color: #667eea; margin-bottom: 1rem;">具体例：65歳超雇用推進助成金の場合</h4>
+                                <p style="color: #4b5563; margin-bottom: 1rem;">この助成金では、社会保険労務士等の専門家による<strong>「高年齢者の雇用管理制度の整備」</strong>に関する支援を受けることが要件です。</p>
+
+                                <div style="background: white; border-radius: 4px; padding: 1rem; margin-bottom: 1rem;">
+                                    <p style="color: #4b5563; margin: 0;"><strong>助成額：</strong>専門家への依頼費用を含む対象経費の60%（中小企業以外は45%）</p>
+                                </div>
+
+                                <div style="background: white; border-radius: 4px; padding: 1rem;">
+                                    <p style="color: #4b5563; margin: 0;"><strong>ポイント：</strong>初回申請に限り、50万円の経費がかかったものとみなして計算されるため、手厚い支援が受けられます。</p>
+                                </div>
+                            </div>
+
+                            <div style="background: #e0f2fe; border: 2px solid #0ea5e9; border-radius: 8px; padding: 1.5rem; text-align: center;">
+                                <p style="color: #0369a1; margin: 0; font-weight: 600;">
+                                    助成金レスキューでは、これらの専門家サポートもワンストップで対応可能です。<br>
+                                    ご不明な点は、いつでも専門エージェントにお尋ねください。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
         // 新規追加：専門家相談ページ表示
         function showExpertConsultation() {
             const chatMessages = document.getElementById('integratedChatMessages');
