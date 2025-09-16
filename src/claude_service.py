@@ -7,8 +7,29 @@ from forms_manager import FormsManager
 logger = logging.getLogger(__name__)
 
 class ClaudeService:
-    # ファイル内容キャッシュ（メモリ使用量削減）
-    _file_cache = {}
+    def __init__(self):
+        # ファイル内容キャッシュ（メモリ使用量削減）
+        self._file_cache = {}
+        # 業務改善助成金ファイルの強制キャッシュクリア
+        self._clear_gyoumukaizen_cache()
+
+    def _clear_gyoumukaizen_cache(self):
+        """業務改善助成金ファイルのキャッシュを強制クリア"""
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        gyoumukaizen_files = [
+            'file/業務改善助成金/gyoumukaizen07.txt',
+            'file/業務改善助成金/gyoumukaizenmanyual.txt',
+            'file/業務改善助成金/業務改善助成金Ｑ＆Ａ.txt',
+            'file/業務改善助成金/業務改善助成金 交付申請書等の書き方と留意事項 について.txt',
+            'file/業務改善助成金/業務改善助成金交付要領.txt',
+            'file/業務改善助成金/最低賃金額以上かどうかを確認する方法.txt'
+        ]
+
+        for file_name in gyoumukaizen_files:
+            file_path = os.path.join(base_dir, file_name)
+            if file_path in self._file_cache:
+                del self._file_cache[file_path]
+                logger.info(f"Cleared cache for: {file_name}")
 
     def _read_file_cached(self, file_path: str) -> str:
         """キャッシュ機能付きファイル読み込み"""

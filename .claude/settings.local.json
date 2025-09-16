@@ -73,7 +73,8 @@
       "Bash(gcloud run domain-mappings list:*)",
       "Bash(gcloud beta run domain-mappings list:*)",
       "Bash(gcloud projects list:*)",
-      "Bash(firebase hosting:sites:get:*)"
+      "Bash(firebase hosting:sites:get:*)",
+      "Bash(chmod:*)"
     ],
     "deny": [],
     "ask": [],

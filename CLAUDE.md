@@ -82,6 +82,28 @@ gcloud run services update jyoseikinrescue --region=asia-northeast1 --image=EXAC
 - **`--source`オプションは使用禁止**
 - **この手順以外のデプロイ方法は禁止**
 
+**🔥 重大問題事例（2025-09-17）**:
+Claude自身がルールを破り、`jyoseikinrescue`でビルド実行。
+バックグラウンドプロセスが修正版を上書きし、大問題発生。
+
+**💀 絶対禁止コマンド**:
+```bash
+# これは絶対に実行禁止
+gcloud builds submit --tag asia-northeast1-docker.pkg.dev/jyoseikinrescue/jyoseikinrescue/jyoseikinrescue .
+```
+
+**✅ 正しい手順**:
+```bash
+# 1. バックグラウンドプロセス確認（必須）
+ps aux | grep "gcloud builds" || echo "No background builds"
+
+# 2. 具体的な名前でビルド（YYYY-MM-DD-HHMM形式推奨）
+gcloud builds submit --tag asia-northeast1-docker.pkg.dev/jyoseikinrescue/jyoseikinrescue/fix-YYYYMMDD-HHMM .
+
+# 3. 完了確認後デプロイ
+gcloud run services update jyoseikinrescue --region=asia-northeast1 --image=EXACT_IMAGE_FROM_STEP2
+```
+
 ## 詳細ドキュメント 📚
 
 - **セッション履歴**:
