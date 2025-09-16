@@ -1116,7 +1116,7 @@
                 📝 就業規則
             </button>
             <button class="mobile-menu-item" onclick="showDocumentTemplates(); closeMobileMenu();">
-                📄 書類ひながた
+                📄 添付書類雛形
             </button>
 
             <div style="border-top: 1px solid #e5e7eb; margin: 10px 20px;"></div>
@@ -1185,7 +1185,7 @@
                 <button onclick="showApplicationForms()" class="nav-item">📋 申請書類</button>
                 <button onclick="showExpertConsultation()" class="nav-item">👨‍💼 専門家相談</button>
                 <button onclick="showEmploymentRules()" class="nav-item">📝 就業規則</button>
-                <button onclick="showDocumentTemplates()" class="nav-item">📄 書類ひながた</button>
+                <button onclick="showDocumentTemplates()" class="nav-item">📄 添付書類雛形</button>
             </div>
         </nav>
     </header>
@@ -2787,24 +2787,90 @@
             }
         }
 
-        // 新規追加：書類ひながたページ表示
+        // 新規追加：添付書類雛形ページ表示
         function showDocumentTemplates() {
             const chatMessages = document.getElementById('integratedChatMessages');
             if (chatMessages) {
                 chatMessages.innerHTML = `
                     <div style="background: white; padding: 2rem; border-radius: 12px; width: 100%; box-sizing: border-box;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #667eea;">
-                            <h2 style="color: #4b5563; margin: 0;">📄 書類ひながた</h2>
+                            <h2 style="color: #4b5563; margin: 0;">📄 添付書類雛形</h2>
                             <button onclick="returnFromApplicationForms()" style="background: #667eea; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
                                 ← チャットに戻る
                             </button>
                         </div>
 
-                        <div style="text-align: center; padding: 3rem;">
-                            <h3 style="color: #667eea; margin-bottom: 1rem;">申請書類の記入例・サンプル</h3>
-                            <p style="color: #6b7280; margin-bottom: 2rem;">各種助成金の申請書類記入例をダウンロード</p>
-                            <p style="font-size: 2rem; margin-bottom: 2rem;">🚧</p>
-                            <p style="color: #9ca3af;">準備中です</p>
+                        <div style="padding: 2rem; max-width: 800px; margin: 0 auto;">
+                            <h3 style="color: #667eea; margin-bottom: 2rem; text-align: center; border-bottom: 2px solid #667eea; padding-bottom: 0.5rem;">助成金申請に必要な添付書類の雛形</h3>
+
+                            <p style="color: #4b5563; margin-bottom: 2rem; line-height: 1.8;">
+                                助成金申請時に必要となる各種添付書類の雛形・テンプレートをダウンロードできます。<br>
+                                これらの書類を事前に準備することで、スムーズな申請手続きが可能になります。
+                            </p>
+
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                                <!-- 雇用条件通知書 -->
+                                <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.5rem; background: #f9fafb;">
+                                    <h4 style="color: #667eea; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                        📋 雇用条件通知書
+                                    </h4>
+                                    <p style="color: #6b7280; margin-bottom: 1rem; font-size: 0.9rem;">
+                                        労働契約締結時に労働者に交付が義務付けられている書類です。多くの助成金で必要書類となります。
+                                    </p>
+                                    <div style="background: white; padding: 0.75rem; border-radius: 4px; font-size: 0.8rem; color: #9ca3af;">
+                                        準備中です
+                                    </div>
+                                </div>
+
+                                <!-- 賃金台帳 -->
+                                <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.5rem; background: #f9fafb;">
+                                    <h4 style="color: #667eea; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                        💰 賃金台帳
+                                    </h4>
+                                    <p style="color: #6b7280; margin-bottom: 1rem; font-size: 0.9rem;">
+                                        従業員の賃金支払状況を記録する帳簿です。賃金引上げ系の助成金では特に重要な書類です。
+                                    </p>
+                                    <div style="background: white; padding: 0.75rem; border-radius: 4px; font-size: 0.8rem; color: #9ca3af;">
+                                        準備中です
+                                    </div>
+                                </div>
+
+                                <!-- 出勤簿・タイムカード -->
+                                <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.5rem; background: #f9fafb;">
+                                    <h4 style="color: #667eea; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                        🕒 出勤簿・タイムカード
+                                    </h4>
+                                    <p style="color: #6b7280; margin-bottom: 1rem; font-size: 0.9rem;">
+                                        労働時間の管理に使用する書類です。働き方改革関連の助成金申請時に必要になります。
+                                    </p>
+                                    <div style="background: white; padding: 0.75rem; border-radius: 4px; font-size: 0.8rem; color: #9ca3af;">
+                                        準備中です
+                                    </div>
+                                </div>
+
+                                <!-- 労働者名簿 -->
+                                <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.5rem; background: #f9fafb;">
+                                    <h4 style="color: #667eea; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                        📑 労働者名簿
+                                    </h4>
+                                    <p style="color: #6b7280; margin-bottom: 1rem; font-size: 0.9rem;">
+                                        事業場に雇用する労働者の情報を記録する法定帳簿です。各種助成金の基礎資料となります。
+                                    </p>
+                                    <div style="background: white; padding: 0.75rem; border-radius: 4px; font-size: 0.8rem; color: #9ca3af;">
+                                        準備中です
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 1.5rem; text-align: center;">
+                                <p style="color: #92400e; margin-bottom: 1rem; font-weight: 600;">
+                                    💡 ご利用上の注意
+                                </p>
+                                <p style="color: #b45309; font-size: 0.9rem; line-height: 1.6;">
+                                    これらの雛形は一般的な形式です。実際の申請時は、各助成金の要綱に定められた様式や記載事項をご確認ください。<br>
+                                    不明な点は管轄の労働局等にお問い合わせいただくか、専門家にご相談ください。
+                                </p>
+                            </div>
                         </div>
                     </div>
                 `;
