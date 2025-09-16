@@ -139,14 +139,16 @@ class ClaudeService:
             import os
             base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             
-            # 4つのファイルを全て読み込み
+            # 業務改善助成金フォルダ内の全ファイルを読み込み
             files = [
-                'gyoumukaizen07.txt',  # 交付要綱
-                'gyoumukaizenmanyual.txt',  # 申請マニュアル
-                '業務改善助成金Ｑ＆Ａ.txt',  # Q&A
-                '業務改善助成金 交付申請書等の書き方と留意事項 について.txt'  # 申請書の書き方
+                'file/業務改善助成金/gyoumukaizen07.txt',  # 交付要綱
+                'file/業務改善助成金/gyoumukaizenmanyual.txt',  # 申請マニュアル
+                'file/業務改善助成金/業務改善助成金Ｑ＆Ａ.txt',  # Q&A
+                'file/業務改善助成金/業務改善助成金 交付申請書等の書き方と留意事項 について.txt',  # 申請書の書き方
+                'file/業務改善助成金/業務改善助成金交付要領.txt',  # 交付要領（最重要）
+                'file/業務改善助成金/最低賃金額以上かどうかを確認する方法.txt'  # 最低賃金確認方法
             ]
-            
+
             all_content = ""
             for file_name in files:
                 file_path = os.path.join(base_dir, file_name)
