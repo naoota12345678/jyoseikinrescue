@@ -128,8 +128,7 @@ class ClaudeService:
         self.forms_manager = FormsManager()
         
         
-        # 業務改善助成金専門プロンプト（廃止予定・毎回読み込みに変更）
-        # self.business_improvement_prompt = self._load_business_improvement_prompt()
+        # 業務改善助成金も汎用システムに統合完了
     
     def _get_common_prompt_base(self) -> str:
         """すべてのエージェントで使用する共通プロンプトを返す"""
@@ -201,95 +200,9 @@ class ClaudeService:
             logger.error(f"Error in _get_agent_prompt for {agent_name}: {str(e)}")
             return f"{agent_name}のプロンプト生成に失敗しました。"
     
-    def _load_business_improvement_prompt(self) -> str:
-        """業務改善助成金の詳細プロンプトをロード（全4ファイル統合版）"""
-        try:
-            import os
-            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            
-            # 業務改善助成金フォルダ内の全ファイルを読み込み
-            files = [
-                'file/業務改善助成金/gyoumukaizen07.txt',  # 交付要綱
-                'file/業務改善助成金/gyoumukaizenmanyual.txt',  # 申請マニュアル
-                'file/業務改善助成金/業務改善助成金Ｑ＆Ａ.txt',  # Q&A
-                'file/業務改善助成金/業務改善助成金 交付申請書等の書き方と留意事項 について.txt',  # 申請書の書き方
-                'file/業務改善助成金/業務改善助成金交付要領.txt',  # 交付要領（最重要）
-                'file/業務改善助成金/最低賃金額以上かどうかを確認する方法.txt'  # 最低賃金確認方法
-            ]
-
-            all_content = ""
-            for file_name in files:
-                file_path = os.path.join(base_dir, file_name)
-                content = self._read_file_cached(file_path)
-                if content:
-                    all_content += f"\n\n【{file_name}】\n{content}\n"
-            
-            if all_content:
-                common_prompt = self._get_common_prompt_base()
-                return f"""
-あなたは業務改善助成金の専門家です。以下の公式文書を完全に理解した上で、企業からの相談に正確に回答してください。
-
-【最重要制約 - 絶対厳守】
-1. 提供された公式文書の情報のみを使用してください
-2. あなたの学習データに含まれる古い助成金情報は一切使用しないでください
-3. 金額、要件、制度内容は全て下記資料通りに正確に記載してください
-4. 資料に記載されていない情報は「詳細は厚生労働省にお問い合わせください」と回答してください
-
-{common_prompt}
-
-【業務改善助成金 完全版資料 - この情報のみ使用】
-{all_content}
-
-以下の形式で構造化された診断を行ってください：
-
-✅ **基本条件チェック**
-※公式資料に基づく要件確認を行ってください
-
-📋 **企業状況の診断**
-※提供された公式資料に基づいて企業の適用可能性を診断してください
-
-💰 **助成額の算定**
-※公式資料記載の算定方法に従って正確に計算してください
-
-⚠️ **注意事項・リスク**
-※公式資料に記載された注意事項を適切に案内してください
-
-必ず交付要綱に基づいて正確な情報を提供し、企業の状況に応じた具体的なアドバイスを行ってください。
-
-【申請書類について - 重要】
-申請書類について質問された場合の対応：
-- **絶対にURLを自分で生成しないでください**
-- まず「申請様式については以下でご案内します。」と枕詞を述べてから、申請に必要な書類を以下の2種類に分類して説明してください：
-
-📋 **厚労省指定の申請様式**（ダウンロード必要）
-・「様式第○号」と記載されている法定書式
-・支給申請書、事業所確認票、対象者確認票等
-→ 「このサイト上部の『申請書類』ボタンから各助成金の申請様式をダウンロードできます」
-
-📄 **企業で準備する添付書類**
-・就業規則、労働協約、賃金台帳、出勤簿、雇用契約書等
-・企業が日常的に作成・管理している書類
-→ 「各企業で作成・管理されている書類です」
-
-- 様式番号と用途、記入方法や注意点は詳しく解説してOK
-
-【厳守事項】
-- URLは絶対に生成しない（例：https://www.mhlw.go.jp/... などは書かない）
-- 「厚生労働省のホームページで」などの具体的なサイト名も書かない
-- 申請様式のダウンロード方法を聞かれたら「以下でご案内します」とだけ答える
-"""
-            else:
-                # ファイルが読み込めない場合のフォールバック
-                return "業務改善助成金の要綱ファイルが読み込めませんでした。"
-                
-        except Exception as e:
-            logger.error(f"Error loading business improvement prompt: {str(e)}")
-            return "業務改善助成金の要綱ファイルが読み込めませんでした。"
+    # _load_business_improvement_prompt メソッドは削除済み - 汎用システムに統合
     
-    def _select_system_prompt(self, question: str) -> str:
-        """質問内容に応じて適切なシステムプロンプトを選択（廃止予定）"""
-        # この関数は専門エージェント方式に移行したため使用されません
-        return self.business_improvement_prompt
+    # _select_system_prompt メソッドは削除済み - 専門エージェント方式に移行
     
     def _select_system_prompt_by_agent(self, agent_type: str, question: str) -> str:
         """エージェントタイプに応じてシステムプロンプトを選択"""
@@ -312,9 +225,9 @@ class ClaudeService:
             # 65歳超雇用推進助成金（65歳超継続雇用促進コース）
             return self._get_65sai_keizoku_prompt()
         else:
-            # その他のエージェントは既存のロジックを使用
-            logger.warning(f"Unknown agent type: '{agent_type}', falling back to general prompt")
-            return self._select_system_prompt(question)
+            # その他のエージェントは汎用システムを使用
+            logger.warning(f"Unknown agent type: '{agent_type}', using generic agent system")
+            return self._get_agent_prompt(agent_type, f'file/{agent_type}')
     
     def _get_hanntei_prompt(self) -> str:
         """助成金判定エージェント用のプロンプトを生成"""
@@ -395,65 +308,7 @@ class ClaudeService:
 質問者の企業情報を踏まえ、{course_name}について専門的で実用的なアドバイスを提供してください。
 """
     
-    def _get_business_improvement_prompt(self) -> str:
-        """業務改善助成金の詳細プロンプトをロード（毎回読み込み版）"""
-        try:
-            import os
-            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            logger.info(f"=== 業務改善助成金エージェント: ファイル読み込み開始 ===")
-            logger.info(f"Base directory: {base_dir}")
-
-            # 業務改善助成金フォルダ内の全ファイルを読み込み
-            files = [
-                'file/業務改善助成金/gyoumukaizen07.txt',  # 交付要綱
-                'file/業務改善助成金/gyoumukaizenmanyual.txt',  # 申請マニュアル
-                'file/業務改善助成金/業務改善助成金Ｑ＆Ａ.txt',  # Q&A
-                'file/業務改善助成金/業務改善助成金 交付申請書等の書き方と留意事項 について.txt',  # 申請書の書き方
-                'file/業務改善助成金/業務改善助成金交付要領.txt',  # 交付要領（最重要）
-                'file/業務改善助成金/最低賃金額以上かどうかを確認する方法.txt'  # 最低賃金確認方法
-            ]
-
-            all_content = ""
-            logger.info(f"Loading {len(files)} files...")
-
-            for file_name in files:
-                file_path = os.path.join(base_dir, file_name)
-                logger.info(f"Trying to load: {file_path}")
-
-                content = self._read_file_cached(file_path)
-                if content:
-                    all_content += f"\n\n【{file_name}】\n{content}\n"
-                    logger.info(f"✓ Successfully loaded: {file_name} ({len(content)} chars)")
-                else:
-                    logger.error(f"✗ Failed to load: {file_path}")
-
-            if not all_content:
-                logger.error("No files were loaded successfully")
-                return "業務改善助成金の詳細資料の読み込みに失敗しました。"
-
-            logger.info(f"Total content loaded: {len(all_content)} characters")
-
-            # 共通プロンプトベースを取得
-            common_base = self._get_common_prompt_base()
-
-            return f"""
-{common_base}
-
-あなたは業務改善助成金の専門エージェントです。
-
-{all_content}
-
-重要な指示:
-- 必ず上記の公式資料に基づいて回答してください
-- 特に交付要領ファイルに記載された申請期間情報を正確に提供してください
-- 申請様式のダウンロード方法を聞かれたら「以下でご案内します」とだけ答える
-- 企業の状況に応じた具体的なアドバイスを行ってください
-
-必ず支給要領に基づいて正確な情報を提供し、企業の状況に応じた具体的なアドバイスを行ってください。
-"""
-        except Exception as e:
-            logger.error(f"Error in _get_business_improvement_prompt: {str(e)}")
-            return "業務改善助成金の詳細資料の読み込みに失敗しました。"
+    # _get_business_improvement_prompt メソッドは削除済み - 汎用システムに統合済み
 
     def _get_career_up_prompt(self, agent_type: str) -> str:
         """キャリアアップ助成金のコース別プロンプトを生成"""
