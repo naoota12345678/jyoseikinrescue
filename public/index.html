@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>助成金レスキュー - AI助成金相談サービス</title>
+    <meta name="description" content="Claude AIを活用した高精度な助成金相談サービス。100種類超の助成金から専門エージェントで「じぶんで」申請。申請可能な助成金を見つけて今すぐ申請しましょう。">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="icon" type="image/png" href="/static/favicon.png">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Stripe SDK -->
+    <script src="https://js.stripe.com/v3/"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f4eddc;
+            min-height: 100vh;
+            margin: 0;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background: transparent;
+            color: #333;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        h1 {
+            font-size: 4rem;
+            font-weight: 900;
+            margin: 2rem 0 1rem 0;
+            text-shadow: 2px 4px 8px rgba(0,0,0,0.3);
+            letter-spacing: -1px;
+        }
+        
+        .subtitle {
+            font-size: 1.5rem;
+            font-weight: 300;
+            opacity: 0.95;
+            margin-bottom: 3rem;
+        }
+        
+        .hero-section {
+            text-align: center;
+            padding: 4rem 0;
+            color: #21292A;
+        }
+        
+        .main-content {
+            padding: 2rem 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .card h2 {
+            color: #495057;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        button {
+            background: #f4eddc;
+            color: #21292A;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 100%;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .chat-area {
+            margin-top: 1.5rem;
+        }
+        
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            margin-bottom: 1rem;
+        }
+        
+        .message {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        
+        .user-message {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .ai-message {
+            background: #f3e5f5;
+            border-left: 4px solid #9c27b0;
+            white-space: pre-wrap;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .features {
+            grid-column: span 2;
+            margin-top: 2rem;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            text-align: center;
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* 認証関連スタイル */
+        .auth-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #e8f5e8;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .usage-stats {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .upgrade-button {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            margin-top: 1rem;
+        }
+        
+        .login-form {
+            max-width: 400px;
+            margin: 2rem auto;
+        }
+        
+        .login-button {
+            background: linear-gradient(135deg, #4285f4 0%, #1a73e8 100%);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .cta-button:hover {
+            transform: scale(1.1) !important;
+            box-shadow: 0 20px 50px rgba(220, 53, 69, 0.7) !important;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 3rem;
+            }
+            
+            .subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .cta-button {
+                padding: 1.5rem 2rem;
+                font-size: 1.2rem;
+            }
+            
+            /* モバイルでの利用規約チェックボックスの修正 */
+            #termsAgreement {
+                flex-shrink: 0 !important;
+                margin-right: 10px !important;
+                margin-top: 3px !important;
+            }
+            
+            label[style*="display: flex"] span {
+                flex: 1 !important;
+                word-break: break-word !important;
+                line-height: 1.4 !important;
+                min-width: 0 !important;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div></div>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <button onclick="showLogin()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 0.75rem 1.5rem; border-radius: 25px; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(40, 167, 69, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(40, 167, 69, 0.3)'">
+                        ログイン
+                    </button>
+                    <button onclick="showLogin()" style="background: rgba(40, 167, 69, 0.8); color: white; padding: 0.75rem 1.5rem; border-radius: 25px; border: 1px solid rgba(40, 167, 69, 1); font-weight: 600; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.3s ease;" onmouseover="this.style.background='rgba(40, 167, 69, 1)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(40, 167, 69, 0.8)'; this.style.transform='translateY(0)'">
+                        会員登録
+                    </button>
+                    
+                    <div id="authSection" class="hidden">
+                    <div class="user-info" id="userInfo">
+                        <span id="userEmail"></span>
+                        <button onclick="logout()" style="padding: 0.5rem 1rem; background: #E35614; color: white; border: none; border-radius: 6px;">ログアウト</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="hero-section">
+        <div class="container">
+            <img src="/static/logo.png" alt="助成金レスキュー" style="max-width: 500px; height: auto; margin: 2rem auto; display: block;" />
+            <p class="subtitle">
+                AI助成金相談サービス<br>
+                100種類超の助成金から専門エージェントで「じぶんで」申請<br>申請可能な助成金を見つけて今すぐ申請しましょう
+            </p>
+            
+            <!-- メインCTA -->
+            <div style="margin-top: 3rem; text-align: center;">
+                <button onclick="startDiagnosis()" class="cta-button" style="font-size: 1.4rem; padding: 2rem 4rem; background: linear-gradient(135deg, #E35614 0%, #D14510 100%) !important; box-shadow: 0 15px 40px rgba(227, 86, 20, 0.5) !important; border: none; border-radius: 50px; color: white; cursor: pointer; font-weight: 700;">
+                    今すぐ無料診断をスタート（1分）
+                </button>
+            </div>
+            
+            <!-- サブCTA -->
+            <div style="margin-top: 2rem;">
+                <p style="opacity: 0.9; font-size: 1.1rem; margin-bottom: 1rem;">
+                    既にアカウントをお持ちの方は
+                </p>
+                <button onclick="showLogin()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none; padding: 1rem 2rem; border-radius: 50px; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);">
+                    💬 ログインしてAI相談を始める
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- サービス特徴セクション -->
+    <div class="container" style="margin: 3rem auto; max-width: 1200px;">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+            <div class="card" style="text-align: center; padding: 1.5rem;">
+                <div style="font-size: 2.2rem; margin-bottom: 0.8rem;">🤖</div>
+                <h3 style="color: #667eea; margin-bottom: 0.8rem; font-size: 1.1rem;">100種類超 完全網羅</h3>
+                <p style="line-height: 1.5; font-size: 0.9rem;">29カテゴリー・100種類超の助成金からAIが最適なものを選定。</p>
+            </div>
+            
+            <div class="card" style="text-align: center; padding: 1.5rem;">
+                <div style="font-size: 2.2rem; margin-bottom: 0.8rem;">⚡</div>
+                <h3 style="color: #667eea; margin-bottom: 0.8rem; font-size: 1.1rem;">即座に診断結果</h3>
+                <p style="line-height: 1.5; font-size: 0.9rem;">わずか1分の質問に答えるだけで、最適な助成金を瞬時に診断。</p>
+            </div>
+            
+            <div class="card" style="text-align: center; padding: 1.5rem;">
+                <div style="font-size: 2.2rem; margin-bottom: 0.8rem;">💰</div>
+                <h3 style="color: #667eea; margin-bottom: 0.8rem; font-size: 1.1rem;">助成金発見</h3>
+                <p style="line-height: 1.5; font-size: 0.9rem;">業務改善・人材開発・働き方改革など様々な分野で受給可能。</p>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 3rem;">
+            <button onclick="startDiagnosis()" style="background: linear-gradient(135deg, #E35614 0%, #D14510 100%); color: white; border: none; padding: 2rem 4rem; border-radius: 50px; font-size: 1.4rem; font-weight: 700; cursor: pointer; box-shadow: 0 15px 40px rgba(227, 86, 20, 0.5); transform: scale(1.05); border: 3px solid rgba(255,255,255,0.3);">
+                今すぐ無料診断をスタート（完全無料）
+            </button>
+        </div>
+    </div>
+    
+    <!-- プランセクション -->
+    <div class="container" style="margin: 4rem auto; max-width: 1200px;">
+        <div style="text-align: center; margin-bottom: 3rem;">
+            <h2 style="color: #21292A; font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem;">💎 料金プラン</h2>
+            <p style="color: #21292A; font-size: 1.2rem; opacity: 0.8;">診断後、詳細な相談が必要な場合にご利用ください</p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
+            <!-- ライトプラン -->
+            <div class="card" style="text-align: center; position: relative; border: 2px solid #17a2b8;">
+                <div style="background: #17a2b8; color: white; padding: 0.5rem; margin: -2.5rem -2.5rem 1.5rem -2.5rem; border-radius: 20px 20px 0 0;">
+                    <h3 style="margin: 0; font-size: 1.3rem;">💡 ライトプラン</h3>
+                </div>
+                <div style="font-size: 2.5rem; color: #17a2b8; font-weight: bold; margin-bottom: 0.5rem;">¥1,480</div>
+                <p style="color: #666; margin-bottom: 1.5rem;">月額（税込）</p>
+                <div style="margin-bottom: 2rem;">
+                    <div style="font-size: 1.8rem; color: #17a2b8; font-weight: bold;">20回/月</div>
+                    <p style="color: #666;">AI専門相談</p>
+                </div>
+                <ul style="text-align: left; margin-bottom: 2rem; padding-left: 0; list-style: none;">
+                    <li style="margin-bottom: 0.5rem;">✅ 全助成金対応</li>
+                    <li style="margin-bottom: 0.5rem;">✅ 24時間対応</li>
+                    <li style="margin-bottom: 0.5rem;">✅ 申請書類案内</li>
+                </ul>
+                <button onclick="window.location.href='/pricing'" style="background: #17a2b8; color: white; border: none; padding: 1rem 2rem; border-radius: 25px; width: 100%; font-weight: 600; cursor: pointer;">
+                    このプランを選択
+                </button>
+            </div>
+            
+            <!-- レギュラープラン -->
+            <div class="card" style="text-align: center; position: relative; border: 2px solid #28a745; transform: scale(1.05); box-shadow: 0 20px 60px rgba(40, 167, 69, 0.3);">
+                <div style="background: #28a745; color: white; padding: 0.5rem; margin: -2.5rem -2.5rem 1.5rem -2.5rem; border-radius: 20px 20px 0 0; position: relative;">
+                    <div style="background: #ffc107; color: #333; padding: 0.3rem 1rem; border-radius: 15px; position: absolute; top: -10px; right: 1rem; font-size: 0.8rem; font-weight: bold;">おすすめ</div>
+                    <h3 style="margin: 0; font-size: 1.3rem;">⭐ レギュラープラン</h3>
+                </div>
+                <div style="font-size: 2.5rem; color: #28a745; font-weight: bold; margin-bottom: 0.5rem;">¥3,300</div>
+                <p style="color: #666; margin-bottom: 1.5rem;">月額（税込）</p>
+                <div style="margin-bottom: 2rem;">
+                    <div style="font-size: 1.8rem; color: #28a745; font-weight: bold;">50回/月</div>
+                    <p style="color: #666;">AI専門相談</p>
+                </div>
+                <ul style="text-align: left; margin-bottom: 2rem; padding-left: 0; list-style: none;">
+                    <li style="margin-bottom: 0.5rem;">✅ 全助成金対応</li>
+                    <li style="margin-bottom: 0.5rem;">✅ 24時間対応</li>
+                    <li style="margin-bottom: 0.5rem;">✅ 申請書類案内</li>
+                </ul>
+                <button onclick="window.location.href='/pricing'" style="background: #28a745; color: white; border: none; padding: 1rem 2rem; border-radius: 25px; width: 100%; font-weight: 600; cursor: pointer;">
+                    このプランを選択
+                </button>
+            </div>
+            
+            <!-- ヘビープラン -->
+            <div class="card" style="text-align: center; position: relative; border: 2px solid #E35614;">
+                <div style="background: #E35614; color: white; padding: 0.5rem; margin: -2.5rem -2.5rem 1.5rem -2.5rem; border-radius: 20px 20px 0 0;">
+                    <h3 style="margin: 0; font-size: 1.3rem;">🔥 ヘビープラン</h3>
+                </div>
+                <div style="font-size: 2.5rem; color: #E35614; font-weight: bold; margin-bottom: 0.5rem;">¥5,500</div>
+                <p style="color: #666; margin-bottom: 1.5rem;">月額（税込）</p>
+                <div style="margin-bottom: 2rem;">
+                    <div style="font-size: 1.8rem; color: #E35614; font-weight: bold;">90回/月</div>
+                    <p style="color: #666;">AI専門相談</p>
+                </div>
+                <ul style="text-align: left; margin-bottom: 2rem; padding-left: 0; list-style: none;">
+                    <li style="margin-bottom: 0.5rem;">✅ 全助成金対応</li>
+                    <li style="margin-bottom: 0.5rem;">✅ 24時間対応</li>
+                    <li style="margin-bottom: 0.5rem;">✅ 申請書類案内</li>
+                </ul>
+                <button onclick="window.location.href='/pricing'" style="background: #E35614; color: white; border: none; padding: 1rem 2rem; border-radius: 25px; width: 100%; font-weight: 600; cursor: pointer;">
+                    このプランを選択
+                </button>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 3rem;">
+            <p style="color: #21292A; font-size: 1rem; margin-bottom: 2rem; opacity: 0.8;">
+                まずは無料診断で、あなたの会社に最適な助成金を確認してください
+            </p>
+            <button onclick="startDiagnosis()" style="background: linear-gradient(135deg, #E35614 0%, #D14510 100%); color: white; border: none; padding: 2rem 4rem; border-radius: 50px; font-size: 1.5rem; font-weight: 800; cursor: pointer; box-shadow: 0 15px 40px rgba(227, 86, 20, 0.5); border: 3px solid rgba(255,255,255,0.5); animation: pulse 2s infinite;">
+                完全無料診断を今すぐ開始する
+            </button>
+        </div>
+    </div>
+    
+    <!-- ログインセクション（初期は非表示） -->
+    <main class="container" id="loginContainer" style="display: none;">
+        <div class="card" style="max-width: 500px; margin: 2rem auto;">
+            <h2>🔐 ログイン / 新規登録</h2>
+            <div class="login-form">
+                <p>100種類超の助成金AI相談サービスをご利用ください。</p>
+                
+                <div class="form-group">
+                    <input type="email" id="emailInput" placeholder="メールアドレス" />
+                </div>
+                
+                <div class="form-group">
+                    <input type="password" id="passwordInput" placeholder="パスワード（6文字以上）" />
+                </div>
+                
+                <button onclick="loginWithEmail()" class="login-button">
+                    ログイン
+                </button>
+                
+                <div style="text-align: center; margin-top: 1rem;">
+                    <a href="#" onclick="showPasswordReset(); return false;" style="color: #667eea; text-decoration: underline; font-size: 14px;">
+                        パスワードをお忘れの方
+                    </a>
+                </div>
+                
+                <div style="text-align: center; margin-top: 1rem; color: #666; font-size: 14px;">
+                    まだアカウントをお持ちでない場合は下の「同意して会員登録する」ボタンをお使いください
+                </div>
+                
+                <!-- 利用規約・プライバシーポリシー同意チェックボックス -->
+                <div style="margin: 1rem 0; padding: 0.75rem; background: #f8f9fa; border-radius: 8px; font-size: 14px;">
+                    <label style="display: flex; align-items: flex-start; cursor: pointer; line-height: 1.5; flex-wrap: wrap;">
+                        <input type="checkbox" id="termsAgreement" style="margin-right: 8px; margin-top: 2px; transform: scale(1.2); flex-shrink: 0;" required>
+                        <span style="flex: 1; min-width: 0; word-wrap: break-word;">
+                            <a href="/terms" target="_blank" style="color: #667eea; text-decoration: underline;">利用規約</a>
+                            と
+                            <a href="https://jyoseikin.jp/privacy/" target="_blank" style="color: #667eea; text-decoration: underline;">プライバシーポリシー</a>
+                            に同意する
+                        </span>
+                    </label>
+                </div>
+                
+                <button onclick="registerWithEmail()" class="login-button" id="registerButton" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); margin-top: 0.5rem; opacity: 0.5; cursor: not-allowed;" disabled>
+                    同意して会員登録する
+                </button>
+                
+                <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
+                    初回登録時は5回の無料お試しがご利用いただけます。
+                </p>
+            </div>
+        </div>
+        
+        <div id="usageSection" class="auth-section hidden">
+            <div class="usage-stats" id="usageStats">
+                <h3>📊 使用状況</h3>
+                <p>Plan: <span id="planType"></span></p>
+                <p>残り質問数: <span id="remainingQuestions"></span> / <span id="totalQuestions"></span></p>
+                <div id="upgradeSection" class="hidden">
+                    <button id="basicPlanButton" onclick="upgradeToBasisPlan()" class="upgrade-button" style="display: none;">
+                        ⬆️ 基本プランにアップグレード (月額3,000円)
+                    </button>
+                    <button id="additionalPackButton" onclick="buyAdditionalPack()" class="upgrade-button" style="display: none;">
+                        📦 50質問追加パック購入 (3,000円)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content" id="mainContent" style="display: none;">
+            <div class="card">
+                <h2>📋 会社情報入力</h2>
+                <form id="companyForm">
+                    <div class="form-group">
+                        <label for="companyName">会社名</label>
+                        <input type="text" id="companyName" name="companyName" placeholder="株式会社〇〇">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="industry">業種</label>
+                        <select id="industry" name="industry">
+                            <option value="">選択してください</option>
+                            <option value="製造業">製造業</option>
+                            <option value="小売業">小売業</option>
+                            <option value="飲食業">飲食業</option>
+                            <option value="サービス業">サービス業</option>
+                            <option value="IT・通信業">IT・通信業</option>
+                            <option value="建設業">建設業</option>
+                            <option value="運輸業">運輸業</option>
+                            <option value="その他">その他</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="employeeCount">従業員数</label>
+                        <input type="number" id="employeeCount" name="employeeCount" placeholder="例: 50">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="currentMinWage">現在の最低賃金 (円/時)</label>
+                        <input type="number" id="currentMinWage" name="currentMinWage" placeholder="例: 900">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="plannedInvestment">設備投資予定</label>
+                        <select id="plannedInvestment" name="plannedInvestment">
+                            <option value="">選択してください</option>
+                            <option value="あり">あり</option>
+                            <option value="なし">なし</option>
+                        </select>
+                    </div>
+                    
+                    <button type="button" onclick="checkGrants()">💡 利用可能な助成金をチェック</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>💬 助成金 AI相談</h2>
+                <div class="chat-area">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message ai-message">
+                            こんにちは！100種類超対応の助成金専門AIアシスタントです。
+                            29カテゴリー・100種類超の助成金について、どのようなことをお聞きになりたいですか？
+
+                            例:
+                            • 「うちの会社に使える助成金はありますか？」
+                            • 「キャリアアップ助成金の申請手続きを教えてください」
+                            • 「設備投資で使える助成金を教えてください」
+                            • 「人材育成に使える助成金はありますか？」
+                            
+                            ※29カテゴリー・100種類超の助成金に対応しています。
+                            　まずは無料診断で最適な助成金をお探しください。
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <textarea id="userQuestion" placeholder="助成金について質問をどうぞ..." rows="3"></textarea>
+                    </div>
+                    
+                    <button type="button" onclick="sendQuestion()" id="sendButton">📤 質問を送信</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="card">
+                <h2>🌟 サービスの特徴</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🤖</div>
+                        <h3>100種類超対応AI</h3>
+                        <p>29カテゴリー・100種類超の助成金を完全網羅した専門AI</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>即座に回答</h3>
+                        <p>24時間365日、いつでも素早く専門的なアドバイスを提供</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💰</div>
+                        <h3>圧倒的コスパ</h3>
+                        <p>従来手数料の1/4で同等以上のサポートを実現</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- パスワードリセットモーダル -->
+    <div id="passwordResetModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 2rem; border-radius: 20px; max-width: 400px; width: 90%; margin: auto; position: relative; top: 50%; transform: translateY(-50%);">
+            <h3 style="color: #667eea; margin-bottom: 1rem;">🔐 パスワードリセット</h3>
+            <p style="color: #666; margin-bottom: 1.5rem; font-size: 14px;">登録されているメールアドレスを入力してください。パスワードリセット用のメールをお送りします。</p>
+            
+            <div class="form-group">
+                <input type="email" id="resetEmailInput" placeholder="メールアドレス" style="width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px;" />
+            </div>
+            
+            <div id="resetMessage" style="margin: 1rem 0; padding: 0.75rem; border-radius: 8px; display: none;"></div>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button onclick="sendPasswordReset()" style="flex: 1; padding: 0.75rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                    リセットメールを送信
+                </button>
+                <button onclick="closePasswordReset()" style="flex: 1; padding: 0.75rem; background: #f3f4f6; color: #666; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                    キャンセル
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== Firebase 認証設定 =====
+        
+        // Firebase設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyDzRzS-C104mWNloO94GNH7Jv93F5gWVto",
+            authDomain: "jyoseikinrescue.firebaseapp.com",
+            projectId: "jyoseikinrescue",
+            storageBucket: "jyoseikinrescue.firebasestorage.app",
+            messagingSenderId: "453016168690",
+            appId: "1:453016168690:web:6658e01bdd588ea63f886b",
+            measurementId: "G-V8WP53NEH4"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        
+        let currentUser = null;
+        let usageStats = null;
+        
+        // 認証状態の監視
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                // ログイン済みの場合はダッシュボードにリダイレクト
+                // ただし、既にリダイレクト中の場合は何もしない
+                if (!window.location.pathname.includes('/dashboard')) {
+                    window.location.href = '/dashboard';
+                }
+            } else {
+                currentUser = null;
+                showLoginForm();
+            }
+        });
+        
+        // メールアドレスでログイン
+        async function loginWithEmail() {
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passwordInput').value;
+            
+            if (!email || !password) {
+                alert('メールアドレスとパスワードを入力してください');
+                return;
+            }
+            
+            try {
+                const result = await auth.signInWithEmailAndPassword(email, password);
+                console.log('ログイン成功:', result.user.email);
+            } catch (error) {
+                console.error('ログインエラー:', error);
+                if (error.code === 'auth/user-not-found') {
+                    alert('ユーザーが見つかりません。新規登録してください。');
+                } else if (error.code === 'auth/wrong-password') {
+                    alert('パスワードが間違っています。');
+                } else {
+                    alert('ログインに失敗しました: ' + error.message);
+                }
+            }
+        }
+        
+        // メールアドレスで新規登録
+        async function registerWithEmail() {
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passwordInput').value;
+            const termsAgreed = document.getElementById('termsAgreement').checked;
+            
+            if (!email || !password) {
+                alert('メールアドレスとパスワードを入力してください');
+                return;
+            }
+            
+            if (!termsAgreed) {
+                alert('利用規約とプライバシーポリシーに同意してください');
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert('パスワードは6文字以上で入力してください');
+                return;
+            }
+            
+            try {
+                const result = await auth.createUserWithEmailAndPassword(email, password);
+                console.log('新規登録成功:', result.user.email);
+
+                // サーバーでユーザー登録
+                await registerNewUser(result.user);
+
+                // 登録完了メールを送信
+                try {
+                    await result.user.sendEmailVerification();
+                    console.log('登録完了メールを送信しました');
+                } catch (emailError) {
+                    console.error('メール送信エラー:', emailError);
+                    // エラーが発生してもアラートは表示する
+                }
+
+                alert('登録完了！無料お試し5回分が付与されました。');
+            } catch (error) {
+                console.error('登録エラー:', error);
+                if (error.code === 'auth/email-already-in-use') {
+                    alert('このメールアドレスは既に使用されています。ログインしてください。');
+                } else if (error.code === 'auth/weak-password') {
+                    alert('パスワードが弱すぎます。6文字以上で設定してください。');
+                } else {
+                    alert('登録に失敗しました: ' + error.message);
+                }
+            }
+        }
+        
+        // ログアウト
+        async function logout() {
+            try {
+                await auth.signOut();
+            } catch (error) {
+                console.error('ログアウトエラー:', error);
+            }
+        }
+        
+        // 新規ユーザー登録
+        async function registerNewUser(user) {
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        uid: user.uid,
+                        email: user.email,
+                        display_name: user.displayName || ''
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    console.error('Registration response:', data);
+                    // エラーでも続行（Firebaseユーザーは作成済み）
+                    console.log('Continuing despite registration error');
+                } else {
+                    console.log('User registered successfully:', data);
+                }
+            } catch (error) {
+                console.error('ユーザー登録エラー:', error);
+                // エラーでも続行（Firebaseユーザーは作成済み）
+                console.log('Continuing despite network error');
+            }
+        }
+        
+        // ユーザーデータ読み込み
+        async function loadUserData() {
+            try {
+                const idToken = await currentUser.getIdToken();
+                
+                const response = await fetch('/api/auth/user', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${idToken}`,
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    usageStats = data.usage_stats;
+                    updateUsageDisplay();
+                }
+            } catch (error) {
+                console.error('ユーザーデータ読み込みエラー:', error);
+            }
+        }
+        
+        // 使用状況表示更新
+        function updateUsageDisplay() {
+            if (!usageStats) return;
+            
+            document.getElementById('planType').textContent = usageStats.plan_type || 'trial';
+            document.getElementById('remainingQuestions').textContent = usageStats.remaining || 0;
+            document.getElementById('totalQuestions').textContent = usageStats.questions_limit || 0;
+            
+            // アップグレードボタンの表示ロジック
+            const upgradeSection = document.getElementById('upgradeSection');
+            const basicPlanButton = document.getElementById('basicPlanButton');
+            const additionalPackButton = document.getElementById('additionalPackButton');
+            const planType = usageStats.plan_type || 'trial';
+            
+            // 質問回数が少なくなったときのみ表示
+            if (usageStats.remaining <= 5) {
+                upgradeSection.classList.remove('hidden');
+                
+                if (planType === 'trial') {
+                    // トライアルユーザー：基本プランのみ表示
+                    basicPlanButton.style.display = 'block';
+                    additionalPackButton.style.display = 'none';
+                } else if (planType === 'basic') {
+                    // 基本プランユーザー：追加パックのみ表示
+                    basicPlanButton.style.display = 'none';
+                    additionalPackButton.style.display = 'block';
+                } else {
+                    // その他：両方非表示
+                    basicPlanButton.style.display = 'none';
+                    additionalPackButton.style.display = 'none';
+                }
+            } else {
+                upgradeSection.classList.add('hidden');
+            }
+            
+            // 送信ボタンの状態更新
+            const sendButton = document.getElementById('sendButton');
+            if (usageStats.remaining <= 0) {
+                sendButton.disabled = true;
+                sendButton.textContent = '質問回数の上限に達しています';
+            } else {
+                sendButton.disabled = false;
+                sendButton.textContent = '📤 質問を送信';
+            }
+        }
+        
+        // UI表示切り替え
+        function showLoginForm() {
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('usageSection').classList.add('hidden');
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('authSection').classList.add('hidden');
+        }
+        
+        
+        function showMainContent() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('usageSection').classList.remove('hidden');
+            document.getElementById('mainContent').style.display = 'grid';
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('userEmail').textContent = currentUser.email;
+        }
+        
+        // ===== 決済関連関数 =====
+        
+        // 基本プランにアップグレード
+        async function upgradeToBasisPlan() {
+            try {
+                const idToken = await currentUser.getIdToken();
+                
+                const response = await fetch('/api/payment/basic-plan', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${idToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        success_url: window.location.origin + '/success',
+                        cancel_url: window.location.origin + '/cancel'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    window.location.href = data.checkout_url;
+                } else {
+                    alert('エラー: ' + data.error);
+                }
+            } catch (error) {
+                console.error('決済エラー:', error);
+                alert('決済処理に失敗しました。');
+            }
+        }
+        
+        // 追加パック購入
+        async function buyAdditionalPack() {
+            try {
+                const idToken = await currentUser.getIdToken();
+                
+                const response = await fetch('/api/payment/additional-pack', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${idToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        success_url: window.location.origin + '/success',
+                        cancel_url: window.location.origin + '/cancel'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    window.location.href = data.checkout_url;
+                } else {
+                    alert('エラー: ' + data.error);
+                }
+            } catch (error) {
+                console.error('決済エラー:', error);
+                alert('決済処理に失敗しました。');
+            }
+        }
+
+        async function sendQuestion() {
+            const question = document.getElementById('userQuestion').value.trim();
+            if (!question) {
+                alert('質問を入力してください');
+                return;
+            }
+            
+            if (!currentUser) {
+                alert('ログインが必要です');
+                return;
+            }
+
+            const chatMessages = document.getElementById('chatMessages');
+            
+            // ユーザーの質問を表示
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user-message';
+            userMessage.textContent = question;
+            chatMessages.appendChild(userMessage);
+            
+            // ローディング表示
+            const loadingMessage = document.createElement('div');
+            loadingMessage.className = 'message loading';
+            loadingMessage.textContent = 'AI が回答を生成中...';
+            chatMessages.appendChild(loadingMessage);
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // 質問をクリア
+            document.getElementById('userQuestion').value = '';
+            
+            try {
+                const companyInfo = getCompanyInfo();
+                const idToken = await currentUser.getIdToken();
+                
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${idToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        company_info: companyInfo,
+                        question: question
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // ローディングメッセージを削除
+                chatMessages.removeChild(loadingMessage);
+                
+                if (data.status === 'success') {
+                    const aiMessage = document.createElement('div');
+                    aiMessage.className = 'message ai-message';
+                    aiMessage.textContent = data.response;
+                    chatMessages.appendChild(aiMessage);
+                    
+                    // 使用状況を更新
+                    if (data.usage_stats) {
+                        usageStats = data.usage_stats;
+                        updateUsageDisplay();
+                    }
+                } else {
+                    const errorMessage = document.createElement('div');
+                    errorMessage.className = 'message ai-message';
+                    
+                    if (data.code === 'LIMIT_EXCEEDED') {
+                        errorMessage.innerHTML = '質問回数の上限に達しています。<br>継続してご利用いただくには、プランのアップグレードまたは追加パックの購入が必要です。';
+                        // 使用状況を更新
+                        if (data.usage_stats) {
+                            usageStats = data.usage_stats;
+                            updateUsageDisplay();
+                        }
+                    } else {
+                        errorMessage.textContent = 'エラー: ' + (data.error || '不明なエラーが発生しました');
+                    }
+                    
+                    chatMessages.appendChild(errorMessage);
+                }
+                
+            } catch (error) {
+                // ローディングメッセージを削除
+                chatMessages.removeChild(loadingMessage);
+                
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'message ai-message';
+                errorMessage.textContent = 'ネットワークエラーが発生しました。しばらく時間をおいて再度お試しください。';
+                chatMessages.appendChild(errorMessage);
+            }
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function checkGrants() {
+            const companyInfo = getCompanyInfo();
+            
+            if (!companyInfo.company_name && !companyInfo.industry) {
+                alert('最低限、会社名または業種を入力してください');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/grant-check', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        company_info: companyInfo
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    const chatMessages = document.getElementById('chatMessages');
+                    const resultMessage = document.createElement('div');
+                    resultMessage.className = 'message ai-message';
+                    resultMessage.innerHTML = '<strong>🔍 助成金適用可能性チェック結果:</strong><br><br>' + 
+                                            data.grants.map(grant => 
+                                                `<strong>${grant.name}:</strong><br>${grant.description}`
+                                            ).join('<br><br>');
+                    chatMessages.appendChild(resultMessage);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                } else {
+                    alert('エラー: ' + (data.error || '不明なエラーが発生しました'));
+                }
+                
+            } catch (error) {
+                alert('ネットワークエラーが発生しました。しばらく時間をおいて再度お試しください。');
+            }
+        }
+
+        function getCompanyInfo() {
+            return {
+                company_name: document.getElementById('companyName').value,
+                industry: document.getElementById('industry').value,
+                employee_count: document.getElementById('employeeCount').value,
+                current_min_wage: document.getElementById('currentMinWage').value,
+                planned_investment: document.getElementById('plannedInvestment').value
+            };
+        }
+
+        // チェックボックスの状態に応じてボタンを有効化/無効化
+        function toggleRegisterButton() {
+            const termsAgreed = document.getElementById('termsAgreement').checked;
+            const registerButton = document.getElementById('registerButton');
+            
+            if (termsAgreed) {
+                registerButton.disabled = false;
+                registerButton.style.opacity = '1';
+                registerButton.style.cursor = 'pointer';
+            } else {
+                registerButton.disabled = true;
+                registerButton.style.opacity = '0.5';
+                registerButton.style.cursor = 'not-allowed';
+            }
+        }
+        
+        // ページ読み込み後にイベントリスナーを設定
+        // ランディングページ用関数
+        function startDiagnosis() {
+            window.location.href = '/diagnosis';
+        }
+        
+        function showLogin() {
+            document.getElementById('loginContainer').style.display = 'block';
+            document.getElementById('loginContainer').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // ページ読み込み完了時のフェードイン
+        window.addEventListener('load', function() {
+            document.body.style.opacity = '1';
+            const termsCheckbox = document.getElementById('termsAgreement');
+            if (termsCheckbox) {
+                termsCheckbox.addEventListener('change', toggleRegisterButton);
+                toggleRegisterButton(); // 初期状態を設定
+            }
+        });
+
+        // パスワードリセット関連の関数
+        function showPasswordReset() {
+            document.getElementById('passwordResetModal').style.display = 'flex';
+            document.getElementById('resetEmailInput').value = '';
+            document.getElementById('resetMessage').style.display = 'none';
+        }
+        
+        function closePasswordReset() {
+            document.getElementById('passwordResetModal').style.display = 'none';
+        }
+        
+        async function sendPasswordReset() {
+            const email = document.getElementById('resetEmailInput').value;
+            const messageDiv = document.getElementById('resetMessage');
+            
+            if (!email) {
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#fee';
+                messageDiv.style.color = '#dc3545';
+                messageDiv.textContent = 'メールアドレスを入力してください';
+                return;
+            }
+            
+            try {
+                await auth.sendPasswordResetEmail(email);
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#d4edda';
+                messageDiv.style.color = '#155724';
+                messageDiv.textContent = 'パスワードリセット用のメールを送信しました。メールボックスをご確認ください。';
+                
+                // 3秒後にモーダルを閉じる
+                setTimeout(() => {
+                    closePasswordReset();
+                }, 3000);
+            } catch (error) {
+                console.error('パスワードリセットエラー:', error);
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#fee';
+                messageDiv.style.color = '#dc3545';
+                
+                if (error.code === 'auth/user-not-found') {
+                    messageDiv.textContent = 'このメールアドレスは登録されていません';
+                } else if (error.code === 'auth/invalid-email') {
+                    messageDiv.textContent = '有効なメールアドレスを入力してください';
+                } else {
+                    messageDiv.textContent = 'エラーが発生しました: ' + error.message;
+                }
+            }
+        }
+        
+        // Enterキーで送信
+        document.getElementById('userQuestion').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendQuestion();
+            }
+        });
+    </script>
+</body>
+</html>
