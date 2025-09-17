@@ -61,7 +61,7 @@
     "jinzai-kaihatsu": {
       "name": "人材開発支援助成金",
       "description": "職業訓練・人材育成を支援",
-      "active": false,
+      "active": true,
       "data_files": [],
       "urls": {
         "main_page": {
@@ -69,11 +69,52 @@
           "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/koyou/kyufukin/d01-1.html",
           "description": "制度概要・各コース案内"
         },
-        "forms": {},
-        "guides": {}
+        "forms": {
+          "申請書類一覧": {
+            "name": "人材開発支援助成金申請書類ダウンロードページ",
+            "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/38819_00007.html",
+            "description": "各コース共通・専用の申請様式一覧",
+            "phase": "全般"
+          }
+        },
+        "guides": {
+          "申請書類ダウンロード": {
+            "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/38819_00007.html",
+            "description": "人材開発支援助成金の申請書類・様式集"
+          }
+        }
       },
-      "last_checked": "2025-01-27",
-      "notes": "今後実装予定"
+      "last_checked": "2025-09-17",
+      "notes": "申請書ダウンロードページ情報追加"
+    },
+    "jinzai-kaihatsu_teigaku": {
+      "name": "人材開発支援助成金（定額制訓練）",
+      "description": "定額制による職業訓練の実施支援",
+      "active": true,
+      "data_files": [],
+      "urls": {
+        "main_page": {
+          "name": "人材開発支援助成金トップページ",
+          "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/koyou/kyufukin/d01-1.html",
+          "description": "制度概要・各コース案内"
+        },
+        "forms": {
+          "申請書類一覧": {
+            "name": "人材開発支援助成金申請書類ダウンロードページ",
+            "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/38819_00007.html",
+            "description": "各コース共通・専用の申請様式一覧",
+            "phase": "全般"
+          }
+        },
+        "guides": {
+          "申請書類ダウンロード": {
+            "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/38819_00007.html",
+            "description": "人材開発支援助成金の申請書類・様式集"
+          }
+        }
+      },
+      "last_checked": "2025-09-17",
+      "notes": "人への投資促進コース（定額制訓練）"
     },
     "career-up_seishain": {
       "name": "キャリアアップ助成金（正社員化コース）",
