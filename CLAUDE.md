@@ -22,11 +22,18 @@
 
 ## システム概要 📋
 
+### ⚠️ 重要: アプリケーション構成（絶対に忘れるな！）
+**アプリ**: Python Flask (Cloud Runで動作)
+**Cloud Run サービス名**: `jyoseikinrescue`
+**Cloud Run URL**: `https://jyoseikinrescue-453016168690.asia-northeast1.run.app`
+**Firebase Hosting**: `jyoseikinrescue.web.app` (Cloud Runにプロキシ)
+**カスタムドメイン**: `shindan.jyoseikin.jp` → `jyoseikinrescue.web.app` → Cloud Run
+
 ### プロジェクト構成
-- **フロントエンド**: Flask + HTML/CSS/JavaScript
+- **メインデプロイ**: Google Cloud Run
+- **アプリケーション**: Python Flask + HTML/CSS/JavaScript
 - **バックエンド**: Python Flask + Firebase
 - **AI**: Claude 3.5 Sonnet API
-- **デプロイ**: Google Cloud Run
 - **認証**: Firebase Auth
 - **決済**: Stripe
 
