@@ -7,9 +7,7 @@ from forms_manager import FormsManager
 logger = logging.getLogger(__name__)
 
 class ClaudeService:
-    def __init__(self):
-        # ファイル内容キャッシュ（内容とタイムスタンプを保存）
-        self._file_cache = {}
+    # クラスレベルの定数定義（__init__の前に移動）
 
     def _read_file_cached(self, file_path: str) -> str:
         """キャッシュ機能付きファイル読み込み（ファイル更新時間ベース）"""
@@ -106,6 +104,9 @@ class ClaudeService:
 - 計画申請と支給申請を混同した回答"""
     
     def __init__(self):
+        # ファイル内容キャッシュ（内容とタイムスタンプを保存）
+        self._file_cache = {}
+
         api_key = os.getenv('CLAUDE_API_KEY') or os.getenv('ANTHROPIC_API_KEY')
         if not api_key:
             logger.warning("CLAUDE_API_KEY/ANTHROPIC_API_KEY is not set, using mock responses")
@@ -121,14 +122,11 @@ class ClaudeService:
             except Exception as e:
                 logger.error(f"Failed to initialize Anthropic client: {str(e)}")
                 raise
-        
+
         self.model = "claude-3-5-sonnet-20241022"  # Haikuから最新のSonnet 3.5に変更
-        
+
         # Forms Manager初期化
         self.forms_manager = FormsManager()
-        
-        
-        # 業務改善助成金も汎用システムに統合完了
     
     def _get_common_prompt_base(self) -> str:
         """すべてのエージェントで使用する共通プロンプトを返す"""
