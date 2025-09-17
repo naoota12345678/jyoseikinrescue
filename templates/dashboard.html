@@ -2766,32 +2766,6 @@
                                 </div>
                             </div>
 
-                            <!-- 相談カテゴリ選択 -->
-                            <div style="margin-bottom: 2rem;">
-                                <h4 style="color: #374151; margin-bottom: 1rem;">📋 相談内容をお選びください</h4>
-                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
-                                    <div class="consultation-category" onclick="selectCategory('business_improvement')" style="border: 2px solid #e5e7eb; border-radius: 8px; padding: 1rem; cursor: pointer; transition: all 0.3s; background: white;">
-                                        <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">🏭</div>
-                                        <h5 style="color: #1f2937; margin: 0 0 0.5rem 0;">業務改善助成金</h5>
-                                        <p style="color: #6b7280; margin: 0; font-size: 0.9rem;">生産性向上・賃金引上げ支援</p>
-                                    </div>
-                                    <div class="consultation-category" onclick="selectCategory('career_up')" style="border: 2px solid #e5e7eb; border-radius: 8px; padding: 1rem; cursor: pointer; transition: all 0.3s; background: white;">
-                                        <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">📈</div>
-                                        <h5 style="color: #1f2937; margin: 0 0 0.5rem 0;">キャリアアップ助成金</h5>
-                                        <p style="color: #6b7280; margin: 0; font-size: 0.9rem;">正社員化・処遇改善支援</p>
-                                    </div>
-                                    <div class="consultation-category" onclick="selectCategory('human_development')" style="border: 2px solid #e5e7eb; border-radius: 8px; padding: 1rem; cursor: pointer; transition: all 0.3s; background: white;">
-                                        <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">🎓</div>
-                                        <h5 style="color: #1f2937; margin: 0 0 0.5rem 0;">人材開発支援助成金</h5>
-                                        <p style="color: #6b7280; margin: 0; font-size: 0.9rem;">職業訓練・人材育成支援</p>
-                                    </div>
-                                    <div class="consultation-category" onclick="selectCategory('comprehensive')" style="border: 2px solid #e5e7eb; border-radius: 8px; padding: 1rem; cursor: pointer; transition: all 0.3s; background: white;">
-                                        <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">🔍</div>
-                                        <h5 style="color: #1f2937; margin: 0 0 0.5rem 0;">総合相談</h5>
-                                        <p style="color: #6b7280; margin: 0; font-size: 0.9rem;">複数助成金・組み合わせ提案</p>
-                                    </div>
-                                </div>
-                            </div>
 
                             <!-- 相談内容詳細入力 -->
                             <div style="margin-bottom: 2rem;">
@@ -2852,7 +2826,7 @@
                                 <button id="bookConsultationBtn" onclick="proceedToBooking()"
                                         style="background: #3b82f6; color: white; border: none; padding: 1rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; opacity: 0.5;"
                                         disabled>
-                                    💳 決済・予約に進む
+                                    💳 支払い・ご予約に進む
                                 </button>
                                 <p style="color: #6b7280; margin-top: 0.5rem; font-size: 0.9rem;">相談内容を選択し、詳細をご記入ください</p>
                             </div>
@@ -4308,8 +4282,7 @@
                 const categoryNames = {
                     'business_improvement': '業務改善助成金',
                     'career_up': 'キャリアアップ助成金',
-                    'human_development': '人材開発支援助成金',
-                    'comprehensive': '総合相談'
+                    'human_development': '人材開発支援助成金'
                 };
 
                 content.innerHTML = `
@@ -4334,7 +4307,7 @@
                             </div>
 
                             <button onclick="proceedToPayment()" style="background: #059669; color: white; border: none; padding: 1rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-top: 1rem;">
-                                💳 決済に進む (${planDetails[selectedPlan].price})
+                                💳 支払い・ご予約に進む (${planDetails[selectedPlan].price})
                             </button>
                         </div>
                     </div>
