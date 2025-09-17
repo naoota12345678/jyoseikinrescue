@@ -41,6 +41,9 @@ class StripeService:
         # 後方互換性のため（既存コードで使用されている可能性）
         self.BASIC_PLAN_PRODUCT_ID = self.REGULAR_PLAN_PRODUCT_ID
         self.ADDITIONAL_PACK_PRODUCT_ID = self.PACK_90_PRODUCT_ID
+
+        # 専門家相談料金設定（税込）
+        self.CONSULTATION_BASIC_PRICE = 14300    # 基本相談 (30分): 14,300円（税込）
     
     def create_customer(self, email: str, name: str = '', metadata: Dict[str, str] = None) -> str:
         """Stripe顧客を作成"""
@@ -390,3 +393,83 @@ class StripeService:
             'action': 'subscription_deleted',
             'subscription_id': subscription.get('id')
         }
+
+    # ===== 専門家相談決済関連メソッド =====
+
+    def create_consultation_payment(self, customer_id: str, plan_type: str, consultation_category: str,
+                                   user_info: Dict[str, Any], success_url: str, cancel_url: str) -> Dict[str, Any]:
+        """専門家相談の決済セッションを作成"""
+        try:
+            # プランタイプから料金を取得
+            price_map = {
+                'basic': self.CONSULTATION_BASIC_PRICE,
+                'standard': self.CONSULTATION_STANDARD_PRICE,
+                'premium': self.CONSULTATION_PREMIUM_PRICE
+            }
+
+            if plan_type not in price_map:
+                raise ValueError(f"Invalid consultation plan type: {plan_type}")
+
+            amount = price_map[plan_type]
+
+            # プラン名マッピング
+            plan_names = {
+                'basic': '基本相談 (30分)',
+                'standard': '詳細相談 (60分)',
+                'premium': '包括相談 (90分)'
+            }
+
+            # カテゴリ名マッピング
+            category_names = {
+                'business_improvement': '業務改善助成金',
+                'career_up': 'キャリアアップ助成金',
+                'human_development': '人材開発支援助成金',
+                'comprehensive': '総合相談'
+            }
+
+            plan_name = plan_names.get(plan_type, plan_type)
+            category_name = category_names.get(consultation_category, consultation_category)
+
+            # Checkout セッションを作成
+            session = stripe.checkout.Session.create(
+                customer=customer_id,
+                payment_method_types=['card'],
+                line_items=[{
+                    'price_data': {
+                        'currency': self.CURRENCY,
+                        'product_data': {
+                            'name': f'専門家相談 - {plan_name}',
+                            'description': f'相談内容: {category_name}'
+                        },
+                        'unit_amount': amount
+                    },
+                    'quantity': 1
+                }],
+                mode='payment',
+                success_url=success_url,
+                cancel_url=cancel_url,
+                metadata={
+                    'user_id': user_info.get('user_id', ''),
+                    'payment_type': 'consultation',
+                    'plan_type': plan_type,
+                    'consultation_category': consultation_category,
+                    'user_email': user_info.get('email', ''),
+                    'user_name': user_info.get('displayName', '')
+                }
+            )
+
+            logger.info(f"Consultation payment session created: {session.id} for {plan_type} - {consultation_category}")
+            return {
+                'id': session.id,
+                'url': session.url,
+                'amount': amount,
+                'plan_name': plan_name,
+                'category_name': category_name
+            }
+
+        except stripe.error.StripeError as e:
+            logger.error(f"Consultation payment creation error: {str(e)}")
+            raise
+        except Exception as e:
+            logger.error(f"Consultation payment error: {str(e)}")
+            raise

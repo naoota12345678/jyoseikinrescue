@@ -2752,11 +2752,121 @@
                             </button>
                         </div>
 
-                        <div style="text-align: center; padding: 3rem;">
-                            <h3 style="color: #667eea; margin-bottom: 1rem;">社会保険労務士による専門相談</h3>
-                            <p style="color: #6b7280; margin-bottom: 2rem;">助成金申請の専門家がサポートします</p>
-                            <p style="font-size: 2rem; margin-bottom: 2rem;">🚧</p>
-                            <p style="color: #9ca3af;">準備中です</p>
+                        <!-- 専門家相談メインコンテンツ -->
+                        <div id="expertConsultationContent">
+                            <div style="text-align: center; margin-bottom: 2rem;">
+                                <h3 style="color: #667eea; margin-bottom: 1rem; font-size: 1.5rem;">社会保険労務士による専門相談</h3>
+                                <p style="color: #6b7280; margin-bottom: 1rem;">助成金申請の専門家があなたの状況に合わせてサポートします</p>
+                                <div style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 1rem; margin: 1rem 0;">
+                                    <p style="color: #0c4a6e; margin: 0; font-size: 0.9rem;">
+                                        <strong>✅ 平日 9:00-18:00 対応</strong> |
+                                        <strong>📞 オンライン相談（Zoom）</strong> |
+                                        <strong>💰 明確な料金体系</strong>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- 相談カテゴリ選択 -->
+                            <div style="margin-bottom: 2rem;">
+                                <h4 style="color: #374151; margin-bottom: 1rem;">📋 相談内容をお選びください</h4>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                                    <div class="consultation-category" onclick="selectCategory('business_improvement')" style="border: 2px solid #e5e7eb; border-radius: 8px; padding: 1rem; cursor: pointer; transition: all 0.3s; background: white;">
+                                        <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">🏭</div>
+                                        <h5 style="color: #1f2937; margin: 0 0 0.5rem 0;">業務改善助成金</h5>
+                                        <p style="color: #6b7280; margin: 0; font-size: 0.9rem;">生産性向上・賃金引上げ支援</p>
+                                    </div>
+                                    <div class="consultation-category" onclick="selectCategory('career_up')" style="border: 2px solid #e5e7eb; border-radius: 8px; padding: 1rem; cursor: pointer; transition: all 0.3s; background: white;">
+                                        <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">📈</div>
+                                        <h5 style="color: #1f2937; margin: 0 0 0.5rem 0;">キャリアアップ助成金</h5>
+                                        <p style="color: #6b7280; margin: 0; font-size: 0.9rem;">正社員化・処遇改善支援</p>
+                                    </div>
+                                    <div class="consultation-category" onclick="selectCategory('human_development')" style="border: 2px solid #e5e7eb; border-radius: 8px; padding: 1rem; cursor: pointer; transition: all 0.3s; background: white;">
+                                        <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">🎓</div>
+                                        <h5 style="color: #1f2937; margin: 0 0 0.5rem 0;">人材開発支援助成金</h5>
+                                        <p style="color: #6b7280; margin: 0; font-size: 0.9rem;">職業訓練・人材育成支援</p>
+                                    </div>
+                                    <div class="consultation-category" onclick="selectCategory('comprehensive')" style="border: 2px solid #e5e7eb; border-radius: 8px; padding: 1rem; cursor: pointer; transition: all 0.3s; background: white;">
+                                        <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">🔍</div>
+                                        <h5 style="color: #1f2937; margin: 0 0 0.5rem 0;">総合相談</h5>
+                                        <p style="color: #6b7280; margin: 0; font-size: 0.9rem;">複数助成金・組み合わせ提案</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 相談内容詳細入力 -->
+                            <div style="margin-bottom: 2rem;">
+                                <h4 style="color: #374151; margin-bottom: 1rem;">📝 相談内容を詳しくお聞かせください</h4>
+
+                                <!-- 事前入力の重要性を説明 -->
+                                <div style="background: #dcfce7; border: 1px solid #22c55e; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                                    <p style="margin: 0; color: #166534; font-size: 0.9rem; line-height: 1.5;">
+                                        <strong>💡 ポイント：</strong>詳細にご記入いただくことで、30分の相談時間内で的確なアドバイスをご提供できます。事前に情報をいただければ、専門家が準備を整えてお待ちしております。
+                                    </p>
+                                </div>
+
+                                <div style="background: #f9fafb; border: 1px solid #d1d5db; border-radius: 8px; padding: 1.5rem;">
+                                    <div style="margin-bottom: 1rem;">
+                                        <label style="display: block; color: #374151; font-weight: 500; margin-bottom: 0.5rem;">会社情報 <span style="color: #ef4444;">*</span></label>
+                                        <input type="text" id="companyInfo" placeholder="会社名、業種、従業員数、設立年等" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem;">
+                                    </div>
+                                    <div style="margin-bottom: 1rem;">
+                                        <label style="display: block; color: #374151; font-weight: 500; margin-bottom: 0.5rem;">現在の課題・改善したい点 <span style="color: #ef4444;">*</span></label>
+                                        <textarea id="currentIssues" rows="3" placeholder="例：最低賃金を引き上げたい、正社員化を進めたい、職業訓練を実施したい" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem; resize: vertical;"></textarea>
+                                    </div>
+                                    <div style="margin-bottom: 1rem;">
+                                        <label style="display: block; color: #374151; font-weight: 500; margin-bottom: 0.5rem;">利用を検討している助成金</label>
+                                        <textarea id="targetSubsidies" rows="2" placeholder="例：業務改善助成金、キャリアアップ助成金" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem; resize: vertical;"></textarea>
+                                    </div>
+                                    <div style="margin-bottom: 1rem;">
+                                        <label style="display: block; color: #374151; font-weight: 500; margin-bottom: 0.5rem;">過去の助成金申請経験</label>
+                                        <input type="text" id="pastApplications" placeholder="なし / あり（助成金名、時期）" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; color: #374151; font-weight: 500; margin-bottom: 0.5rem;">その他・質問事項</label>
+                                        <textarea id="additionalQuestions" rows="3" placeholder="具体的な質問やご要望をお書きください" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem; resize: vertical;"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 料金プラン -->
+                            <div style="margin-bottom: 2rem;">
+                                <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                                    <h4 style="margin: 0 0 0.5rem 0;">💰 専門家相談料金</h4>
+                                    <div style="font-size: 2rem; font-weight: bold; margin: 0.5rem 0;">¥14,300<span style="font-size: 0.9rem; font-weight: normal;">(税込)</span></div>
+                                    <p style="margin: 0.5rem 0; opacity: 0.9;">基本相談 30分</p>
+                                </div>
+                            </div>
+
+                            <!-- 追加料金に関する注意事項 -->
+                            <div style="background: #fee2e2; border: 1px solid #ef4444; border-radius: 8px; padding: 1rem; margin-bottom: 2rem;">
+                                <h5 style="color: #991b1b; margin: 0 0 0.5rem 0; font-size: 0.95rem;">⚠️ 追加料金について</h5>
+                                <ul style="color: #991b1b; margin: 0; font-size: 0.85rem; padding-left: 1.2rem; line-height: 1.5;">
+                                    <li>30分を超過した場合、時間単位で追加料金が発生します</li>
+                                    <li>就業規則や賃金規定等の詳細なアドバイスが必要な場合、別途料金がかかる場合があります</li>
+                                    <li>追加料金が発生する場合は、事前にご説明し、ご了承いただいてから進めさせていただきます</li>
+                                </ul>
+                            </div>
+
+                            <!-- 予約ボタン -->
+                            <div style="text-align: center; margin-top: 2rem;">
+                                <button id="bookConsultationBtn" onclick="proceedToBooking()"
+                                        style="background: #3b82f6; color: white; border: none; padding: 1rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; opacity: 0.5;"
+                                        disabled>
+                                    💳 決済・予約に進む
+                                </button>
+                                <p style="color: #6b7280; margin-top: 0.5rem; font-size: 0.9rem;">相談内容を選択し、詳細をご記入ください</p>
+                            </div>
+
+                            <!-- 注意事項 -->
+                            <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 1rem; margin-top: 2rem;">
+                                <h5 style="color: #92400e; margin: 0 0 0.5rem 0;">ご相談前の準備事項</h5>
+                                <ul style="color: #92400e; margin: 0; font-size: 0.9rem; padding-left: 1.2rem;">
+                                    <li>会社概要（従業員数、業種、設立年等）</li>
+                                    <li>現在の労働条件（賃金、労働時間等）</li>
+                                    <li>改善したい点・導入したい制度</li>
+                                    <li>今までの助成金申請状況</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -4120,6 +4230,168 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // 専門家相談用のJavaScript関数
+        let selectedCategory = null;
+
+        function selectCategory(category) {
+            selectedCategory = category;
+
+            // すべてのカテゴリのスタイルをリセット
+            document.querySelectorAll('.consultation-category').forEach(el => {
+                el.style.border = '2px solid #e5e7eb';
+                el.style.background = 'white';
+            });
+
+            // 選択されたカテゴリをハイライト
+            event.target.closest('.consultation-category').style.border = '2px solid #3b82f6';
+            event.target.closest('.consultation-category').style.background = '#f0f9ff';
+
+            updateBookingButton();
+        }
+
+        function validateConsultationForm() {
+            // 必須項目のチェック
+            const companyInfo = document.getElementById('companyInfo')?.value?.trim();
+            const currentIssues = document.getElementById('currentIssues')?.value?.trim();
+
+            if (selectedCategory && companyInfo && currentIssues) {
+                return true;
+            }
+            return false;
+        }
+
+        function updateBookingButton() {
+            const bookBtn = document.getElementById('bookConsultationBtn');
+            if (validateConsultationForm()) {
+                bookBtn.style.opacity = '1';
+                bookBtn.disabled = false;
+                bookBtn.style.background = '#3b82f6';
+            } else {
+                bookBtn.style.opacity = '0.5';
+                bookBtn.disabled = true;
+                bookBtn.style.background = '#9ca3af';
+            }
+        }
+
+        function proceedToBooking() {
+            if (!validateConsultationForm()) {
+                alert('相談カテゴリを選択し、必須項目（会社情報、現在の課題）をご記入ください');
+                return;
+            }
+
+            // 相談内容を収集
+            const consultationDetails = {
+                category: selectedCategory,
+                companyInfo: document.getElementById('companyInfo').value,
+                currentIssues: document.getElementById('currentIssues').value,
+                targetSubsidies: document.getElementById('targetSubsidies').value,
+                pastApplications: document.getElementById('pastApplications').value,
+                additionalQuestions: document.getElementById('additionalQuestions').value
+            };
+
+            // 決済画面に遷移
+            proceedToPayment(consultationDetails);
+        }
+
+        function showBookingCalendar() {
+            const content = document.getElementById('expertConsultationContent');
+            if (content) {
+                // プラン情報を取得
+                const planDetails = {
+                    'basic': { name: '基本相談 (30分)', price: '¥13,000', duration: '30分' },
+                    'standard': { name: '詳細相談 (60分)', price: '¥22,000', duration: '60分' },
+                    'premium': { name: '包括相談 (90分)', price: '¥33,000', duration: '90分' }
+                };
+
+                const categoryNames = {
+                    'business_improvement': '業務改善助成金',
+                    'career_up': 'キャリアアップ助成金',
+                    'human_development': '人材開発支援助成金',
+                    'comprehensive': '総合相談'
+                };
+
+                content.innerHTML = `
+                    <div style="margin-bottom: 2rem;">
+                        <button onclick="showExpertConsultation()" style="background: #6b7280; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; margin-bottom: 1rem;">
+                            ← 相談内容選択に戻る
+                        </button>
+
+                        <div style="background: #f9fafb; border: 1px solid #d1d5db; border-radius: 8px; padding: 1rem; margin-bottom: 2rem;">
+                            <h4 style="color: #374151; margin: 0 0 0.5rem 0;">選択内容</h4>
+                            <p style="margin: 0; color: #6b7280;"><strong>相談内容:</strong> ${categoryNames[selectedCategory]}</p>
+                            <p style="margin: 0; color: #6b7280;"><strong>プラン:</strong> ${planDetails[selectedPlan].name} - ${planDetails[selectedPlan].price}</p>
+                        </div>
+
+                        <div style="text-align: center;">
+                            <h3 style="color: #374151; margin-bottom: 1rem;">🗓️ 日時選択・決済</h3>
+                            <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 2rem; margin: 2rem 0;">
+                                <p style="font-size: 1.1rem; margin: 0; color: #92400e;">
+                                    <strong>Calendly予約システム連携</strong><br>
+                                    <span style="font-size: 0.9rem;">決済完了後、予約カレンダーが表示されます</span>
+                                </p>
+                            </div>
+
+                            <button onclick="proceedToPayment()" style="background: #059669; color: white; border: none; padding: 1rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; margin-top: 1rem;">
+                                💳 決済に進む (${planDetails[selectedPlan].price})
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function proceedToPayment() {
+            if (!selectedCategory || !selectedPlan) {
+                alert('相談内容とプランを選択してください');
+                return;
+            }
+
+            // ローディング表示
+            const content = document.getElementById('expertConsultationContent');
+            content.innerHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <div style="display: inline-block; animation: spin 1s linear infinite; width: 32px; height: 32px; border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%;"></div>
+                    <p style="margin-top: 1rem; color: #6b7280;">決済処理を開始しています...</p>
+                </div>
+                <style>
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                </style>
+            `;
+
+            // Stripe決済API呼び出し
+            fetch('/api/payment/consultation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user?.accessToken || ''}`
+                },
+                body: JSON.stringify({
+                    plan_type: selectedPlan,
+                    consultation_category: selectedCategory
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Stripe Checkoutページにリダイレクト
+                    window.location.href = data.payment_url;
+                } else {
+                    throw new Error(data.error || '決済セッションの作成に失敗しました');
+                }
+            })
+            .catch(error => {
+                console.error('Payment error:', error);
+                alert('決済処理でエラーが発生しました: ' + error.message);
+                // エラー時は元の画面に戻る
+                showBookingCalendar();
+            });
+        }
+    </script>
 
 </body>
 </html>

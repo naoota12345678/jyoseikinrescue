@@ -855,6 +855,97 @@ def create_additional_pack_90_checkout():
     """90回追加パック（5,500円）の決済セッションを作成"""
     return _create_pack_checkout('pack_90', 90)
 
+# ===== 専門家相談決済エンドポイント =====
+
+@app.route('/api/payment/consultation', methods=['POST'])
+@require_auth
+def create_consultation_payment():
+    """専門家相談の決済セッションを作成"""
+    try:
+        current_user = get_current_user()
+        data = request.json
+
+        # リクエストデータの検証
+        plan_type = data.get('plan_type')
+        consultation_category = data.get('consultation_category')
+
+        if not plan_type or not consultation_category:
+            return jsonify({'error': 'プランタイプと相談カテゴリは必須です'}), 400
+
+        if plan_type not in ['basic', 'standard', 'premium']:
+            return jsonify({'error': '無効なプランタイプです'}), 400
+
+        if consultation_category not in ['business_improvement', 'career_up', 'human_development', 'comprehensive']:
+            return jsonify({'error': '無効な相談カテゴリです'}), 400
+
+        # Stripe顧客IDがない場合は自動作成
+        stripe_customer_id = current_user.get('stripe_customer_id')
+        if not stripe_customer_id:
+            try:
+                stripe_customer_id = get_stripe_service().create_customer(
+                    email=current_user['email'],
+                    name=current_user.get('display_name', ''),
+                    metadata={'firebase_uid': current_user['user_id']}
+                )
+                get_auth_service().update_stripe_customer_id(current_user.get('user_id') or current_user['id'], stripe_customer_id)
+                logger.info(f"Created Stripe customer for consultation: {stripe_customer_id}")
+            except Exception as e:
+                logger.error(f"Failed to create Stripe customer: {str(e)}")
+                return jsonify({'error': f'Stripe顧客作成エラー: {str(e)}'}), 500
+
+        # URL設定
+        base_url = request.host_url.rstrip('/')
+        success_url = f"{base_url}/consultation/payment-success?session_id={{CHECKOUT_SESSION_ID}}"
+        cancel_url = f"{base_url}/dashboard?payment=cancelled"
+
+        # カスタムURLが指定されている場合は使用
+        if data.get('success_url'):
+            success_url = data.get('success_url')
+        if data.get('cancel_url'):
+            cancel_url = data.get('cancel_url')
+
+        # ユーザー情報を準備
+        user_info = {
+            'user_id': current_user.get('user_id') or current_user['id'],
+            'email': current_user.get('email', ''),
+            'displayName': current_user.get('display_name', ''),
+        }
+
+        # Stripe決済セッションを作成
+        stripe_service = get_stripe_service()
+        session_result = stripe_service.create_consultation_payment(
+            customer_id=stripe_customer_id,
+            plan_type=plan_type,
+            consultation_category=consultation_category,
+            user_info=user_info,
+            success_url=success_url,
+            cancel_url=cancel_url
+        )
+
+        logger.info(f"Consultation payment session created: {session_result['id']} for user {current_user['user_id']}")
+
+        return jsonify({
+            'success': True,
+            'session_id': session_result['id'],
+            'payment_url': session_result['url'],
+            'amount': session_result['amount'],
+            'plan_name': session_result['plan_name'],
+            'category_name': session_result['category_name']
+        })
+
+    except Exception as e:
+        logger.error(f"Error creating consultation payment: {str(e)}")
+        return jsonify({'error': '決済セッションの作成に失敗しました'}), 500
+
+@app.route('/consultation/payment-success')
+def consultation_payment_success():
+    """専門家相談決済成功ページ"""
+    session_id = request.args.get('session_id')
+    if not session_id:
+        return redirect('/dashboard?error=no_session_id')
+
+    return render_template('consultation_payment_success.html', session_id=session_id)
+
 def _create_pack_checkout(pack_type: str, questions_count: int):
     """追加パック決済セッション作成の共通処理"""
     try:
@@ -956,6 +1047,14 @@ def stripe_webhook():
                 elif plan_type == 'additional_pack':
                     # 既存コードとの互換性のため
                     get_subscription_service().add_additional_pack(user_id, session_id)
+
+                # 専門家相談決済完了
+                # 注意: 相談決済は単発決済のため、ここでCalendly URLなど必要な処理を実行
+                elif result.get('metadata', {}).get('payment_type') == 'consultation':
+                    consultation_category = result.get('metadata', {}).get('consultation_category')
+                    plan_type = result.get('metadata', {}).get('plan_type')
+                    logger.info(f"Consultation payment completed: user={user_id}, category={consultation_category}, plan={plan_type}")
+                    # TODO: Calendly統合とZoom会議室作成をここで実装
         
         return jsonify({'received': True})
         
