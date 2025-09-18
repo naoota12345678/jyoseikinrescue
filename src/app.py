@@ -2457,6 +2457,44 @@ def create_expert_consultation():
             'error': 'システムエラーが発生しました'
         }), 500
 
+@app.route('/expert-consultation/booking/<consultation_id>')
+@require_auth
+def expert_consultation_booking(consultation_id):
+    """専門家相談の日時選択ページ（Google Calendar版）"""
+    if not EXPERT_CONSULTATION_ENABLED:
+        return render_template('error.html',
+                             error_message='専門家相談システムが利用できません'), 500
+
+    try:
+        current_user = get_current_user()
+        user_id = current_user.get('user_id') or current_user['id']
+
+        # 相談情報を取得
+        consultation = expert_consultation_service.get_consultation(consultation_id)
+        if not consultation:
+            return render_template('error.html',
+                                 error_message='相談情報が見つかりません'), 404
+
+        # 本人確認
+        if consultation['user_id'] != user_id:
+            return render_template('error.html',
+                                 error_message='アクセス権限がありません'), 403
+
+        # 決済完了チェック
+        if consultation['status'] != 'paid':
+            return render_template('error.html',
+                                 error_message='決済が完了していません'), 400
+
+        return render_template('consultation_booking.html',
+                             consultation_id=consultation_id,
+                             user_name=consultation['user_name'],
+                             user_email=consultation['user_email'])
+
+    except Exception as e:
+        logger.error(f"相談予約ページエラー: {e}")
+        return render_template('error.html',
+                             error_message='システムエラーが発生しました'), 500
+
 @app.route('/expert-consultation/success/<consultation_id>')
 @require_auth
 def expert_consultation_success(consultation_id):
@@ -2534,6 +2572,358 @@ def expert_consultation_status(consultation_id):
         logger.error(f"相談ステータス確認エラー: {e}")
         return render_template('error.html',
                              error_message='システムエラーが発生しました'), 500
+
+# =====================================
+# Google Calendar API エンドポイント
+# =====================================
+
+try:
+    from google_calendar_service import google_calendar_service
+    GOOGLE_CALENDAR_ENABLED = True
+except ImportError:
+    GOOGLE_CALENDAR_ENABLED = False
+    logger.warning("Google Calendar service not available")
+
+try:
+    from consultation_schedule_service import consultation_schedule_service
+    SCHEDULE_SERVICE_ENABLED = True
+except ImportError:
+    SCHEDULE_SERVICE_ENABLED = False
+    logger.warning("Schedule service not available")
+
+@app.route('/api/google-calendar/available-dates')
+@require_auth
+def get_available_dates():
+    """利用可能な日付リストを取得"""
+    if not GOOGLE_CALENDAR_ENABLED:
+        return jsonify({'error': 'Google Calendar service not available'}), 500
+
+    try:
+        dates = google_calendar_service.get_available_dates()
+        return jsonify({
+            'success': True,
+            'dates': dates
+        })
+
+    except Exception as e:
+        logger.error(f"利用可能日取得エラー: {e}")
+        return jsonify({'error': '利用可能な日付の取得に失敗しました'}), 500
+
+@app.route('/api/google-calendar/time-slots')
+@require_auth
+def get_time_slots():
+    """指定日の時間枠を取得"""
+    if not GOOGLE_CALENDAR_ENABLED:
+        return jsonify({'error': 'Google Calendar service not available'}), 500
+
+    try:
+        date_str = request.args.get('date')
+        if not date_str:
+            return jsonify({'error': '日付が必要です'}), 400
+
+        slots = google_calendar_service.generate_time_slots(date_str)
+        return jsonify({
+            'success': True,
+            'slots': slots
+        })
+
+    except Exception as e:
+        logger.error(f"時間枠取得エラー: {e}")
+        return jsonify({'error': '時間枠の取得に失敗しました'}), 500
+
+@app.route('/api/google-calendar/book-consultation', methods=['POST'])
+@require_auth
+def book_consultation_slot():
+    """相談枠を予約"""
+    if not GOOGLE_CALENDAR_ENABLED:
+        return jsonify({'error': 'Google Calendar service not available'}), 500
+
+    try:
+        current_user = get_current_user()
+        data = request.json
+
+        consultation_id = data.get('consultation_id')
+        date_str = data.get('date')
+        time_str = data.get('time')
+
+        if not all([consultation_id, date_str, time_str]):
+            return jsonify({'error': 'すべての項目を入力してください'}), 400
+
+        # 相談情報を取得
+        if EXPERT_CONSULTATION_ENABLED:
+            consultation = expert_consultation_service.get_consultation(consultation_id)
+            if not consultation:
+                return jsonify({'error': '相談情報が見つかりません'}), 404
+
+            user_name = consultation['user_name']
+            user_email = consultation['user_email']
+        else:
+            # フォールバック
+            user_name = current_user.get('name', 'ユーザー')
+            user_email = current_user.get('email', 'user@example.com')
+
+        # 予約実行
+        result = google_calendar_service.book_consultation_slot(
+            consultation_id=consultation_id,
+            user_name=user_name,
+            user_email=user_email,
+            date_str=date_str,
+            time_str=time_str
+        )
+
+        if result['success']:
+            return jsonify({
+                'success': True,
+                'message': '予約が確定しました',
+                'event_data': result['event_data']
+            })
+        else:
+            return jsonify({'error': result['error']}), 400
+
+    except Exception as e:
+        logger.error(f"相談予約エラー: {e}")
+        return jsonify({'error': '予約処理中にエラーが発生しました'}), 500
+
+@app.route('/expert-consultation/confirmed/<consultation_id>')
+@require_auth
+def expert_consultation_confirmed(consultation_id):
+    """専門家相談予約確定ページ（Google Calendar版）"""
+    if not GOOGLE_CALENDAR_ENABLED:
+        return render_template('error.html',
+                             error_message='Google Calendar システムが利用できません'), 500
+
+    try:
+        current_user = get_current_user()
+        user_id = current_user.get('user_id') or current_user['id']
+
+        # 相談イベント情報を取得
+        event_data = google_calendar_service.get_consultation_event(consultation_id)
+        if not event_data:
+            return render_template('error.html',
+                                 error_message='相談情報が見つかりません'), 404
+
+        return render_template('consultation_success.html',
+                             consultation_id=consultation_id,
+                             event_data=event_data,
+                             user_name=event_data['user_name'],
+                             user_email=event_data['user_email'])
+
+    except Exception as e:
+        logger.error(f"相談予約確定ページエラー: {e}")
+        return render_template('error.html',
+                             error_message='システムエラーが発生しました'), 500
+
+# =====================================
+# スケジュール管理API（管理者専用）
+# =====================================
+
+@app.route('/api/admin/schedule/business-hours', methods=['GET'])
+@require_auth  # 実際は管理者認証が必要
+def get_business_hours():
+    """営業時間設定を取得"""
+    if not SCHEDULE_SERVICE_ENABLED:
+        return jsonify({'error': 'Schedule service not available'}), 500
+
+    try:
+        business_hours = consultation_schedule_service.get_business_hours()
+        return jsonify({
+            'success': True,
+            'business_hours': business_hours
+        })
+
+    except Exception as e:
+        logger.error(f"営業時間取得エラー: {e}")
+        return jsonify({'error': '営業時間の取得に失敗しました'}), 500
+
+@app.route('/api/admin/schedule/business-hours', methods=['POST'])
+@require_auth  # 実際は管理者認証が必要
+def save_business_hours():
+    """営業時間設定を保存"""
+    if not SCHEDULE_SERVICE_ENABLED:
+        return jsonify({'error': 'Schedule service not available'}), 500
+
+    try:
+        data = request.json
+        business_hours = data.get('business_hours')
+
+        if not business_hours:
+            return jsonify({'error': '営業時間データが必要です'}), 400
+
+        success = consultation_schedule_service.save_business_hours(business_hours)
+
+        if success:
+            return jsonify({
+                'success': True,
+                'message': '営業時間を保存しました'
+            })
+        else:
+            return jsonify({'error': '営業時間の保存に失敗しました'}), 500
+
+    except Exception as e:
+        logger.error(f"営業時間保存エラー: {e}")
+        return jsonify({'error': '営業時間の保存中にエラーが発生しました'}), 500
+
+@app.route('/api/admin/schedule/blocked-dates', methods=['GET'])
+@require_auth  # 実際は管理者認証が必要
+def get_blocked_dates():
+    """予約不可日を取得"""
+    if not SCHEDULE_SERVICE_ENABLED:
+        return jsonify({'error': 'Schedule service not available'}), 500
+
+    try:
+        blocked_dates = consultation_schedule_service.get_blocked_dates()
+        return jsonify({
+            'success': True,
+            'blocked_dates': blocked_dates
+        })
+
+    except Exception as e:
+        logger.error(f"予約不可日取得エラー: {e}")
+        return jsonify({'error': '予約不可日の取得に失敗しました'}), 500
+
+@app.route('/api/admin/schedule/blocked-dates', methods=['POST'])
+@require_auth  # 実際は管理者認証が必要
+def add_blocked_date():
+    """予約不可日を追加"""
+    if not SCHEDULE_SERVICE_ENABLED:
+        return jsonify({'error': 'Schedule service not available'}), 500
+
+    try:
+        data = request.json
+        date_str = data.get('date')
+        reason = data.get('reason', '')
+
+        if not date_str:
+            return jsonify({'error': '日付が必要です'}), 400
+
+        success, message = consultation_schedule_service.add_blocked_date(date_str, reason)
+
+        if success:
+            return jsonify({
+                'success': True,
+                'message': message
+            })
+        else:
+            return jsonify({'error': message}), 400
+
+    except Exception as e:
+        logger.error(f"予約不可日追加エラー: {e}")
+        return jsonify({'error': '予約不可日の追加中にエラーが発生しました'}), 500
+
+@app.route('/api/admin/schedule/blocked-dates', methods=['DELETE'])
+@require_auth  # 実際は管理者認証が必要
+def remove_blocked_date():
+    """予約不可日を削除"""
+    if not SCHEDULE_SERVICE_ENABLED:
+        return jsonify({'error': 'Schedule service not available'}), 500
+
+    try:
+        data = request.json
+        date_str = data.get('date')
+
+        if not date_str:
+            return jsonify({'error': '日付が必要です'}), 400
+
+        success, message = consultation_schedule_service.remove_blocked_date(date_str)
+
+        if success:
+            return jsonify({
+                'success': True,
+                'message': message
+            })
+        else:
+            return jsonify({'error': message}), 400
+
+    except Exception as e:
+        logger.error(f"予約不可日削除エラー: {e}")
+        return jsonify({'error': '予約不可日の削除中にエラーが発生しました'}), 500
+
+@app.route('/api/admin/schedule/blocked-time-slots', methods=['POST'])
+@require_auth  # 実際は管理者認証が必要
+def add_blocked_time_slot():
+    """予約不可時間枠を追加"""
+    if not SCHEDULE_SERVICE_ENABLED:
+        return jsonify({'error': 'Schedule service not available'}), 500
+
+    try:
+        data = request.json
+        date_str = data.get('date')
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
+        reason = data.get('reason', '')
+
+        if not all([date_str, start_time, end_time]):
+            return jsonify({'error': '日付、開始時間、終了時間が必要です'}), 400
+
+        success, message = consultation_schedule_service.add_blocked_time_slot(
+            date_str, start_time, end_time, reason
+        )
+
+        if success:
+            return jsonify({
+                'success': True,
+                'message': message
+            })
+        else:
+            return jsonify({'error': message}), 400
+
+    except Exception as e:
+        logger.error(f"予約不可時間追加エラー: {e}")
+        return jsonify({'error': '予約不可時間の追加中にエラーが発生しました'}), 500
+
+@app.route('/api/admin/schedule/blocked-time-slots', methods=['DELETE'])
+@require_auth  # 実際は管理者認証が必要
+def remove_blocked_time_slot():
+    """予約不可時間枠を削除"""
+    if not SCHEDULE_SERVICE_ENABLED:
+        return jsonify({'error': 'Schedule service not available'}), 500
+
+    try:
+        data = request.json
+        date_str = data.get('date')
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
+
+        if not all([date_str, start_time, end_time]):
+            return jsonify({'error': '日付、開始時間、終了時間が必要です'}), 400
+
+        success, message = consultation_schedule_service.remove_blocked_time_slot(
+            date_str, start_time, end_time
+        )
+
+        if success:
+            return jsonify({
+                'success': True,
+                'message': message
+            })
+        else:
+            return jsonify({'error': message}), 400
+
+    except Exception as e:
+        logger.error(f"予約不可時間削除エラー: {e}")
+        return jsonify({'error': '予約不可時間の削除中にエラーが発生しました'}), 500
+
+@app.route('/api/admin/schedule/summary')
+@require_auth  # 実際は管理者認証が必要
+def get_schedule_summary():
+    """スケジュール概要を取得"""
+    if not SCHEDULE_SERVICE_ENABLED:
+        return jsonify({'error': 'Schedule service not available'}), 500
+
+    try:
+        summary = consultation_schedule_service.get_schedule_summary()
+
+        if summary:
+            return jsonify({
+                'success': True,
+                'summary': summary
+            })
+        else:
+            return jsonify({'error': 'スケジュール概要の取得に失敗しました'}), 500
+
+    except Exception as e:
+        logger.error(f"スケジュール概要取得エラー: {e}")
+        return jsonify({'error': 'スケジュール概要の取得中にエラーが発生しました'}), 500
 
 # 管理者アカウント初期化（アプリ起動時）
 if ADMIN_AUTH_ENABLED:

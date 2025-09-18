@@ -7,6 +7,11 @@ Werkzeug==3.0.1
 # Firebase & Auth
 firebase-admin==6.4.0
 google-cloud-firestore==2.13.1
+# Google Calendar API
+google-auth==2.23.4
+google-auth-oauthlib==1.1.0
+google-auth-httplib2==0.1.1
+google-api-python-client==2.108.0
 # Stripe
 stripe==12.4.0
 # JWT for token handling

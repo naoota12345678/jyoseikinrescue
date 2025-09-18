@@ -179,6 +179,283 @@
             color: #333;
         }
 
+        .status-badge {
+            font-size: 0.8rem;
+            font-weight: bold;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+        }
+
+        .status-badge.active {
+            background: #28a745;
+            color: white;
+        }
+
+        /* モーダルスタイル */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 2% auto;
+            padding: 0;
+            border-radius: 10px;
+            width: 95%;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .close {
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .close:hover {
+            opacity: 0.7;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 2rem;
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: 600;
+        }
+
+        .tab:hover {
+            background: #f8f9fa;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .form-row.header {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        .day-name {
+            width: 100px;
+            font-weight: 500;
+        }
+
+        .day-toggle {
+            width: 20px;
+            height: 20px;
+        }
+
+        .time-input {
+            width: 80px;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-right: 1rem;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .blocked-date-item, .blocked-time-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .add-form {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input, .form-group textarea {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+
+        .inline-form {
+            display: flex;
+            gap: 1rem;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
         @media (max-width: 768px) {
             .dashboard-container {
                 padding: 0 1rem;
@@ -196,6 +473,32 @@
                 flex-direction: column;
                 gap: 1rem;
                 text-align: center;
+            }
+
+            .modal-content {
+                width: 98%;
+                margin: 1% auto;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab {
+                padding: 0.75rem 1rem;
+                border-bottom: 1px solid #e9ecef;
+                border-right: none;
+            }
+
+            .form-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.5rem;
+            }
+
+            .inline-form {
+                flex-direction: column;
+                align-items: stretch;
             }
         }
     </style>
@@ -250,12 +553,12 @@
                         <span class="action-label">相談予約一覧</span>
                         <span class="coming-soon">開発中</span>
                     </li>
+                    <li class="action-item" onclick="showScheduleManagement()">
+                        <span class="action-label">📅 予約時間管理</span>
+                        <span class="status-badge active">利用可能</span>
+                    </li>
                     <li class="action-item" onclick="navigateTo('/admin/consultation-settings')">
                         <span class="action-label">料金・時間設定</span>
-                        <span class="coming-soon">開発中</span>
-                    </li>
-                    <li class="action-item" onclick="navigateTo('/admin/calendly')">
-                        <span class="action-label">Calendly連携</span>
                         <span class="coming-soon">開発中</span>
                     </li>
                 </ul>
@@ -329,6 +632,166 @@
         </div>
     </div>
 
+    <!-- 時間管理モーダル -->
+    <div id="scheduleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">📅 予約時間管理</h2>
+                <button class="close" onclick="closeScheduleModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- アラート表示エリア -->
+                <div id="alertContainer"></div>
+
+                <!-- タブメニュー -->
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('business-hours')">営業時間設定</button>
+                    <button class="tab" onclick="switchTab('blocked-dates')">休日設定</button>
+                    <button class="tab" onclick="switchTab('blocked-times')">時間ブロック</button>
+                </div>
+
+                <!-- 営業時間設定タブ -->
+                <div id="business-hours" class="tab-content active">
+                    <div class="section-title">
+                        🕐 営業時間設定
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-row header">
+                            <div class="day-name">曜日</div>
+                            <div style="width: 60px;">営業</div>
+                            <div style="width: 100px;">開始時間</div>
+                            <div style="width: 100px;">終了時間</div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="day-name">月曜日</div>
+                            <input type="checkbox" class="day-toggle" id="monday-enabled">
+                            <input type="time" class="time-input" id="monday-start" value="09:00">
+                            <input type="time" class="time-input" id="monday-end" value="18:00">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="day-name">火曜日</div>
+                            <input type="checkbox" class="day-toggle" id="tuesday-enabled">
+                            <input type="time" class="time-input" id="tuesday-start" value="09:00">
+                            <input type="time" class="time-input" id="tuesday-end" value="18:00">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="day-name">水曜日</div>
+                            <input type="checkbox" class="day-toggle" id="wednesday-enabled">
+                            <input type="time" class="time-input" id="wednesday-start" value="09:00">
+                            <input type="time" class="time-input" id="wednesday-end" value="18:00">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="day-name">木曜日</div>
+                            <input type="checkbox" class="day-toggle" id="thursday-enabled">
+                            <input type="time" class="time-input" id="thursday-start" value="09:00">
+                            <input type="time" class="time-input" id="thursday-end" value="18:00">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="day-name">金曜日</div>
+                            <input type="checkbox" class="day-toggle" id="friday-enabled">
+                            <input type="time" class="time-input" id="friday-start" value="09:00">
+                            <input type="time" class="time-input" id="friday-end" value="18:00">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="day-name">土曜日</div>
+                            <input type="checkbox" class="day-toggle" id="saturday-enabled">
+                            <input type="time" class="time-input" id="saturday-start" value="09:00">
+                            <input type="time" class="time-input" id="saturday-end" value="18:00">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="day-name">日曜日</div>
+                            <input type="checkbox" class="day-toggle" id="sunday-enabled">
+                            <input type="time" class="time-input" id="sunday-start" value="09:00">
+                            <input type="time" class="time-input" id="sunday-end" value="18:00">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="saveBusinessHours()">
+                        営業時間を保存
+                    </button>
+                </div>
+
+                <!-- 休日設定タブ -->
+                <div id="blocked-dates" class="tab-content">
+                    <div class="section-title">
+                        🚫 休日設定
+                    </div>
+
+                    <!-- 新しい休日追加フォーム -->
+                    <div class="add-form">
+                        <h4 style="margin-bottom: 1rem;">新しい休日を追加</h4>
+                        <div class="inline-form">
+                            <div class="form-group">
+                                <label for="newBlockedDate">日付</label>
+                                <input type="date" id="newBlockedDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="newBlockedDateReason">理由</label>
+                                <input type="text" id="newBlockedDateReason" placeholder="例: 年末年始休暇">
+                            </div>
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <button class="btn btn-success" onclick="addBlockedDate()">追加</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 休日一覧 -->
+                    <div id="blockedDatesList">
+                        <!-- 動的に生成 -->
+                    </div>
+                </div>
+
+                <!-- 時間ブロック設定タブ -->
+                <div id="blocked-times" class="tab-content">
+                    <div class="section-title">
+                        ⏰ 時間ブロック設定
+                    </div>
+
+                    <!-- 新しい時間ブロック追加フォーム -->
+                    <div class="add-form">
+                        <h4 style="margin-bottom: 1rem;">新しい時間ブロックを追加</h4>
+                        <div class="inline-form">
+                            <div class="form-group">
+                                <label for="newBlockedTimeDate">日付</label>
+                                <input type="date" id="newBlockedTimeDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="newBlockedTimeStart">開始時間</label>
+                                <input type="time" id="newBlockedTimeStart" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="newBlockedTimeEnd">終了時間</label>
+                                <input type="time" id="newBlockedTimeEnd" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="newBlockedTimeReason">理由</label>
+                                <input type="text" id="newBlockedTimeReason" placeholder="例: 重要会議">
+                            </div>
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <button class="btn btn-success" onclick="addBlockedTimeSlot()">追加</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 時間ブロック一覧 -->
+                    <div id="blockedTimesList">
+                        <!-- 動的に生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ログアウト機能
         async function logout() {
@@ -380,6 +843,285 @@
 
         // ページ読み込み時に統計をロード
         document.addEventListener('DOMContentLoaded', loadStats);
+
+        // =====================
+        // 時間管理モーダル機能
+        // =====================
+
+        // モーダル表示
+        function showScheduleManagement() {
+            document.getElementById('scheduleModal').style.display = 'block';
+            loadBusinessHours();
+            loadBlockedDates();
+            loadBlockedTimes();
+        }
+
+        // モーダル閉じる
+        function closeScheduleModal() {
+            document.getElementById('scheduleModal').style.display = 'none';
+        }
+
+        // モーダル外クリックで閉じる
+        window.onclick = function(event) {
+            const modal = document.getElementById('scheduleModal');
+            if (event.target === modal) {
+                closeScheduleModal();
+            }
+        }
+
+        // タブ切り替え
+        function switchTab(tabName) {
+            // 全タブを非アクティブに
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // 選択タブをアクティブに
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // アラート表示
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alert);
+
+            // 5秒後に自動で消す
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+
+        // 営業時間読み込み
+        async function loadBusinessHours() {
+            try {
+                const response = await fetch('/api/admin/schedule/business-hours');
+                const result = await response.json();
+
+                if (result.success) {
+                    const businessHours = result.business_hours;
+
+                    // 各曜日の設定を反映
+                    Object.keys(businessHours).forEach(day => {
+                        const dayData = businessHours[day];
+
+                        document.getElementById(`${day}-enabled`).checked = dayData.enabled;
+                        document.getElementById(`${day}-start`).value = dayData.start;
+                        document.getElementById(`${day}-end`).value = dayData.end;
+                    });
+                }
+            } catch (error) {
+                console.error('営業時間読み込みエラー:', error);
+                showAlert('営業時間の読み込みに失敗しました', 'error');
+            }
+        }
+
+        // 営業時間保存
+        async function saveBusinessHours() {
+            try {
+                const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+                const businessHours = {};
+
+                days.forEach(day => {
+                    businessHours[day] = {
+                        enabled: document.getElementById(`${day}-enabled`).checked,
+                        start: document.getElementById(`${day}-start`).value,
+                        end: document.getElementById(`${day}-end`).value
+                    };
+                });
+
+                const response = await fetch('/api/admin/schedule/business-hours', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ business_hours: businessHours })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert('営業時間を保存しました');
+                } else {
+                    showAlert(result.error || '営業時間の保存に失敗しました', 'error');
+                }
+
+            } catch (error) {
+                console.error('営業時間保存エラー:', error);
+                showAlert('営業時間の保存中にエラーが発生しました', 'error');
+            }
+        }
+
+        // 休日一覧読み込み
+        async function loadBlockedDates() {
+            try {
+                const response = await fetch('/api/admin/schedule/blocked-dates');
+                const result = await response.json();
+
+                if (result.success) {
+                    const container = document.getElementById('blockedDatesList');
+                    container.innerHTML = '';
+
+                    if (result.blocked_dates.length === 0) {
+                        container.innerHTML = '<p style="color: #666; text-align: center;">設定された休日はありません</p>';
+                        return;
+                    }
+
+                    result.blocked_dates.forEach(blockedDate => {
+                        const item = document.createElement('div');
+                        item.className = 'blocked-date-item';
+                        item.innerHTML = `
+                            <div>
+                                <strong>${blockedDate.date}</strong>
+                                ${blockedDate.reason ? ` - ${blockedDate.reason}` : ''}
+                            </div>
+                            <button class="btn btn-danger" onclick="removeBlockedDate('${blockedDate.date}')">削除</button>
+                        `;
+                        container.appendChild(item);
+                    });
+                }
+            } catch (error) {
+                console.error('休日読み込みエラー:', error);
+                showAlert('休日の読み込みに失敗しました', 'error');
+            }
+        }
+
+        // 休日追加
+        async function addBlockedDate() {
+            try {
+                const date = document.getElementById('newBlockedDate').value;
+                const reason = document.getElementById('newBlockedDateReason').value;
+
+                if (!date) {
+                    showAlert('日付を選択してください', 'error');
+                    return;
+                }
+
+                const response = await fetch('/api/admin/schedule/blocked-dates', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ date, reason })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert(result.message);
+                    // フォームリセット
+                    document.getElementById('newBlockedDate').value = '';
+                    document.getElementById('newBlockedDateReason').value = '';
+                    // 一覧再読み込み
+                    loadBlockedDates();
+                } else {
+                    showAlert(result.error || '休日の追加に失敗しました', 'error');
+                }
+
+            } catch (error) {
+                console.error('休日追加エラー:', error);
+                showAlert('休日の追加中にエラーが発生しました', 'error');
+            }
+        }
+
+        // 休日削除
+        async function removeBlockedDate(date) {
+            if (!confirm(`${date}の休日設定を削除しますか？`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/schedule/blocked-dates', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ date })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert(result.message);
+                    loadBlockedDates();
+                } else {
+                    showAlert(result.error || '休日の削除に失敗しました', 'error');
+                }
+
+            } catch (error) {
+                console.error('休日削除エラー:', error);
+                showAlert('休日の削除中にエラーが発生しました', 'error');
+            }
+        }
+
+        // 時間ブロック一覧読み込み
+        async function loadBlockedTimes() {
+            try {
+                // 現在は簡単な表示のみ実装
+                const container = document.getElementById('blockedTimesList');
+                container.innerHTML = '<p style="color: #666; text-align: center;">時間ブロック機能は準備中です</p>';
+
+            } catch (error) {
+                console.error('時間ブロック読み込みエラー:', error);
+                showAlert('時間ブロックの読み込みに失敗しました', 'error');
+            }
+        }
+
+        // 時間ブロック追加
+        async function addBlockedTimeSlot() {
+            try {
+                const date = document.getElementById('newBlockedTimeDate').value;
+                const startTime = document.getElementById('newBlockedTimeStart').value;
+                const endTime = document.getElementById('newBlockedTimeEnd').value;
+                const reason = document.getElementById('newBlockedTimeReason').value;
+
+                if (!date || !startTime || !endTime) {
+                    showAlert('日付、開始時間、終了時間を入力してください', 'error');
+                    return;
+                }
+
+                if (startTime >= endTime) {
+                    showAlert('開始時間は終了時間より前である必要があります', 'error');
+                    return;
+                }
+
+                const response = await fetch('/api/admin/schedule/blocked-time-slots', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        date,
+                        start_time: startTime,
+                        end_time: endTime,
+                        reason
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert(result.message);
+                    // フォームリセット
+                    document.getElementById('newBlockedTimeDate').value = '';
+                    document.getElementById('newBlockedTimeStart').value = '';
+                    document.getElementById('newBlockedTimeEnd').value = '';
+                    document.getElementById('newBlockedTimeReason').value = '';
+                    // 一覧再読み込み
+                    loadBlockedTimes();
+                } else {
+                    showAlert(result.error || '時間ブロックの追加に失敗しました', 'error');
+                }
+
+            } catch (error) {
+                console.error('時間ブロック追加エラー:', error);
+                showAlert('時間ブロックの追加中にエラーが発生しました', 'error');
+            }
+        }
     </script>
 </body>
 </html>

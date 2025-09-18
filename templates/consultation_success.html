@@ -287,9 +287,9 @@
             <div class="next-steps">
                 <h3>📋 次のステップ</h3>
                 <ol class="steps-list">
-                    <li>下記のCalendlyから具体的な相談日時を予約してください</li>
-                    <li>予約確定後、Zoomミーティングの詳細が自動送信されます</li>
-                    <li>相談当日、時間になりましたらZoomに参加してください</li>
+                    <li>下記のカレンダーから具体的な相談日時を予約してください</li>
+                    <li>予約確定後、Google Meetリンクが自動生成されます</li>
+                    <li>相談当日、時間になりましたらGoogle Meetに参加してください</li>
                     <li>助成金の専門家が1対1でご相談に対応いたします</li>
                 </ol>
             </div>
@@ -323,15 +323,29 @@
                 </div>
             </div>
 
-            <!-- Calendly予約セクション -->
+            <!-- Google Calendar予約セクション -->
             <div class="calendly-section">
                 <h3>📅 相談日時を予約する</h3>
-                <p>下記のカレンダーから、ご都合の良い日時を選択してご予約ください。</p>
+                <p>下記から、ご都合の良い日時を選択してご予約ください。Google Meet URLは予約確定時に自動生成されます。</p>
 
-                <!-- Calendly埋め込みウィジェット -->
-                <div id="calendly-widget-container">
-                    {{ calendly_widget|safe }}
+                <!-- 予約ボタン -->
+                <div style="text-align: center; margin: 2rem 0;">
+                    <a href="/expert-consultation/booking/{{ consultation_id }}" class="btn btn-primary" style="display: inline-block; text-decoration: none;">
+                        📅 日時を選択して予約する
+                    </a>
                 </div>
+
+                <!-- 予約済みの場合の表示 -->
+                {% if event_data %}
+                <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 10px; padding: 1.5rem; margin-top: 1rem;">
+                    <h4 style="color: #155724; margin-bottom: 1rem;">✅ 予約確定済み</h4>
+                    <div style="color: #155724;">
+                        <p><strong>日時:</strong> {{ event_data.start_time[:16] | replace('T', ' ') }}</p>
+                        <p><strong>Google Meet:</strong> <a href="{{ event_data.meet_url }}" target="_blank" style="color: #155724;">{{ event_data.meet_url }}</a></p>
+                        <p style="margin-top: 1rem; font-size: 0.9rem;">※ 相談開始5分前からMeetに参加可能です</p>
+                    </div>
+                </div>
+                {% endif %}
             </div>
 
             <!-- アクションボタン -->
