@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, jsonify, session, send_from_directory
+from flask import Flask, render_template, request, jsonify, session, send_from_directory, redirect
 import os
 import sys
+import time
 from dotenv import load_dotenv
 # srcディレクトリをPythonパスに追加
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -181,7 +182,13 @@ def diagnosis_simple():
 def dashboard():
     """統合ダッシュボード（エージェント選択画面）"""
     # 認証はクライアント側のFirebaseで行う
-    return render_template('dashboard.html')
+
+    # 管理者ログイン状態確認
+    is_admin = False
+    if ADMIN_AUTH_ENABLED:
+        is_admin = is_admin_user()
+
+    return render_template('dashboard.html', is_admin=is_admin)
 
 @app.route('/pricing')
 def pricing():
@@ -2150,6 +2157,163 @@ def send_emergency_alert():
             'success': False,
             'error': str(e)
         }), 500
+
+# =============================================================================
+# 管理者認証システム
+# =============================================================================
+
+try:
+    from admin_auth import admin_auth, require_admin, is_admin_user
+    ADMIN_AUTH_ENABLED = True
+    logger.info("Admin authentication module loaded successfully")
+except Exception as e:
+    logger.error(f"Admin authentication module failed to load: {str(e)}")
+    ADMIN_AUTH_ENABLED = False
+    # ダミーのデコレータを提供
+    def require_admin(f):
+        return f
+    def is_admin_user():
+        return False
+
+@app.route('/admin/login')
+def admin_login_page():
+    """管理者ログインページ"""
+    if ADMIN_AUTH_ENABLED and admin_auth.is_admin_logged_in():
+        return redirect('/dashboard')
+
+    return render_template('admin_login.html')
+
+@app.route('/admin/api/login', methods=['POST'])
+def admin_login_api():
+    """管理者ログインAPI"""
+    if not ADMIN_AUTH_ENABLED:
+        return jsonify({
+            'success': False,
+            'error': '管理者認証システムが無効です'
+        }), 500
+
+    try:
+        data = request.json
+        email = data.get('email', '').strip()
+        password = data.get('password', '')
+
+        if not email or not password:
+            return jsonify({
+                'success': False,
+                'error': 'メールアドレスとパスワードを入力してください'
+            }), 400
+
+        # 管理者認証
+        if admin_auth.authenticate_admin(email, password):
+            # セッション作成
+            admin_auth.create_admin_session()
+
+            logger.info(f"管理者ログイン成功: {email}")
+            return jsonify({
+                'success': True,
+                'message': 'ログインに成功しました',
+                'redirect': '/dashboard'
+            })
+        else:
+            logger.warning(f"管理者ログイン失敗: {email}")
+            return jsonify({
+                'success': False,
+                'error': 'メールアドレスまたはパスワードが正しくありません'
+            }), 401
+
+    except Exception as e:
+        logger.error(f"管理者ログインAPIエラー: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'システムエラーが発生しました'
+        }), 500
+
+@app.route('/admin/api/logout', methods=['POST'])
+def admin_logout_api():
+    """管理者ログアウトAPI"""
+    if not ADMIN_AUTH_ENABLED:
+        return jsonify({'success': False, 'error': '管理者認証システムが無効です'}), 500
+
+    try:
+        admin_auth.destroy_admin_session()
+        logger.info("管理者ログアウト完了")
+        return jsonify({
+            'success': True,
+            'message': 'ログアウトしました',
+            'redirect': '/admin/login'
+        })
+
+    except Exception as e:
+        logger.error(f"管理者ログアウトAPIエラー: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'システムエラーが発生しました'
+        }), 500
+
+@app.route('/admin/api/change-password', methods=['POST'])
+@require_admin
+def admin_change_password_api():
+    """管理者パスワード変更API"""
+    if not ADMIN_AUTH_ENABLED:
+        return jsonify({'success': False, 'error': '管理者認証システムが無効です'}), 500
+
+    try:
+        data = request.json
+        current_password = data.get('current_password', '')
+        new_password = data.get('new_password', '')
+        confirm_password = data.get('confirm_password', '')
+
+        if not current_password or not new_password or not confirm_password:
+            return jsonify({
+                'success': False,
+                'error': '全てのフィールドを入力してください'
+            }), 400
+
+        if new_password != confirm_password:
+            return jsonify({
+                'success': False,
+                'error': '新しいパスワードが一致しません'
+            }), 400
+
+        # パスワード変更
+        success, message = admin_auth.change_admin_password(current_password, new_password)
+
+        if success:
+            logger.info("管理者パスワード変更成功")
+            return jsonify({
+                'success': True,
+                'message': message
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': message
+            }), 400
+
+    except Exception as e:
+        logger.error(f"管理者パスワード変更APIエラー: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'システムエラーが発生しました'
+        }), 500
+
+@app.route('/admin/test')
+@require_admin
+def admin_test():
+    """管理者権限テスト"""
+    return jsonify({
+        'success': True,
+        'message': '管理者権限が正常に動作しています',
+        'timestamp': time.time()
+    })
+
+# 管理者アカウント初期化（アプリ起動時）
+if ADMIN_AUTH_ENABLED:
+    try:
+        admin_auth.initialize_admin()
+        logger.info("管理者アカウント初期化完了")
+    except Exception as e:
+        logger.error(f"管理者アカウント初期化エラー: {e}")
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
