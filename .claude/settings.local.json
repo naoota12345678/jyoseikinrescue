@@ -79,7 +79,12 @@
       "WebFetch(domain:docs.stripe.com)",
       "Bash(gcloud secrets:*)",
       "Bash(gcloud services enable:*)",
-      "Bash(del env_vars.yaml)"
+      "Bash(del env_vars.yaml)",
+      "Bash(gcloud organizations:*)",
+      "Bash(gcloud projects create:*)",
+      "Bash(gcloud iam service-accounts create:*)",
+      "Bash(gcloud iam service-accounts keys create:*)",
+      "Bash(gcloud org-policies delete:*)"
     ],
     "deny": [],
     "ask": [],

@@ -52,4 +52,5 @@ instance/
 .webassets-cache
 
 # Google Cloud
-.gcloudignore
+.gcloudignore*.json
+UsersnaootDownloads*
