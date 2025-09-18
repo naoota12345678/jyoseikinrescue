@@ -77,7 +77,9 @@
       "Bash(chmod:*)",
       "Bash(git tag:*)",
       "WebFetch(domain:docs.stripe.com)",
-      "Bash(gcloud secrets:*)"
+      "Bash(gcloud secrets:*)",
+      "Bash(gcloud services enable:*)",
+      "Bash(del env_vars.yaml)"
     ],
     "deny": [],
     "ask": [],
