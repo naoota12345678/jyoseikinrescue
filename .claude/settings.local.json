@@ -75,7 +75,8 @@
       "Bash(gcloud projects list:*)",
       "Bash(firebase hosting:sites:get:*)",
       "Bash(chmod:*)",
-      "Bash(git tag:*)"
+      "Bash(git tag:*)",
+      "WebFetch(domain:docs.stripe.com)"
     ],
     "deny": [],
     "ask": [],

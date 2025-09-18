@@ -80,6 +80,9 @@ gcloud builds list --limit=1 --format="value(images)"
 
 # 3. デプロイ（必ずサービス名jyoseikinrescue指定）
 gcloud run services update jyoseikinrescue --region=asia-northeast1 --image=EXACT_IMAGE_FROM_STEP2
+
+# 4. 🚨 重要：トラフィックを最新リビジョンに向ける（忘れると変更が反映されない）
+gcloud run services update-traffic jyoseikinrescue --region=asia-northeast1 --to-latest
 ```
 
 **🚨 絶対に守ること**:
@@ -109,6 +112,9 @@ gcloud builds submit --tag asia-northeast1-docker.pkg.dev/jyoseikinrescue/jyosei
 
 # 3. 完了確認後デプロイ
 gcloud run services update jyoseikinrescue --region=asia-northeast1 --image=EXACT_IMAGE_FROM_STEP2
+
+# 4. 🚨 最重要：トラフィックを最新リビジョンに向ける
+gcloud run services update-traffic jyoseikinrescue --region=asia-northeast1 --to-latest
 ```
 
 ## 詳細ドキュメント 📚

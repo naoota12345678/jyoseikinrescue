@@ -2212,7 +2212,7 @@ def admin_login_api():
             return jsonify({
                 'success': True,
                 'message': 'ログインに成功しました',
-                'redirect': '/dashboard'
+                'redirect': '/admin/dashboard'
             })
         else:
             logger.warning(f"管理者ログイン失敗: {email}")
@@ -2306,6 +2306,12 @@ def admin_test():
         'message': '管理者権限が正常に動作しています',
         'timestamp': time.time()
     })
+
+@app.route('/admin/dashboard')
+@require_admin
+def admin_dashboard():
+    """管理者ダッシュボード"""
+    return render_template('admin_dashboard.html')
 
 # 管理者アカウント初期化（アプリ起動時）
 if ADMIN_AUTH_ENABLED:

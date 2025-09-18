@@ -44,7 +44,7 @@ class AdminAuth:
     def initialize_admin(self):
         """管理者アカウントの初期化"""
         try:
-            db = firebase_service.get_firestore_client()
+            db = firebase_service.get_db()
             admin_ref = db.collection('admin_auth').document('admin')
 
             # 既存の管理者データ確認
@@ -82,7 +82,7 @@ class AdminAuth:
                 logger.warning(f"無効な管理者メールアドレス: {email}")
                 return False
 
-            db = firebase_service.get_firestore_client()
+            db = firebase_service.get_db()
             admin_ref = db.collection('admin_auth').document('admin')
             admin_doc = admin_ref.get()
 
@@ -128,7 +128,7 @@ class AdminAuth:
     def change_admin_password(self, current_password, new_password):
         """管理者パスワード変更"""
         try:
-            db = firebase_service.get_firestore_client()
+            db = firebase_service.get_db()
             admin_ref = db.collection('admin_auth').document('admin')
             admin_doc = admin_ref.get()
 
