@@ -29,6 +29,21 @@
 **Firebase Hosting**: `jyoseikinrescue.web.app` (Cloud Runにプロキシ)
 **カスタムドメイン**: `shindan.jyoseikin.jp` → `jyoseikinrescue.web.app` → Cloud Run
 
+### 🔑 重要：Googleワークスペース連携構成（2025-09-18追加）
+**アカウント関係（必須暗記）**:
+- **親アカウント**: hasebe.sr.office@gmail.com（Google Cloud権限あり）
+- **ワークスペース**: info@hasebe-sr-office.com（カレンダー＋Meet管理）
+- **デプロイ用**: naoota12345678@gmail.com（Cloud Run管理）
+
+**Google Cloudプロジェクト**:
+- **メインアプリ**: `jyoseikinrescue`（naoota12345678@gmail.com）
+- **カレンダーAPI**: `jyoseikin-calender`（hasebe.sr.office@gmail.com）
+
+**重要な連携情報**:
+- **サービスアカウント**: `calendar-system@jyoseikin-calender.iam.gserviceaccount.com`
+- **カレンダーID**: `info@hasebe-sr-office.com`
+- **機能**: CalendlyからGoogle Meet直接連携に移行完了
+
 ### プロジェクト構成
 - **メインデプロイ**: Google Cloud Run
 - **アプリケーション**: Python Flask + HTML/CSS/JavaScript
@@ -43,6 +58,7 @@
 3. **メモ機能**: 相談内容の保存・管理
 4. **申請書類リンク**: 厚労省公式書類への直接リンク
 5. **料金プラン**: Light/Regular/Heavy（¥1,480～¥5,500）
+6. **専門家相談システム**: Google Meet直接連携で30分¥14,300
 
 ## エージェントID管理 🏷️
 
@@ -162,7 +178,14 @@ gcloud run services update-traffic jyoseikinrescue --region=asia-northeast1 --to
 ## 開発セッション履歴
 詳細は `sessions/` フォルダ内の各ファイルを参照
 
+### 2025-09-18 Googleワークスペース連携完了セッション ✅
+**要求内容**:
+- CalendlyからGoogle Meet直接連携への移行
+- 複雑なアカウント権限問題の解決
+- ワークスペースカレンダーとの統合
+- 本物のGoogle Meet URL自動生成システム構築
+
 ### 2025-08-30 助成金申請フォーム管理システム構築セッション ✅
-**要求内容**: 
+**要求内容**:
 - AIが間違ったURLを返す問題の修正（特にキャリアアップ助成金）
 - ランディングページのロゴ表示修正・デザイン改善
