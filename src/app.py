@@ -1055,13 +1055,16 @@ def stripe_webhook():
                     # 既存コードとの互換性のため
                     get_subscription_service().add_additional_pack(user_id, session_id)
 
-                # 専門家相談決済完了
-                # 注意: 相談決済は単発決済のため、ここでCalendly URLなど必要な処理を実行
-                elif result.get('metadata', {}).get('payment_type') == 'consultation':
-                    consultation_category = result.get('metadata', {}).get('consultation_category')
-                    plan_type = result.get('metadata', {}).get('plan_type')
-                    logger.info(f"Consultation payment completed: user={user_id}, category={consultation_category}, plan={plan_type}")
-                    # TODO: Calendly統合とZoom会議室作成をここで実装
+            elif result['action'] == 'expert_consultation_paid':
+                # 専門家相談決済完了処理
+                consultation_id = result.get('consultation_id')
+                payment_intent_id = result.get('payment_intent_id')
+
+                if EXPERT_CONSULTATION_ENABLED and consultation_id:
+                    expert_consultation_service.update_consultation_payment(
+                        consultation_id, payment_intent_id
+                    )
+                    logger.info(f"Expert consultation payment completed: {consultation_id}")
         
         return jsonify({'received': True})
         
@@ -2169,7 +2172,18 @@ try:
 except Exception as e:
     logger.error(f"Admin authentication module failed to load: {str(e)}")
     ADMIN_AUTH_ENABLED = False
-    # ダミーのデコレータを提供
+    def require_admin(f):
+        return f
+
+# 専門家相談システム
+try:
+    from expert_consultation import expert_consultation_service
+    from calendly_service import calendly_service
+    EXPERT_CONSULTATION_ENABLED = True
+    logger.info("Expert consultation module loaded successfully")
+except Exception as e:
+    logger.error(f"Expert consultation module failed to load: {str(e)}")
+    EXPERT_CONSULTATION_ENABLED = False
     def require_admin(f):
         return f
     def is_admin_user():
@@ -2297,6 +2311,25 @@ def admin_change_password_api():
             'error': 'システムエラーが発生しました'
         }), 500
 
+@app.route('/admin/api/init', methods=['POST'])
+def admin_init_api():
+    """管理者アカウント初期化API（診断用）"""
+    if not ADMIN_AUTH_ENABLED:
+        return jsonify({'success': False, 'error': '管理者認証システムが無効です'}), 500
+
+    try:
+        success = admin_auth.initialize_admin()
+        return jsonify({
+            'success': success,
+            'message': '管理者アカウント初期化が完了しました' if success else '初期化に失敗しました'
+        })
+    except Exception as e:
+        logger.error(f"管理者初期化APIエラー: {e}")
+        return jsonify({
+            'success': False,
+            'error': f'システムエラー: {str(e)}'
+        }), 500
+
 @app.route('/admin/test')
 @require_admin
 def admin_test():
@@ -2312,6 +2345,195 @@ def admin_test():
 def admin_dashboard():
     """管理者ダッシュボード"""
     return render_template('admin_dashboard.html')
+
+# =============================================================================
+# 専門家相談システム
+# =============================================================================
+
+@app.route('/expert-consultation')
+@require_auth
+def expert_consultation():
+    """専門家相談予約ページ"""
+    if not EXPERT_CONSULTATION_ENABLED:
+        return jsonify({'error': '専門家相談システムが利用できません'}), 500
+
+    return render_template('expert_consultation.html')
+
+@app.route('/api/expert-consultation/eligibility')
+@require_auth
+def expert_consultation_eligibility():
+    """専門家相談の利用資格確認API"""
+    if not EXPERT_CONSULTATION_ENABLED:
+        return jsonify({'error': '専門家相談システムが利用できません'}), 500
+
+    try:
+        current_user = get_current_user()
+        user_id = current_user.get('user_id') or current_user['id']
+
+        can_book, message = expert_consultation_service.can_user_book_consultation(user_id)
+
+        return jsonify({
+            'eligible': can_book,
+            'message': message,
+            'upgrade_required': not can_book and '有料プラン' in message
+        })
+
+    except Exception as e:
+        logger.error(f"相談資格確認エラー: {e}")
+        return jsonify({
+            'eligible': False,
+            'message': 'システムエラーが発生しました'
+        }), 500
+
+@app.route('/api/expert-consultation/create', methods=['POST'])
+@require_auth
+def create_expert_consultation():
+    """専門家相談リクエスト作成API"""
+    if not EXPERT_CONSULTATION_ENABLED:
+        return jsonify({'error': '専門家相談システムが利用できません'}), 500
+
+    try:
+        current_user = get_current_user()
+        user_id = current_user.get('user_id') or current_user['id']
+
+        # 利用資格チェック
+        can_book, eligibility_message = expert_consultation_service.can_user_book_consultation(user_id)
+        if not can_book:
+            return jsonify({
+                'success': False,
+                'error': eligibility_message
+            }), 403
+
+        data = request.json
+        user_name = data.get('userName', '').strip()
+        user_email = data.get('userEmail', '').strip()
+        consultation_notes = data.get('consultationNotes', '').strip()
+
+        if not user_name or not user_email:
+            return jsonify({
+                'success': False,
+                'error': 'お名前とメールアドレスを入力してください'
+            }), 400
+
+        # 相談リクエストを作成
+        consultation_id = expert_consultation_service.create_consultation_request(
+            user_id=user_id,
+            user_email=user_email,
+            user_name=user_name,
+            notes=consultation_notes
+        )
+
+        if not consultation_id:
+            return jsonify({
+                'success': False,
+                'error': '相談リクエストの作成に失敗しました'
+            }), 500
+
+        # Stripe決済セッション作成
+        stripe_service = get_stripe_service()
+
+        success_url = request.url_root.rstrip('/') + f'/expert-consultation/success/{consultation_id}'
+        cancel_url = request.url_root.rstrip('/') + '/expert-consultation'
+
+        checkout_session = stripe_service.create_expert_consultation_checkout(
+            consultation_id=consultation_id,
+            user_id=user_id,
+            user_name=user_name,
+            user_email=user_email,
+            success_url=success_url,
+            cancel_url=cancel_url
+        )
+
+        return jsonify({
+            'success': True,
+            'checkout_url': checkout_session['url'],
+            'consultation_id': consultation_id
+        })
+
+    except Exception as e:
+        logger.error(f"専門家相談作成エラー: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'システムエラーが発生しました'
+        }), 500
+
+@app.route('/expert-consultation/success/<consultation_id>')
+@require_auth
+def expert_consultation_success(consultation_id):
+    """専門家相談決済完了ページ"""
+    if not EXPERT_CONSULTATION_ENABLED:
+        return jsonify({'error': '専門家相談システムが利用できません'}), 500
+
+    try:
+        current_user = get_current_user()
+        user_id = current_user.get('user_id') or current_user['id']
+
+        # 相談情報を取得
+        consultation = expert_consultation_service.get_consultation(consultation_id)
+        if not consultation:
+            return render_template('error.html',
+                                 error_message='相談情報が見つかりません'), 404
+
+        # 本人確認
+        if consultation['user_id'] != user_id:
+            return render_template('error.html',
+                                 error_message='アクセス権限がありません'), 403
+
+        # Calendlyウィジェット生成
+        calendly_widget = calendly_service.get_embedded_widget_html(
+            consultation_id=consultation_id,
+            user_email=consultation['user_email'],
+            user_name=consultation['user_name']
+        )
+
+        # 決済日時をフォーマット
+        payment_date = "決済処理中"
+        if consultation.get('payment_completed_at'):
+            from datetime import datetime
+            payment_date = datetime.fromtimestamp(
+                consultation['payment_completed_at']
+            ).strftime('%Y年%m月%d日 %H:%M')
+
+        return render_template('consultation_success.html',
+                             consultation_id=consultation_id,
+                             user_name=consultation['user_name'],
+                             user_email=consultation['user_email'],
+                             payment_date=payment_date,
+                             calendly_widget=calendly_widget)
+
+    except Exception as e:
+        logger.error(f"相談決済完了ページエラー: {e}")
+        return render_template('error.html',
+                             error_message='システムエラーが発生しました'), 500
+
+@app.route('/expert-consultation/status/<consultation_id>')
+@require_auth
+def expert_consultation_status(consultation_id):
+    """専門家相談ステータス確認ページ"""
+    if not EXPERT_CONSULTATION_ENABLED:
+        return jsonify({'error': '専門家相談システムが利用できません'}), 500
+
+    try:
+        current_user = get_current_user()
+        user_id = current_user.get('user_id') or current_user['id']
+
+        # 相談情報を取得
+        consultation = expert_consultation_service.get_consultation(consultation_id)
+        if not consultation:
+            return render_template('error.html',
+                                 error_message='相談情報が見つかりません'), 404
+
+        # 本人確認
+        if consultation['user_id'] != user_id:
+            return render_template('error.html',
+                                 error_message='アクセス権限がありません'), 403
+
+        return jsonify(consultation)
+
+    except Exception as e:
+        logger.error(f"相談ステータス確認エラー: {e}")
+        return render_template('error.html',
+                             error_message='システムエラーが発生しました'), 500
 
 # 管理者アカウント初期化（アプリ起動時）
 if ADMIN_AUTH_ENABLED:

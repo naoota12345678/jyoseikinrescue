@@ -351,10 +351,24 @@ class StripeService:
             metadata = session.get('metadata', {})
             user_id = metadata.get('user_id')
             plan_type = metadata.get('plan_type')
-            
+            payment_type = metadata.get('payment_type')
+            consultation_id = metadata.get('consultation_id')
+
             if not user_id:
                 return {'status': 'error', 'error': 'Missing user_id in metadata'}
-            
+
+            # 専門家相談の決済完了処理
+            if payment_type == 'expert_consultation' and consultation_id:
+                return {
+                    'status': 'success',
+                    'action': 'expert_consultation_paid',
+                    'consultation_id': consultation_id,
+                    'user_id': user_id,
+                    'session_id': session.get('id'),
+                    'payment_intent_id': session.get('payment_intent')
+                }
+
+            # 通常のサブスクリプション・パック決済
             return {
                 'status': 'success',
                 'action': 'checkout_completed',
@@ -472,4 +486,51 @@ class StripeService:
             raise
         except Exception as e:
             logger.error(f"Consultation payment error: {str(e)}")
+            raise
+
+    def create_expert_consultation_checkout(self, consultation_id, user_id, user_name, user_email, success_url, cancel_url):
+        """専門家相談用のStripe決済セッションを作成"""
+        try:
+            # 専門家相談の料金
+            EXPERT_CONSULTATION_PRICE = 14300  # 30分 14,300円
+
+            # Checkout セッションを作成
+            session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[{
+                    'price_data': {
+                        'currency': self.CURRENCY,
+                        'product_data': {
+                            'name': '専門家相談（30分）',
+                            'description': '助成金専門家との1対1オンライン相談'
+                        },
+                        'unit_amount': EXPERT_CONSULTATION_PRICE
+                    },
+                    'quantity': 1
+                }],
+                mode='payment',
+                success_url=success_url,
+                cancel_url=cancel_url,
+                metadata={
+                    'consultation_id': consultation_id,
+                    'user_id': user_id,
+                    'user_name': user_name,
+                    'user_email': user_email,
+                    'payment_type': 'expert_consultation',
+                    'service_type': 'expert_consultation_30min'
+                }
+            )
+
+            logger.info(f"Expert consultation payment session created: {session.id} for consultation {consultation_id}")
+            return {
+                'id': session.id,
+                'url': session.url,
+                'amount': EXPERT_CONSULTATION_PRICE
+            }
+
+        except stripe.error.StripeError as e:
+            logger.error(f"Expert consultation payment creation error: {str(e)}")
+            raise
+        except Exception as e:
+            logger.error(f"Expert consultation payment error: {str(e)}")
             raise

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>専門家相談 - 助成金レスキュー</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 3rem 2rem;
+        }
+
+        .service-info {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid #e9ecef;
+        }
+
+        .price-tag {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .features li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+        }
+
+        .features li:last-child {
+            border-bottom: none;
+        }
+
+        .features li::before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .eligibility-check {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .eligibility-check h3 {
+            color: #1976d2;
+            margin-bottom: 1rem;
+        }
+
+        .eligibility-status {
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .eligible {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .not-eligible {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .consultation-form {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 15px;
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .booking-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1.5rem 3rem;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .booking-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .booking-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .back-link a:hover {
+            color: #764ba2;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid #f5c6cb;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .content {
+                padding: 2rem 1rem;
+            }
+
+            .consultation-form {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧑‍⚕️ 専門家相談</h1>
+            <p>助成金のプロフェッショナルに直接相談</p>
+        </div>
+
+        <div class="content">
+            <!-- サービス情報 -->
+            <div class="service-info">
+                <div class="price-tag">30分 ¥14,300（税込）</div>
+                <ul class="features">
+                    <li>助成金専門家との1対1のオンライン相談</li>
+                    <li>あなたの状況に合わせた個別アドバイス</li>
+                    <li>具体的な申請手順と必要書類の説明</li>
+                    <li>申請の成功確率を最大化するための戦略</li>
+                    <li>質疑応答形式で疑問を解決</li>
+                </ul>
+            </div>
+
+            <!-- 利用資格チェック -->
+            <div class="eligibility-check">
+                <h3>📋 利用資格確認</h3>
+                <div id="eligibilityStatus" class="eligibility-status">
+                    資格を確認中...
+                </div>
+            </div>
+
+            <!-- エラーメッセージ -->
+            <div id="errorMessage" class="error-message"></div>
+
+            <!-- 相談予約フォーム -->
+            <div id="consultationForm" class="consultation-form" style="display: none;">
+                <h3>📅 相談予約</h3>
+                <p style="margin-bottom: 1.5rem; color: #666;">
+                    決済完了後、Calendlyで具体的な日時を予約していただきます。
+                </p>
+
+                <form id="bookingForm">
+                    <div class="form-group">
+                        <label for="userName">お名前 *</label>
+                        <input type="text" id="userName" name="userName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="userEmail">メールアドレス *</label>
+                        <input type="email" id="userEmail" name="userEmail" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="consultationNotes">相談内容・ご質問（事前準備のため）</label>
+                        <textarea id="consultationNotes" name="consultationNotes"
+                                placeholder="どのような助成金について相談されたいか、現在の状況など、事前に教えていただけると相談がスムーズに進みます。"></textarea>
+                    </div>
+
+                    <button type="submit" class="booking-button" id="bookingButton">
+                        専門家相談を予約する（¥14,300）
+                    </button>
+
+                    <div class="loading" id="loadingIndicator">
+                        <div class="loading-spinner"></div>
+                        決済ページに移動中...
+                    </div>
+                </form>
+            </div>
+
+            <div class="back-link">
+                <a href="/dashboard">← ダッシュボードに戻る</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ページ読み込み時に利用資格をチェック
+        document.addEventListener('DOMContentLoaded', function() {
+            checkEligibility();
+            loadUserInfo();
+        });
+
+        async function checkEligibility() {
+            try {
+                const response = await fetch('/api/expert-consultation/eligibility');
+                const result = await response.json();
+
+                const statusElement = document.getElementById('eligibilityStatus');
+                const formElement = document.getElementById('consultationForm');
+                const errorElement = document.getElementById('errorMessage');
+
+                if (result.eligible) {
+                    statusElement.className = 'eligibility-status eligible';
+                    statusElement.textContent = '✓ ' + result.message;
+                    formElement.style.display = 'block';
+                } else {
+                    statusElement.className = 'eligibility-status not-eligible';
+                    statusElement.textContent = '✗ ' + result.message;
+
+                    if (result.upgrade_required) {
+                        statusElement.innerHTML += '<br><br><a href="/subscription" style="color: #721c24; text-decoration: underline;">有料プランにアップグレード</a>';
+                    }
+                }
+
+            } catch (error) {
+                console.error('Eligibility check error:', error);
+                document.getElementById('errorMessage').textContent = '資格確認中にエラーが発生しました。';
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+        }
+
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('/api/user');
+                const user = await response.json();
+
+                if (user.name) {
+                    document.getElementById('userName').value = user.name;
+                }
+                if (user.email) {
+                    document.getElementById('userEmail').value = user.email;
+                }
+
+            } catch (error) {
+                console.error('User info load error:', error);
+            }
+        }
+
+        // 予約フォーム送信
+        document.getElementById('bookingForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = {
+                userName: document.getElementById('userName').value.trim(),
+                userEmail: document.getElementById('userEmail').value.trim(),
+                consultationNotes: document.getElementById('consultationNotes').value.trim()
+            };
+
+            if (!formData.userName || !formData.userEmail) {
+                showError('お名前とメールアドレスを入力してください。');
+                return;
+            }
+
+            setLoading(true);
+
+            try {
+                const response = await fetch('/api/expert-consultation/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Stripe決済ページにリダイレクト
+                    window.location.href = result.checkout_url;
+                } else {
+                    showError(result.error || '予約処理中にエラーが発生しました。');
+                }
+
+            } catch (error) {
+                console.error('Booking error:', error);
+                showError('通信エラーが発生しました。再度お試しください。');
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        function setLoading(isLoading) {
+            const button = document.getElementById('bookingButton');
+            const loading = document.getElementById('loadingIndicator');
+
+            if (isLoading) {
+                button.style.display = 'none';
+                loading.style.display = 'block';
+                button.disabled = true;
+            } else {
+                button.style.display = 'block';
+                loading.style.display = 'none';
+                button.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

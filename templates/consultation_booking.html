@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>相談日時選択 - 助成金レスキュー</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .content {
+            padding: 3rem 2rem;
+        }
+
+        .booking-info {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .booking-info h3 {
+            color: #1976d2;
+            margin-bottom: 1rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #1976d2;
+        }
+
+        .booking-form {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .date-selection {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 2rem;
+        }
+
+        .date-selection h3 {
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+
+        .date-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .date-option {
+            background: white;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .date-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .date-option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .date-option .date {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .date-option .weekday {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .time-selection {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 2rem;
+            display: none;
+        }
+
+        .time-selection.active {
+            display: block;
+        }
+
+        .time-selection h3 {
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 1rem;
+        }
+
+        .time-option {
+            background: white;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .time-option:hover {
+            border-color: #28a745;
+            transform: translateY(-2px);
+        }
+
+        .time-option.selected {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .time-option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #f8f9fa;
+        }
+
+        .confirmation-section {
+            background: white;
+            border: 2px solid #28a745;
+            border-radius: 15px;
+            padding: 2rem;
+            display: none;
+        }
+
+        .confirmation-section.active {
+            display: block;
+        }
+
+        .confirmation-section h3 {
+            color: #28a745;
+            margin-bottom: 1.5rem;
+        }
+
+        .confirmation-details {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .detail-value {
+            color: #333;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            min-width: 150px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid #f5c6cb;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #28a745;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .content {
+                padding: 2rem 1rem;
+            }
+
+            .date-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .time-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📅 相談日時を選択</h1>
+            <p>決済が完了しました。ご希望の相談日時を選択してください。</p>
+        </div>
+
+        <div class="content">
+            <!-- 予約情報 -->
+            <div class="booking-info">
+                <h3>📝 ご予約情報</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">相談者:</span>
+                        <span>{{ user_name }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">相談時間:</span>
+                        <span>30分</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">料金:</span>
+                        <span>¥14,300（決済済み）</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">相談ID:</span>
+                        <span>{{ consultation_id }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- エラーメッセージ -->
+            <div id="errorMessage" class="error-message"></div>
+
+            <!-- 日付選択 -->
+            <div class="date-selection">
+                <h3>1️⃣ 相談日を選択してください</h3>
+                <div class="date-grid" id="dateGrid">
+                    <!-- 動的に生成 -->
+                </div>
+            </div>
+
+            <!-- 時間選択 -->
+            <div class="time-selection" id="timeSelection">
+                <h3>2️⃣ 相談時間を選択してください</h3>
+                <div class="time-grid" id="timeGrid">
+                    <!-- 動的に生成 -->
+                </div>
+            </div>
+
+            <!-- 確認セクション -->
+            <div class="confirmation-section" id="confirmationSection">
+                <h3>3️⃣ 予約内容を確認してください</h3>
+                <div class="confirmation-details">
+                    <div class="detail-row">
+                        <span class="detail-label">相談日時</span>
+                        <span class="detail-value" id="selectedDateTime">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Google Meet</span>
+                        <span class="detail-value">予約確定後に作成されます</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">リマインダー</span>
+                        <span class="detail-value">前日と1時間前にメール通知</span>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="resetSelection()">選択をやり直す</button>
+                    <button class="btn btn-primary" id="confirmButton" onclick="confirmBooking()">予約を確定する</button>
+                </div>
+
+                <div class="loading" id="loadingIndicator">
+                    <div class="loading-spinner"></div>
+                    予約を確定中...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedDate = null;
+        let selectedTime = null;
+        let availableDates = [];
+
+        // ページ読み込み時の処理
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAvailableDates();
+        });
+
+        async function loadAvailableDates() {
+            try {
+                const response = await fetch('/api/google-calendar/available-dates');
+                const result = await response.json();
+
+                if (result.success) {
+                    availableDates = result.dates;
+                    renderDateGrid();
+                } else {
+                    showError('利用可能な日付の取得に失敗しました。');
+                }
+
+            } catch (error) {
+                console.error('Date loading error:', error);
+                showError('通信エラーが発生しました。');
+            }
+        }
+
+        function renderDateGrid() {
+            const dateGrid = document.getElementById('dateGrid');
+            dateGrid.innerHTML = '';
+
+            availableDates.forEach(dateInfo => {
+                const dateOption = document.createElement('div');
+                dateOption.className = 'date-option';
+                dateOption.dataset.date = dateInfo.date;
+                dateOption.innerHTML = `
+                    <div class="date">${dateInfo.display_date}</div>
+                    <div class="weekday">${getWeekdayName(dateInfo.weekday)}</div>
+                `;
+                dateOption.onclick = () => selectDate(dateInfo.date, dateOption);
+                dateGrid.appendChild(dateOption);
+            });
+        }
+
+        function getWeekdayName(weekday) {
+            const names = ['月', '火', '水', '木', '金', '土', '日'];
+            return names[weekday];
+        }
+
+        async function selectDate(date, element) {
+            // 選択状態更新
+            document.querySelectorAll('.date-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedDate = date;
+
+            // 時間枠を読み込み
+            await loadTimeSlots(date);
+
+            // 時間選択セクションを表示
+            document.getElementById('timeSelection').classList.add('active');
+        }
+
+        async function loadTimeSlots(date) {
+            try {
+                const response = await fetch(`/api/google-calendar/time-slots?date=${date}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    renderTimeGrid(result.slots);
+                } else {
+                    showError('時間枠の取得に失敗しました。');
+                }
+
+            } catch (error) {
+                console.error('Time slots loading error:', error);
+                showError('通信エラーが発生しました。');
+            }
+        }
+
+        function renderTimeGrid(slots) {
+            const timeGrid = document.getElementById('timeGrid');
+            timeGrid.innerHTML = '';
+
+            slots.forEach(slot => {
+                const timeOption = document.createElement('div');
+                timeOption.className = `time-option ${slot.available ? '' : 'disabled'}`;
+                timeOption.dataset.time = slot.display_time;
+                timeOption.textContent = slot.display_time;
+
+                if (slot.available) {
+                    timeOption.onclick = () => selectTime(slot.display_time, timeOption);
+                }
+
+                timeGrid.appendChild(timeOption);
+            });
+        }
+
+        function selectTime(time, element) {
+            // 選択状態更新
+            document.querySelectorAll('.time-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedTime = time;
+
+            // 確認セクションを表示
+            updateConfirmation();
+            document.getElementById('confirmationSection').classList.add('active');
+        }
+
+        function updateConfirmation() {
+            const selectedDateInfo = availableDates.find(d => d.date === selectedDate);
+            const dateTimeText = `${selectedDateInfo.display_date} ${selectedTime}`;
+            document.getElementById('selectedDateTime').textContent = dateTimeText;
+        }
+
+        async function confirmBooking() {
+            if (!selectedDate || !selectedTime) {
+                showError('日付と時間を選択してください。');
+                return;
+            }
+
+            setLoading(true);
+
+            try {
+                const response = await fetch('/api/google-calendar/book-consultation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        consultation_id: '{{ consultation_id }}',
+                        date: selectedDate,
+                        time: selectedTime
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // 成功ページにリダイレクト
+                    window.location.href = `/expert-consultation/confirmed/{{ consultation_id }}`;
+                } else {
+                    showError(result.error || '予約の確定に失敗しました。');
+                }
+
+            } catch (error) {
+                console.error('Booking confirmation error:', error);
+                showError('通信エラーが発生しました。');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function resetSelection() {
+            selectedDate = null;
+            selectedTime = null;
+
+            document.querySelectorAll('.date-option').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.time-option').forEach(el => el.classList.remove('selected'));
+
+            document.getElementById('timeSelection').classList.remove('active');
+            document.getElementById('confirmationSection').classList.remove('active');
+        }
+
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        function setLoading(isLoading) {
+            const button = document.getElementById('confirmButton');
+            const loading = document.getElementById('loadingIndicator');
+
+            if (isLoading) {
+                button.style.display = 'none';
+                loading.style.display = 'block';
+                button.disabled = true;
+            } else {
+                button.style.display = 'block';
+                loading.style.display = 'none';
+                button.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

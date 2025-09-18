@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>決済完了 - 専門家相談予約 - 助成金レスキュー</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .content {
+            padding: 3rem 2rem;
+        }
+
+        .status-card {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .status-card h2 {
+            color: #155724;
+            margin-bottom: 1rem;
+        }
+
+        .status-card p {
+            color: #155724;
+            font-size: 1.1rem;
+        }
+
+        .next-steps {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .next-steps h3 {
+            color: #1976d2;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+        }
+
+        .steps-list {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+
+        .steps-list li {
+            counter-increment: step-counter;
+            padding: 1rem 0;
+            border-bottom: 1px solid #bbdefb;
+            position: relative;
+            padding-left: 3rem;
+        }
+
+        .steps-list li:last-child {
+            border-bottom: none;
+        }
+
+        .steps-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 1rem;
+            background: #2196f3;
+            color: white;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .consultation-info {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .consultation-info h3 {
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .info-value {
+            color: #333;
+        }
+
+        .calendly-section {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .calendly-section h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .calendly-section p {
+            text-align: center;
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .support-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .support-info h4 {
+            color: #856404;
+            margin-bottom: 0.5rem;
+        }
+
+        .support-info p {
+            color: #856404;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .content {
+                padding: 2rem 1rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                margin-bottom: 1rem;
+            }
+
+            .info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="success-icon">✅</div>
+            <h1>決済完了</h1>
+            <p>専門家相談の予約準備が整いました</p>
+        </div>
+
+        <div class="content">
+            <!-- 決済完了ステータス -->
+            <div class="status-card">
+                <h2>お支払いありがとうございます</h2>
+                <p>専門家相談（30分 ¥14,300）の決済が正常に完了しました。</p>
+            </div>
+
+            <!-- 次のステップ -->
+            <div class="next-steps">
+                <h3>📋 次のステップ</h3>
+                <ol class="steps-list">
+                    <li>下記のCalendlyから具体的な相談日時を予約してください</li>
+                    <li>予約確定後、Zoomミーティングの詳細が自動送信されます</li>
+                    <li>相談当日、時間になりましたらZoomに参加してください</li>
+                    <li>助成金の専門家が1対1でご相談に対応いたします</li>
+                </ol>
+            </div>
+
+            <!-- 相談情報 -->
+            <div class="consultation-info">
+                <h3>📝 ご相談情報</h3>
+                <div class="info-row">
+                    <span class="info-label">相談ID</span>
+                    <span class="info-value">{{ consultation_id }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">お名前</span>
+                    <span class="info-value">{{ user_name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">メールアドレス</span>
+                    <span class="info-value">{{ user_email }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">相談時間</span>
+                    <span class="info-value">30分</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">料金</span>
+                    <span class="info-value">¥14,300（税込）</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">決済日時</span>
+                    <span class="info-value">{{ payment_date }}</span>
+                </div>
+            </div>
+
+            <!-- Calendly予約セクション -->
+            <div class="calendly-section">
+                <h3>📅 相談日時を予約する</h3>
+                <p>下記のカレンダーから、ご都合の良い日時を選択してご予約ください。</p>
+
+                <!-- Calendly埋め込みウィジェット -->
+                <div id="calendly-widget-container">
+                    {{ calendly_widget|safe }}
+                </div>
+            </div>
+
+            <!-- アクションボタン -->
+            <div class="action-buttons">
+                <a href="/dashboard" class="btn btn-secondary">ダッシュボードに戻る</a>
+                <a href="/expert-consultation/status/{{ consultation_id }}" class="btn btn-primary">予約状況を確認</a>
+            </div>
+
+            <!-- サポート情報 -->
+            <div class="support-info">
+                <h4>📞 サポートが必要ですか？</h4>
+                <p>
+                    予約や相談に関してご不明な点がございましたら、
+                    <strong>rescue@jyoseikin.jp</strong> までお気軽にお問い合わせください。
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Calendlyイベントリスナー
+        window.addEventListener('message', function(e) {
+            if (e.data.event && e.data.event.indexOf('calendly') === 0) {
+                console.log('Calendly event:', e.data.event);
+
+                if (e.data.event === 'calendly.event_scheduled') {
+                    // 予約完了時の処理
+                    showBookingSuccess();
+                }
+            }
+        });
+
+        function showBookingSuccess() {
+            // 予約完了メッセージを表示
+            const successMessage = document.createElement('div');
+            successMessage.innerHTML = `
+                <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 10px; padding: 1.5rem; margin-top: 1rem; text-align: center;">
+                    <h4 style="color: #155724; margin-bottom: 0.5rem;">🎉 予約完了</h4>
+                    <p style="color: #155724; margin: 0;">
+                        相談日時の予約が完了しました。確認メールをお送りしておりますのでご確認ください。
+                    </p>
+                </div>
+            `;
+
+            document.querySelector('.calendly-section').appendChild(successMessage);
+
+            // 5秒後に予約状況ページにリダイレクト
+            setTimeout(() => {
+                window.location.href = '/expert-consultation/status/{{ consultation_id }}';
+            }, 5000);
+        }
+
+        // ページ読み込み完了時の処理
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('専門家相談決済完了ページ読み込み完了');
+        });
+    </script>
+</body>
+</html>
