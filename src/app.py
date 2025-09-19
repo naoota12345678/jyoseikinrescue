@@ -2351,9 +2351,9 @@ def admin_dashboard():
 # =============================================================================
 
 @app.route('/expert-consultation')
-@require_auth
 def expert_consultation():
     """専門家相談予約ページ"""
+    # 認証はクライアント側のFirebaseで行う（ダッシュボードと同じ方式）
     if not EXPERT_CONSULTATION_ENABLED:
         return jsonify({'error': '専門家相談システムが利用できません'}), 500
 
