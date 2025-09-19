@@ -4253,19 +4253,27 @@
         function proceedToBooking() {
             console.log('proceedToBooking() called - checking auth status');
 
-            // 認証トークンをチェック
-            const token = localStorage.getItem('auth_token');
-            if (!token) {
-                console.log('No auth token found - redirecting to login');
+            // Firebase認証の現在のユーザーをチェック
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                console.log('No authenticated user found - redirecting to login');
                 alert('専門家相談をご利用いただくには、ログインが必要です。');
                 window.location.href = '/';
                 return;
             }
 
-            console.log('Auth token found - proceeding to expert consultation');
-            // 専門家相談ページ（/expert-consultation）に遷移
-            window.location.href = '/expert-consultation';
-            console.log('window.location.href set to /expert-consultation');
+            console.log('Authenticated user found - proceeding to expert consultation');
+            // 認証済みユーザーのトークンをlocalStorageに保存（専門家相談ページで使用するため）
+            user.getIdToken().then(token => {
+                localStorage.setItem('auth_token', token);
+                console.log('Token saved to localStorage');
+                // 専門家相談ページ（/expert-consultation）に遷移
+                window.location.href = '/expert-consultation';
+            }).catch(error => {
+                console.error('Failed to get token:', error);
+                alert('認証エラーが発生しました。再度ログインしてください。');
+                window.location.href = '/';
+            });
         }
 
         function showBookingCalendar() {
