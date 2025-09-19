@@ -84,7 +84,9 @@
       "Bash(gcloud projects create:*)",
       "Bash(gcloud iam service-accounts create:*)",
       "Bash(gcloud iam service-accounts keys create:*)",
-      "Bash(gcloud org-policies delete:*)"
+      "Bash(gcloud org-policies delete:*)",
+      "Bash(git reset:*)",
+      "Bash(start http://localhost:8080/expert-consultation)"
     ],
     "deny": [],
     "ask": [],

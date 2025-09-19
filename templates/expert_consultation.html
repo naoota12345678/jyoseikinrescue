@@ -343,7 +343,12 @@
 
         async function checkEligibility() {
             try {
-                const response = await fetch('/api/expert-consultation/eligibility');
+                const token = localStorage.getItem('auth_token');
+                const response = await fetch('/api/expert-consultation/eligibility', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
                 const result = await response.json();
 
                 const statusElement = document.getElementById('eligibilityStatus');
@@ -372,7 +377,12 @@
 
         async function loadUserInfo() {
             try {
-                const response = await fetch('/api/user');
+                const token = localStorage.getItem('auth_token');
+                const response = await fetch('/api/user', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
                 const user = await response.json();
 
                 if (user.name) {
@@ -405,10 +415,12 @@
             setLoading(true);
 
             try {
+                const token = localStorage.getItem('auth_token');
                 const response = await fetch('/api/expert-consultation/create', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
                     },
                     body: JSON.stringify(formData)
                 });
