@@ -4251,7 +4251,18 @@
         }
 
         function proceedToBooking() {
-            console.log('proceedToBooking() called - trying to navigate to /expert-consultation');
+            console.log('proceedToBooking() called - checking auth status');
+
+            // 認証トークンをチェック
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                console.log('No auth token found - redirecting to login');
+                alert('専門家相談をご利用いただくには、ログインが必要です。');
+                window.location.href = '/auth';
+                return;
+            }
+
+            console.log('Auth token found - proceeding to expert consultation');
             // 専門家相談ページ（/expert-consultation）に遷移
             window.location.href = '/expert-consultation';
             console.log('window.location.href set to /expert-consultation');
