@@ -344,12 +344,31 @@
         async function checkEligibility() {
             try {
                 const token = localStorage.getItem('auth_token');
+                console.log('Auth token exists:', !!token);
+
+                if (!token) {
+                    console.error('No auth token found');
+                    document.getElementById('errorMessage').textContent = '認証が必要です。ログインしてください。';
+                    document.getElementById('errorMessage').style.display = 'block';
+                    document.getElementById('eligibilityStatus').className = 'eligibility-status not-eligible';
+                    document.getElementById('eligibilityStatus').textContent = '✗ ログインが必要です';
+                    return;
+                }
+
                 const response = await fetch('/api/expert-consultation/eligibility', {
                     headers: {
                         'Authorization': 'Bearer ' + token
                     }
                 });
+
+                console.log('Eligibility response status:', response.status);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const result = await response.json();
+                console.log('Eligibility result:', result);
 
                 const statusElement = document.getElementById('eligibilityStatus');
                 const formElement = document.getElementById('consultationForm');
@@ -370,20 +389,34 @@
 
             } catch (error) {
                 console.error('Eligibility check error:', error);
-                document.getElementById('errorMessage').textContent = '資格確認中にエラーが発生しました。';
+                document.getElementById('errorMessage').textContent = '資格確認中にエラーが発生しました。ページをリロードしてください。';
                 document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('eligibilityStatus').className = 'eligibility-status not-eligible';
+                document.getElementById('eligibilityStatus').textContent = '✗ エラーが発生しました';
             }
         }
 
         async function loadUserInfo() {
             try {
                 const token = localStorage.getItem('auth_token');
+                if (!token) {
+                    console.log('No auth token for user info');
+                    return;
+                }
+
                 const response = await fetch('/api/user', {
                     headers: {
                         'Authorization': 'Bearer ' + token
                     }
                 });
+
+                if (!response.ok) {
+                    console.error('Failed to load user info:', response.status);
+                    return;
+                }
+
                 const user = await response.json();
+                console.log('User info loaded:', user);
 
                 if (user.name) {
                     document.getElementById('userName').value = user.name;
