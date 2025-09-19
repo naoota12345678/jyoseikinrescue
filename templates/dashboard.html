@@ -2823,7 +2823,7 @@
 
                             <!-- 予約ボタン -->
                             <div style="text-align: center; margin-top: 2rem;">
-                                <button id="bookConsultationBtn" onclick="proceedToBooking()"
+                                <button id="bookConsultationBtn" onclick="console.log('Button clicked!'); proceedToBooking();"
                                         style="background: #3b82f6; color: white; border: none; padding: 1rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
                                     💳 専門家相談を予約する
                                 </button>
@@ -4249,8 +4249,10 @@
         }
 
         function proceedToBooking() {
+            console.log('proceedToBooking() called - trying to navigate to /expert-consultation');
             // 専門家相談ページ（/expert-consultation）に遷移
             window.location.href = '/expert-consultation';
+            console.log('window.location.href set to /expert-consultation');
         }
 
         function showBookingCalendar() {
