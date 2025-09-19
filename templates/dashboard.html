@@ -2843,6 +2843,11 @@
                         </div>
                     </div>
                 `;
+
+                // ボタンを有効化
+                setTimeout(() => {
+                    updateBookingButton();
+                }, 100);
             }
         }
 
@@ -4237,14 +4242,11 @@
 
         function updateBookingButton() {
             const bookBtn = document.getElementById('bookConsultationBtn');
-            if (validateConsultationForm()) {
+            // 専門家相談ボタンは常に有効（別ページに遷移するため）
+            if (bookBtn) {
                 bookBtn.style.opacity = '1';
                 bookBtn.disabled = false;
                 bookBtn.style.background = '#3b82f6';
-            } else {
-                bookBtn.style.opacity = '0.5';
-                bookBtn.disabled = true;
-                bookBtn.style.background = '#9ca3af';
             }
         }
 
