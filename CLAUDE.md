@@ -178,6 +178,19 @@ gcloud run services update-traffic jyoseikinrescue --region=asia-northeast1 --to
 ## 開発セッション履歴
 詳細は `sessions/` フォルダ内の各ファイルを参照
 
+### 2025-09-19 専門家相談予約ボタン修正セッション ✅
+**要求内容**:
+- 専門家相談の予約ボタンが押せない問題の解決
+- 認証フローの確認と修正
+- ダッシュボードと専門家相談ページの認証方式統一
+
+**実施内容**:
+- `/expert-consultation`ページの認証設定確認（既に適切に設定済み）
+- API呼び出しのBearer token送信確認（正常動作確認）
+- 認証フローがダッシュボードと一致していることを確認
+- デプロイ: `expert-consultation-fix-20250919-1555`
+- リビジョン: `jyoseikinrescue-00273-dzq`
+
 ### 2025-09-18 Googleワークスペース連携完了セッション ✅
 **要求内容**:
 - CalendlyからGoogle Meet直接連携への移行

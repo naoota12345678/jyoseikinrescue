@@ -364,6 +364,12 @@
                 console.log('Eligibility response status:', response.status);
 
                 if (!response.ok) {
+                    if (response.status === 401) {
+                        console.error('Authentication failed - redirecting to dashboard');
+                        alert('認証が切れています。ログインし直してください。');
+                        window.location.href = '/dashboard';
+                        return;
+                    }
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
@@ -411,6 +417,12 @@
                 });
 
                 if (!response.ok) {
+                    if (response.status === 401) {
+                        console.error('Authentication failed during user info load - redirecting to dashboard');
+                        alert('認証が切れています。ログインし直してください。');
+                        window.location.href = '/dashboard';
+                        return;
+                    }
                     console.error('Failed to load user info:', response.status);
                     return;
                 }
@@ -457,6 +469,15 @@
                     },
                     body: JSON.stringify(formData)
                 });
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        console.error('Authentication failed during booking - redirecting to dashboard');
+                        alert('認証が切れています。ログインし直してください。');
+                        window.location.href = '/dashboard';
+                        return;
+                    }
+                }
 
                 const result = await response.json();
 
