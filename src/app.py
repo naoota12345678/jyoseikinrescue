@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, session, send_from_directory, redirect
+from flask_cors import CORS
 import os
 import sys
 import time
@@ -37,6 +38,9 @@ except Exception as e:
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-here')
+
+# CORS設定
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # Static files route
 @app.route('/static/<path:filename>')
@@ -2358,6 +2362,41 @@ def expert_consultation():
         return jsonify({'error': '専門家相談システムが利用できません'}), 500
 
     return render_template('expert_consultation.html')
+
+@app.route('/api/user')
+@require_auth
+def get_user_info():
+    """ユーザー情報取得API"""
+    try:
+        current_user = get_current_user()
+        user_id = current_user.get('user_id') or current_user.get('id')
+
+        # Firestoreからユーザーデータを取得
+        db = firebase_service.get_db()
+        user_ref = db.collection('users').document(user_id)
+        user_doc = user_ref.get()
+
+        if user_doc.exists:
+            user_data = user_doc.to_dict()
+            return jsonify({
+                'id': user_id,
+                'email': current_user.get('email', ''),
+                'name': user_data.get('name', '') or current_user.get('display_name', '') or current_user.get('name', ''),
+                'subscription': user_data.get('subscription', {}),
+                'subscription_plan': user_data.get('subscription_plan', 'free')
+            })
+        else:
+            # Firestoreにユーザーデータが存在しない場合
+            return jsonify({
+                'id': user_id,
+                'email': current_user.get('email', ''),
+                'name': current_user.get('display_name', '') or current_user.get('name', ''),
+                'subscription': {},
+                'subscription_plan': 'free'
+            })
+    except Exception as e:
+        logger.error(f"ユーザー情報取得エラー: {e}")
+        return jsonify({'error': 'ユーザー情報の取得に失敗しました'}), 500
 
 @app.route('/api/expert-consultation/eligibility')
 @require_auth

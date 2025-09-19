@@ -86,7 +86,8 @@
       "Bash(gcloud iam service-accounts keys create:*)",
       "Bash(gcloud org-policies delete:*)",
       "Bash(git reset:*)",
-      "Bash(start http://localhost:8080/expert-consultation)"
+      "Bash(start http://localhost:8080/expert-consultation)",
+      "Bash(start https://jyoseikinrescue-yuebabzoza-an.a.run.app/expert-consultation)"
     ],
     "deny": [],
     "ask": [],
