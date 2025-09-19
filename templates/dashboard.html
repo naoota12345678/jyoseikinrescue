@@ -2824,11 +2824,10 @@
                             <!-- 予約ボタン -->
                             <div style="text-align: center; margin-top: 2rem;">
                                 <button id="bookConsultationBtn" onclick="proceedToBooking()"
-                                        style="background: #3b82f6; color: white; border: none; padding: 1rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; opacity: 0.5;"
-                                        disabled>
-                                    💳 支払い・ご予約に進む
+                                        style="background: #3b82f6; color: white; border: none; padding: 1rem 2rem; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                                    💳 専門家相談を予約する
                                 </button>
-                                <p style="color: #6b7280; margin-top: 0.5rem; font-size: 0.9rem;">相談内容を選択し、詳細をご記入ください</p>
+                                <p style="color: #6b7280; margin-top: 0.5rem; font-size: 0.9rem;">クリックして相談予約ページへ進みます</p>
                             </div>
 
                             <!-- 注意事項 -->
@@ -4250,23 +4249,8 @@
         }
 
         function proceedToBooking() {
-            if (!validateConsultationForm()) {
-                alert('相談カテゴリを選択し、必須項目（会社情報、現在の課題）をご記入ください');
-                return;
-            }
-
-            // 相談内容を収集
-            const consultationDetails = {
-                category: selectedCategory,
-                companyInfo: document.getElementById('companyInfo').value,
-                currentIssues: document.getElementById('currentIssues').value,
-                targetSubsidies: document.getElementById('targetSubsidies').value,
-                pastApplications: document.getElementById('pastApplications').value,
-                additionalQuestions: document.getElementById('additionalQuestions').value
-            };
-
-            // 決済画面に遷移
-            proceedToPayment(consultationDetails);
+            // 専門家相談ページ（/expert-consultation）に遷移
+            window.location.href = '/expert-consultation';
         }
 
         function showBookingCalendar() {
