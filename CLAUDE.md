@@ -131,6 +131,25 @@ gcloud run services update jyoseikinrescue --region=asia-northeast1 --image=EXAC
 
 # 4. 🚨 最重要：トラフィックを最新リビジョンに向ける
 gcloud run services update-traffic jyoseikinrescue --region=asia-northeast1 --to-latest
+
+# 5. 🔍 デプロイ後検証（必須）
+gcloud run services describe jyoseikinrescue --region=asia-northeast1 --format="value(status.latestCreatedRevisionName)"
+gcloud run revisions list --service=jyoseikinrescue --region=asia-northeast1 --limit=3 --format="table(metadata.name,status.conditions[0].status,spec.containers[0].image)"
+```
+
+### 🚨 重要：バックグラウンドプロセス対策（2025-09-21追加）
+**問題**: 別のビルドプロセスが並行して動作し、修正版を上書きする
+**対策**:
+1. **必ずps auxでバックグラウンドプロセスチェック**
+2. **`--to-latest`使用禁止、具体的リビジョン指定必須**
+3. **デプロイ後に即座にリビジョン確認**
+
+```bash
+# ❌ 危険な方法（--to-latestは上書きされるリスク）
+gcloud run services update-traffic jyoseikinrescue --region=asia-northeast1 --to-latest
+
+# ✅ 安全な方法（具体的リビジョン指定）
+gcloud run services update-traffic jyoseikinrescue --region=asia-northeast1 --to-revisions=SPECIFIC_REVISION_NAME=100
 ```
 
 ## 詳細ドキュメント 📚

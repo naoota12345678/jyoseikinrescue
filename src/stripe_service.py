@@ -44,6 +44,9 @@ class StripeService:
 
         # 専門家相談料金設定（税込）
         self.CONSULTATION_BASIC_PRICE = 14300    # 基本相談 (30分): 14,300円（税込）
+
+        # 専門家相談用固定商品ID
+        self.CONSULTATION_PRICE_ID = 'price_1S9ggFJcdIKryf6lQjHhlUz6'  # 14,300円の固定Price ID
     
     def create_customer(self, email: str, name: str = '', metadata: Dict[str, str] = None) -> str:
         """Stripe顧客を作成"""
@@ -444,19 +447,12 @@ class StripeService:
             plan_name = plan_names.get(plan_type, plan_type)
             category_name = category_names.get(consultation_category, consultation_category)
 
-            # Checkout セッションを作成
+            # Checkout セッションを作成（固定Price ID使用）
             session = stripe.checkout.Session.create(
                 customer=customer_id,
                 payment_method_types=['card'],
                 line_items=[{
-                    'price_data': {
-                        'currency': self.CURRENCY,
-                        'product_data': {
-                            'name': f'専門家相談 - {plan_name}',
-                            'description': f'相談内容: {category_name}'
-                        },
-                        'unit_amount': amount
-                    },
+                    'price': self.CONSULTATION_PRICE_ID,
                     'quantity': 1
                 }],
                 mode='payment',
