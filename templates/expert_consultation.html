@@ -238,6 +238,77 @@
             100% { transform: rotate(360deg); }
         }
 
+        .booking-cta-section {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border: 1px solid #e9ecef;
+        }
+
+        .benefits-section {
+            margin: 2rem 0;
+        }
+
+        .benefits-section h2 {
+            color: #333;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+
+        .benefit-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .benefit-card.highlight {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px solid #667eea;
+        }
+
+        .benefit-card h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .benefit-card ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .benefit-card li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f1f3f4;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .benefit-card li:last-child {
+            border-bottom: none;
+        }
+
+        .benefit-card li::before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+            margin-top: 0.1rem;
+        }
+
+        .benefit-card.highlight li::before {
+            content: "🌟";
+            margin-right: 0.5rem;
+        }
+
         @media (max-width: 768px) {
             .container {
                 margin: 1rem;
@@ -259,6 +330,19 @@
             .consultation-form {
                 padding: 1.5rem;
             }
+
+            .booking-cta-section {
+                padding: 1.5rem;
+                margin-bottom: 2rem;
+            }
+
+            .benefit-card {
+                padding: 1.5rem;
+            }
+
+            .benefits-section h2 {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
@@ -270,18 +354,6 @@
         </div>
 
         <div class="content">
-            <!-- サービス情報 -->
-            <div class="service-info">
-                <div class="price-tag">30分 ¥14,300（税込）</div>
-                <ul class="features">
-                    <li>助成金専門家との1対1のオンライン相談</li>
-                    <li>あなたの状況に合わせた個別アドバイス</li>
-                    <li>具体的な申請手順と必要書類の説明</li>
-                    <li>申請の成功確率を最大化するための戦略</li>
-                    <li>質疑応答形式で疑問を解決</li>
-                </ul>
-            </div>
-
             <!-- 利用資格チェック -->
             <div class="eligibility-check">
                 <h3>📋 利用資格確認</h3>
@@ -293,32 +365,60 @@
             <!-- エラーメッセージ -->
             <div id="errorMessage" class="error-message"></div>
 
-            <!-- 相談予約フォーム -->
+            <!-- 上部予約ボタン -->
+            <div id="topBookingSection" style="display: none;">
+                <div class="booking-cta-section">
+                    <div class="price-tag">30分 ¥14,300（税込）</div>
+                    <button class="booking-button" id="topBookingButton">
+                        🧑‍⚕️ 専門家相談を予約する
+                    </button>
+                </div>
+            </div>
+
+            <!-- 相談フォーム -->
             <div id="consultationForm" class="consultation-form" style="display: none;">
-                <h3>📅 相談予約</h3>
-                <p style="margin-bottom: 1.5rem; color: #666;">
-                    決済完了後、Google Meetで具体的な日時を予約していただきます。
-                </p>
+                <h3>📝 相談内容の詳細入力</h3>
+                <div class="form-description">
+                    <p><strong>🎯 30分間を最大限活用するために</strong></p>
+                    <ul style="margin: 1rem 0; padding-left: 1.5rem; color: #666;">
+                        <li>事前に詳細をお聞かせください</li>
+                        <li>より具体的で実践的なアドバイスが可能になります</li>
+                        <li>必要に応じて、事前にメールで追加質問させていただく場合があります</li>
+                    </ul>
+                </div>
 
                 <form id="bookingForm">
                     <div class="form-group">
                         <label for="userName">お名前 *</label>
-                        <input type="text" id="userName" name="userName" required>
+                        <input type="text" id="userName" name="userName" required
+                               placeholder="例：田中太郎">
                     </div>
 
                     <div class="form-group">
-                        <label for="userEmail">メールアドレス *</label>
-                        <input type="email" id="userEmail" name="userEmail" required>
+                        <label for="consultationDetails">相談内容の詳細 *</label>
+                        <textarea id="consultationDetails" name="consultationDetails" required
+                                  placeholder="以下の内容を可能な限り詳しくお書きください：
+• どの助成金について相談したいか
+• 現在の事業状況・従業員数
+• 具体的に何でお困りか
+• いつ頃申請を検討しているか
+• これまでの助成金申請経験
+
+例：
+「キャリアアップ助成金の正社員化コースについて相談したいです。現在パート5名を雇用しており、そのうち2名を正社員に転換予定です。申請書類の書き方や、転換のタイミング、必要な準備について具体的に教えてください。来年3月までに申請したいと考えています。助成金申請は初めてです。」"
+                                  style="min-height: 200px;"></textarea>
                     </div>
 
-                    <div class="form-group">
-                        <label for="consultationNotes">相談内容・ご質問（事前準備のため）</label>
-                        <textarea id="consultationNotes" name="consultationNotes"
-                                placeholder="どのような助成金について相談されたいか、現在の状況など、事前に教えていただけると相談がスムーズに進みます。"></textarea>
+                    <div class="pre-consultation-note">
+                        <p style="font-size: 0.9rem; color: #666; background: #f8f9fa; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                            <strong>💡 事前準備について</strong><br>
+                            詳細に内容をお書きいただけた場合、相談前に助成金レスキューから詳細確認のメールにて、必要書類のご案内をお送りする場合があります。これにより、相談時間をより有効に活用できます。<br><br>
+                            もし相談内容があいまいな場合、ヒアリングに時間を使わなければならないため、時間の有効活用のため、より詳細な入力をお勧めいたします。
+                        </p>
                     </div>
 
                     <button type="submit" class="booking-button" id="bookingButton">
-                        専門家相談を予約する（¥14,300）
+                        決済に進む（¥14,300）
                     </button>
 
                     <div class="loading" id="loadingIndicator">
@@ -326,6 +426,65 @@
                         決済ページに移動中...
                     </div>
                 </form>
+            </div>
+
+            <!-- 相談のメリット・活用方法 -->
+            <div id="consultationBenefits" style="display: none;">
+                <div class="benefits-section">
+                    <h2>💡 こんな時に専門家相談をご利用ください</h2>
+
+                    <div class="benefit-card">
+                        <h3>🎯 申請前の戦略相談</h3>
+                        <ul>
+                            <li>どの助成金が最適かわからない</li>
+                            <li>申請の成功確率を知りたい</li>
+                            <li>必要な準備期間や手順を確認したい</li>
+                            <li>会社の状況に合った助成金選びをしたい</li>
+                        </ul>
+                    </div>
+
+                    <div class="benefit-card">
+                        <h3>📋 申請書類の具体的指導</h3>
+                        <ul>
+                            <li>申請書の書き方がわからない</li>
+                            <li>添付書類の作成方法を知りたい</li>
+                            <li>計画書の内容をチェックしてほしい</li>
+                            <li>不備のない申請をしたい</li>
+                        </ul>
+                    </div>
+
+                    <div class="benefit-card">
+                        <h3>⚠️ 申請中・申請後のトラブル対応</h3>
+                        <ul>
+                            <li>審査で指摘を受けた</li>
+                            <li>追加書類の提出方法がわからない</li>
+                            <li>支給申請の手続きで困っている</li>
+                            <li>制度変更への対応が必要</li>
+                        </ul>
+                    </div>
+
+                    <div class="benefit-card highlight">
+                        <h3>🎖️ 専門家相談を受ける5つのメリット</h3>
+                        <ul>
+                            <li><strong>成功確率UP:</strong> 経験豊富な専門家による個別アドバイス</li>
+                            <li><strong>時間短縮:</strong> 迷いや不安を解消し、効率的に進められる</li>
+                            <li><strong>リスク回避:</strong> 申請ミスや不備を事前に防げる</li>
+                            <li><strong>最新情報:</strong> 制度変更や最新の審査傾向を把握</li>
+                            <li><strong>個別対応:</strong> あなたの会社に最適な戦略を提案</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 下部予約ボタン -->
+                <div class="booking-cta-section">
+                    <h3 style="text-align: center; margin-bottom: 1rem; color: #333;">
+                        助成金申請の成功確率を最大化しませんか？
+                    </h3>
+                    <div class="price-tag">30分 ¥14,300（税込）</div>
+                    <button class="booking-button" id="bottomBookingButton">
+                        🧑‍⚕️ 専門家相談を予約する
+                    </button>
+                </div>
             </div>
 
             <div class="back-link">
@@ -377,13 +536,14 @@
                 console.log('Eligibility result:', result);
 
                 const statusElement = document.getElementById('eligibilityStatus');
-                const formElement = document.getElementById('consultationForm');
-                const errorElement = document.getElementById('errorMessage');
+                const topBookingSection = document.getElementById('topBookingSection');
+                const consultationBenefits = document.getElementById('consultationBenefits');
 
                 if (result.eligible) {
                     statusElement.className = 'eligibility-status eligible';
                     statusElement.textContent = '✓ ' + result.message;
-                    formElement.style.display = 'block';
+                    topBookingSection.style.display = 'block';
+                    consultationBenefits.style.display = 'block';
                 } else {
                     statusElement.className = 'eligibility-status not-eligible';
                     statusElement.textContent = '✗ ' + result.message;
@@ -442,18 +602,37 @@
             }
         }
 
-        // 予約フォーム送信
+        // 予約ボタンのイベントリスナー（フォーム表示）
+        function addBookingButtonListener(buttonId) {
+            document.getElementById(buttonId).addEventListener('click', function(e) {
+                e.preventDefault();
+                showConsultationForm();
+            });
+        }
+
+        // 相談フォームを表示
+        function showConsultationForm() {
+            document.getElementById('consultationForm').style.display = 'block';
+            document.getElementById('consultationForm').scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+
+        // フォーム送信処理
         document.getElementById('bookingForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const formData = {
                 userName: document.getElementById('userName').value.trim(),
-                userEmail: document.getElementById('userEmail').value.trim(),
-                consultationNotes: document.getElementById('consultationNotes').value.trim()
+                userEmail: '', // メールアドレスは不要
+                consultationNotes: document.getElementById('consultationDetails').value.trim()
             };
 
-            if (!formData.userName || !formData.userEmail) {
-                showError('お名前とメールアドレスを入力してください。');
+            console.log('Form data:', formData); // デバッグ用
+
+            if (!formData.userName || !formData.consultationNotes) {
+                showError('お名前と相談内容の詳細を入力してください。');
                 return;
             }
 
@@ -461,6 +640,13 @@
 
             try {
                 const token = localStorage.getItem('auth_token');
+                if (!token) {
+                    showError('認証が必要です。ログインしてください。');
+                    return;
+                }
+
+                console.log('Sending request to /api/expert-consultation/create'); // デバッグ用
+
                 const response = await fetch('/api/expert-consultation/create', {
                     method: 'POST',
                     headers: {
@@ -470,18 +656,28 @@
                     body: JSON.stringify(formData)
                 });
 
+                console.log('Response status:', response.status); // デバッグ用
+
                 if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('API Error:', response.status, errorText);
+
                     if (response.status === 401) {
                         console.error('Authentication failed during booking - redirecting to dashboard');
                         alert('認証が切れています。ログインし直してください。');
                         window.location.href = '/dashboard';
                         return;
                     }
+
+                    showError(`サーバーエラー: ${response.status} - ${errorText}`);
+                    return;
                 }
 
                 const result = await response.json();
+                console.log('API Response:', result); // デバッグ用
 
                 if (result.success) {
+                    console.log('Redirecting to:', result.checkout_url);
                     // Stripe決済ページにリダイレクト
                     window.location.href = result.checkout_url;
                 } else {
@@ -494,6 +690,12 @@
             } finally {
                 setLoading(false);
             }
+        });
+
+        // 両方の予約ボタンにイベントリスナーを追加
+        document.addEventListener('DOMContentLoaded', function() {
+            addBookingButtonListener('topBookingButton');
+            addBookingButtonListener('bottomBookingButton');
         });
 
         function showError(message) {

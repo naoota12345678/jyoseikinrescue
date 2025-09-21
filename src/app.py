@@ -2448,11 +2448,15 @@ def create_expert_consultation():
         user_email = data.get('userEmail', '').strip()
         consultation_notes = data.get('consultationNotes', '').strip()
 
-        if not user_name or not user_email:
+        if not user_name:
             return jsonify({
                 'success': False,
-                'error': 'お名前とメールアドレスを入力してください'
+                'error': 'お名前を入力してください'
             }), 400
+
+        # メールアドレスが空の場合は、現在のユーザー情報から取得
+        if not user_email:
+            user_email = current_user.get('email', '')
 
         # 相談リクエストを作成
         consultation_id = expert_consultation_service.create_consultation_request(
@@ -2535,9 +2539,20 @@ def expert_consultation_booking(consultation_id):
                              error_message='システムエラーが発生しました'), 500
 
 @app.route('/expert-consultation/success/<consultation_id>')
-@require_auth
 def expert_consultation_success(consultation_id):
     """専門家相談決済完了ページ"""
+    # 認証はクライアント側のFirebaseで行う（ダッシュボードと同じ方式）
+    if not EXPERT_CONSULTATION_ENABLED:
+        return jsonify({'error': '専門家相談システムが利用できません'}), 500
+
+    # consultation_idを渡してクライアント側で処理
+    return render_template('consultation_success.html',
+                         consultation_id=consultation_id)
+
+@app.route('/api/expert-consultation/success/<consultation_id>')
+@require_auth
+def expert_consultation_success_api(consultation_id):
+    """専門家相談決済完了ページのデータを取得するAPI"""
     if not EXPERT_CONSULTATION_ENABLED:
         return jsonify({'error': '専門家相談システムが利用できません'}), 500
 
@@ -2548,13 +2563,11 @@ def expert_consultation_success(consultation_id):
         # 相談情報を取得
         consultation = expert_consultation_service.get_consultation(consultation_id)
         if not consultation:
-            return render_template('error.html',
-                                 error_message='相談情報が見つかりません'), 404
+            return jsonify({'error': '相談情報が見つかりません'}), 404
 
         # 本人確認
         if consultation['user_id'] != user_id:
-            return render_template('error.html',
-                                 error_message='アクセス権限がありません'), 403
+            return jsonify({'error': 'アクセス権限がありません'}), 403
 
         # Calendlyウィジェット生成
         calendly_widget = calendly_service.get_embedded_widget_html(
@@ -2571,17 +2584,19 @@ def expert_consultation_success(consultation_id):
                 consultation['payment_completed_at']
             ).strftime('%Y年%m月%d日 %H:%M')
 
-        return render_template('consultation_success.html',
-                             consultation_id=consultation_id,
-                             user_name=consultation['user_name'],
-                             user_email=consultation['user_email'],
-                             payment_date=payment_date,
-                             calendly_widget=calendly_widget)
+        return jsonify({
+            'success': True,
+            'consultation_id': consultation_id,
+            'user_name': consultation['user_name'],
+            'user_email': consultation['user_email'],
+            'payment_date': payment_date,
+            'calendly_widget': calendly_widget,
+            'status': consultation.get('status', 'pending')
+        })
 
     except Exception as e:
-        logger.error(f"相談決済完了ページエラー: {e}")
-        return render_template('error.html',
-                             error_message='システムエラーが発生しました'), 500
+        logger.error(f"相談決済完了APIエラー: {e}")
+        return jsonify({'error': 'システムエラーが発生しました'}), 500
 
 @app.route('/expert-consultation/status/<consultation_id>')
 @require_auth

@@ -177,13 +177,27 @@ class ExpertConsultationService:
     def can_user_book_consultation(self, user_id):
         """ユーザーが相談予約可能かチェック（認証済みユーザーは利用可能）"""
         try:
+            logger.info(f"チェック開始 - user_id: {user_id}")
             db = firebase_service.get_db()
-            user_ref = db.collection('users').document(user_id)
-            user_doc = user_ref.get()
+            logger.info(f"DB取得完了 - プロジェクト: {db.project}")
 
-            if not user_doc.exists:
+            # user_idフィールドで検索
+            users_ref = db.collection('users').where('user_id', '==', user_id)
+            user_docs = users_ref.get()
+            logger.info(f"クエリ実行完了 - 件数: {len(user_docs)}")
+
+            if not user_docs:
+                logger.error(f"ユーザーが見つかりません: user_id={user_id}")
                 return False, "ユーザー情報が見つかりません"
 
+            user_doc = user_docs[0]  # 最初のドキュメント
+            logger.info(f"ユーザー情報取得完了 - doc_id: {user_doc.id}")
+
+            if False:  # この条件は不要になった
+                logger.error(f"ユーザードキュメントが存在しません: users/{user_id}")
+                return False, "ユーザー情報が見つかりません"
+
+            logger.info(f"ユーザー情報確認完了 - user_id: {user_id}")
             # 認証済みユーザーは全員相談予約可能（trialユーザー含む）
             return True, "相談予約が可能です"
 

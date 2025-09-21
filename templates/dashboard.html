@@ -2741,6 +2741,27 @@
 
         // 新規追加：専門家相談ページ表示
         function showExpertConsultation() {
+            // Firebase認証確認してからトークンを取得してリダイレクト
+            firebase.auth().onAuthStateChanged(user => {
+                if (!user) {
+                    console.error('No authenticated user found');
+                    return;
+                }
+
+                console.log('Authenticated user found - proceeding to expert consultation');
+                // 認証済みユーザーのトークンをlocalStorageに保存（専門家相談ページで使用するため）
+                user.getIdToken().then(token => {
+                    localStorage.setItem('auth_token', token);
+                    console.log('Token saved to localStorage');
+                    // 専門家相談ページ（/expert-consultation）に遷移
+                    window.location.href = '/expert-consultation';
+                }).catch(error => {
+                    console.error('Failed to get token:', error);
+                });
+            });
+        }
+
+        function showExpertConsultationOld() {
             const chatMessages = document.getElementById('integratedChatMessages');
             if (chatMessages) {
                 chatMessages.innerHTML = `

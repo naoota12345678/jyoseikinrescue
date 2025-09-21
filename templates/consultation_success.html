@@ -365,21 +365,131 @@
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script>
+        // Firebase設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyDgPJ2K3aEY1L6EyCUSlKNJYQkqNPkbfOY",
+            authDomain: "jyoseikinrescue.firebaseapp.com",
+            projectId: "jyoseikinrescue",
+            storageBucket: "jyoseikinrescue.appspot.com",
+            messagingSenderId: "453016168690",
+            appId: "1:453016168690:web:6b1cf3c5e6ac2e8c73fe80"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+
+        // consultation_idを取得
+        const consultationId = '{{ consultation_id }}';
+        let currentConsultationData = null;
+
+        // ページ読み込み時に認証確認とデータ読み込み
+        document.addEventListener('DOMContentLoaded', function() {
+            firebase.auth().onAuthStateChanged(function(user) {
+                if (user) {
+                    console.log('Authenticated user:', user.uid);
+                    loadConsultationData();
+                } else {
+                    console.log('User not authenticated, redirecting to dashboard');
+                    alert('認証が必要です。ログインしてください。');
+                    window.location.href = '/dashboard';
+                }
+            });
+        });
+
+        async function loadConsultationData() {
+            try {
+                // まずFirebaseから新しいトークンを取得
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    console.error('No authenticated user');
+                    alert('認証が切れています。ログインし直してください。');
+                    window.location.href = '/dashboard';
+                    return;
+                }
+
+                console.log('Getting fresh token from Firebase...');
+                const token = await user.getIdToken(true); // 強制的に新しいトークンを取得
+                localStorage.setItem('auth_token', token);
+                console.log('Fresh token obtained and stored');
+
+                const response = await fetch(`/api/expert-consultation/success/${consultationId}`, {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        console.error('Authentication failed - redirecting to dashboard');
+                        alert('認証が切れています。ログインし直してください。');
+                        window.location.href = '/dashboard';
+                        return;
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Consultation data loaded:', data);
+
+                if (data.success) {
+                    currentConsultationData = data;
+                    updatePageContent(data);
+                } else {
+                    throw new Error(data.error || 'データの取得に失敗しました');
+                }
+
+            } catch (error) {
+                console.error('Error loading consultation data:', error);
+                alert('データの読み込みに失敗しました。ページをリロードしてください。');
+            }
+        }
+
+        function updatePageContent(data) {
+            // 各要素を更新
+            document.querySelector('.info-row .info-value').textContent = data.consultation_id;
+
+            const infoRows = document.querySelectorAll('.info-row');
+            if (infoRows[1]) infoRows[1].querySelector('.info-value').textContent = data.user_name;
+            if (infoRows[2]) infoRows[2].querySelector('.info-value').textContent = data.user_email;
+            if (infoRows[5]) infoRows[5].querySelector('.info-value').textContent = data.payment_date;
+
+            // 予約ボタンのリンクを更新
+            const bookingButton = document.querySelector('.calendly-section .btn-primary');
+            if (bookingButton) {
+                bookingButton.href = `/expert-consultation/booking/${data.consultation_id}`;
+            }
+
+            // ステータス確認ボタンのリンクを更新
+            const statusButton = document.querySelector('.action-buttons .btn-primary');
+            if (statusButton) {
+                statusButton.href = `/expert-consultation/status/${data.consultation_id}`;
+            }
+
+            // Calendlyウィジェットがある場合は表示
+            if (data.calendly_widget) {
+                const calendlySection = document.querySelector('.calendly-section');
+                const existingCalendly = calendlySection.querySelector('.calendly-inline-widget');
+                if (existingCalendly) {
+                    existingCalendly.remove();
+                }
+                calendlySection.insertAdjacentHTML('beforeend', data.calendly_widget);
+            }
+        }
+
         // Calendlyイベントリスナー
         window.addEventListener('message', function(e) {
             if (e.data.event && e.data.event.indexOf('calendly') === 0) {
                 console.log('Calendly event:', e.data.event);
 
                 if (e.data.event === 'calendly.event_scheduled') {
-                    // 予約完了時の処理
                     showBookingSuccess();
                 }
             }
         });
 
         function showBookingSuccess() {
-            // 予約完了メッセージを表示
             const successMessage = document.createElement('div');
             successMessage.innerHTML = `
                 <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 10px; padding: 1.5rem; margin-top: 1rem; text-align: center;">
@@ -392,16 +502,10 @@
 
             document.querySelector('.calendly-section').appendChild(successMessage);
 
-            // 5秒後に予約状況ページにリダイレクト
             setTimeout(() => {
-                window.location.href = '/expert-consultation/status/{{ consultation_id }}';
+                window.location.href = `/expert-consultation/status/${consultationId}`;
             }, 5000);
         }
-
-        // ページ読み込み完了時の処理
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('専門家相談決済完了ページ読み込み完了');
-        });
     </script>
 </body>
 </html>
