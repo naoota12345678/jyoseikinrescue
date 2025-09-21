@@ -175,7 +175,7 @@ class ExpertConsultationService:
             return []
 
     def can_user_book_consultation(self, user_id):
-        """ユーザーが相談予約可能かチェック（有料プラン必須）"""
+        """ユーザーが相談予約可能かチェック（認証済みユーザーは利用可能）"""
         try:
             db = firebase_service.get_db()
             user_ref = db.collection('users').document(user_id)
@@ -184,14 +184,8 @@ class ExpertConsultationService:
             if not user_doc.exists:
                 return False, "ユーザー情報が見つかりません"
 
-            user_data = user_doc.to_dict()
-            subscription_plan = user_data.get('subscription_plan', 'free')
-
-            # 有料プラン（light, regular, heavy）のみ相談可能
-            if subscription_plan in ['light', 'regular', 'heavy']:
-                return True, "相談予約が可能です"
-            else:
-                return False, "専門家相談は有料プラン利用者のみご利用いただけます"
+            # 認証済みユーザーは全員相談予約可能（trialユーザー含む）
+            return True, "相談予約が可能です"
 
         except Exception as e:
             logger.error(f"相談予約可能性チェックエラー: {e}")
