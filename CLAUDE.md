@@ -197,6 +197,41 @@ gcloud run services update-traffic jyoseikinrescue --region=asia-northeast1 --to
 ## 開発セッション履歴
 詳細は `sessions/` フォルダ内の各ファイルを参照
 
+### 2025-09-21 Stripe決済後認証問題解決セッション ✅
+**問題報告**:
+- ユーザーがStripe決済画面から戻るボタンで戻ると「認証が必要です」エラーが発生
+- 専門家相談の決済完了ページにアクセスできない状況
+
+**根本原因特定**:
+- `/expert-consultation/success/<consultation_id>`ルートが`@require_auth`デコレータを使用
+- `@require_auth`はAPI用でHTML routes向けではない（Authorization headerが必要）
+- Stripe checkout後のブラウザ直接アクセスではheaderが設定されない
+- localStorageトークンの期限切れが併発
+
+**実施した修正**:
+1. **認証方式の変更** (`src/app.py:2541`):
+   - `/expert-consultation/success/<consultation_id>`から`@require_auth`を削除
+   - クライアント側Firebase認証に変更（ダッシュボードと同じ方式）
+
+2. **新API endpoint追加** (`src/app.py:2552`):
+   - `/api/expert-consultation/success/<consultation_id>`を作成
+   - サーバーサイド認証とデータ取得を分離
+
+3. **クライアント側認証強化** (`templates/consultation_success.html`):
+   - Firebase認証ライブラリ追加
+   - `user.getIdToken(true)`で強制トークン更新機能実装
+   - 認証失敗時のダッシュボードリダイレクト機能
+
+**技術的特徴**:
+- **トークン自動更新**: Stripe戻り時に新しいFirebaseトークンを自動取得
+- **認証フォールバック**: 認証失敗時の適切なエラーハンドリング
+- **API分離設計**: HTML表示と認証データ取得を分離
+
+**デプロイ情報**:
+- ビルド: `stripe-auth-fix-20250921-2101`
+- リビジョン: `jyoseikinrescue-00298-5gv`
+- コミット: `0927971`
+
 ### 2025-09-19 専門家相談予約ボタン修正セッション ✅
 **要求内容**:
 - 専門家相談の予約ボタンが押せない問題の解決
