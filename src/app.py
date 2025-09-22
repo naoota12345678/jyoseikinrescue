@@ -2501,7 +2501,6 @@ def create_expert_consultation():
         }), 500
 
 @app.route('/expert-consultation/booking/<consultation_id>')
-@require_auth
 def expert_consultation_booking(consultation_id):
     """専門家相談の日時選択ページ（Google Calendar版）"""
     if not EXPERT_CONSULTATION_ENABLED:
