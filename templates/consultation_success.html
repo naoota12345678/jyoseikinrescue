@@ -386,15 +386,20 @@
 
         // ページ読み込み時に認証確認とデータ読み込み
         document.addEventListener('DOMContentLoaded', function() {
-            // 認証状態の確認
-            let authCheckComplete = false;
+            let authWaitTimer = null;
+            let authProcessed = false;
 
             firebase.auth().onAuthStateChanged(async function(user) {
-                // 初回の認証状態確認のみ処理
-                if (authCheckComplete) return;
-                authCheckComplete = true;
-
                 if (user) {
+                    // 認証成功：タイマーをクリアして処理
+                    if (authWaitTimer) {
+                        clearTimeout(authWaitTimer);
+                        authWaitTimer = null;
+                    }
+
+                    if (authProcessed) return;
+                    authProcessed = true;
+
                     console.log('Authenticated user:', user.uid);
 
                     try {
@@ -411,10 +416,17 @@
                         alert('認証の更新に失敗しました。ページをリロードしてください。');
                     }
                 } else {
-                    // 認証されていない場合
-                    console.log('User not authenticated, redirecting to dashboard');
-                    alert('認証が必要です。ログインしてください。');
-                    window.location.href = '/dashboard';
+                    // 認証されていない場合：10秒待機してから判定
+                    if (!authWaitTimer) {
+                        console.log('No user detected, waiting for Firebase auth restoration...');
+                        authWaitTimer = setTimeout(() => {
+                            if (!firebase.auth().currentUser && !authProcessed) {
+                                console.log('User not authenticated after timeout, redirecting to dashboard');
+                                alert('認証が必要です。ログインしてください。');
+                                window.location.href = '/dashboard';
+                            }
+                        }, 10000);
+                    }
                 }
             });
         });
