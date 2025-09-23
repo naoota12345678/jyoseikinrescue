@@ -386,43 +386,37 @@
 
         // ページ読み込み時に認証確認とデータ読み込み
         document.addEventListener('DOMContentLoaded', function() {
-            // 初回読み込みフラグ
-            let isFirstLoad = true;
+            // 認証状態の確認
+            let authCheckComplete = false;
 
             firebase.auth().onAuthStateChanged(async function(user) {
+                // 初回の認証状態確認のみ処理
+                if (authCheckComplete) return;
+                authCheckComplete = true;
+
                 if (user) {
                     console.log('Authenticated user:', user.uid);
 
-                    // Stripeから戻った直後の場合、トークンを確実に更新
-                    if (isFirstLoad) {
-                        isFirstLoad = false;
-                        try {
-                            console.log('Getting fresh token after Stripe redirect...');
-                            const token = await user.getIdToken(true);
-                            localStorage.setItem('auth_token', token);
-                            console.log('Token refreshed successfully');
-                        } catch (error) {
-                            console.error('Error refreshing token:', error);
-                        }
-                    }
+                    try {
+                        // Stripeから戻った直後なので、トークンを確実に更新
+                        console.log('Getting fresh token after Stripe redirect...');
+                        const token = await user.getIdToken(true);
+                        localStorage.setItem('auth_token', token);
+                        console.log('Token refreshed successfully');
 
-                    loadConsultationData();
-                } else if (!isFirstLoad) {
-                    // 初回読み込み時のみリダイレクト（認証状態の初期化を待つ）
+                        // データ読み込み
+                        loadConsultationData();
+                    } catch (error) {
+                        console.error('Error refreshing token:', error);
+                        alert('認証の更新に失敗しました。ページをリロードしてください。');
+                    }
+                } else {
+                    // 認証されていない場合
                     console.log('User not authenticated, redirecting to dashboard');
                     alert('認証が必要です。ログインしてください。');
                     window.location.href = '/dashboard';
                 }
             });
-
-            // 認証状態の初期化に少し時間を与える
-            setTimeout(function() {
-                if (isFirstLoad && !firebase.auth().currentUser) {
-                    console.log('No user after timeout, redirecting');
-                    alert('認証が必要です。ログインしてください。');
-                    window.location.href = '/dashboard';
-                }
-            }, 3000);
         });
 
         async function loadConsultationData() {
