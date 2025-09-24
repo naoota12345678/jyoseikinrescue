@@ -2554,20 +2554,35 @@ def expert_consultation_success(consultation_id):
 @require_auth
 def expert_consultation_success_api(consultation_id):
     """専門家相談決済完了ページのデータを取得するAPI"""
+    logger.info(f"=== API呼び出し開始: consultation_id={consultation_id} ===")
+
     if not EXPERT_CONSULTATION_ENABLED:
+        logger.error("専門家相談システムが無効")
         return jsonify({'error': '専門家相談システムが利用できません'}), 500
 
     try:
         current_user = get_current_user()
-        user_id = current_user.get('user_id') or current_user['id']
+        # Firebase UIDのみを使用（ドキュメントIDは使わない）
+        user_id = current_user.get('user_id')
+        if not user_id:
+            logger.error(f"Firebase UIDが取得できません: current_user={current_user}")
+            return jsonify({'error': 'ユーザー認証エラー'}), 401
+        logger.info(f"認証ユーザー: user_id={user_id}, current_user={current_user}")
 
         # 相談情報を取得
+        logger.info(f"Firestoreクエリ実行: expert_consultations/{consultation_id}")
         consultation = expert_consultation_service.get_consultation(consultation_id)
+        logger.info(f"Firestoreクエリ結果: consultation={consultation}")
+
         if not consultation:
+            logger.warning(f"相談情報が見つかりません: consultation_id={consultation_id}")
             return jsonify({'error': '相談情報が見つかりません'}), 404
 
         # 本人確認
-        if consultation['user_id'] != user_id:
+        consultation_user_id = consultation.get('user_id')
+        logger.info(f"本人確認: consultation_user_id={consultation_user_id}, user_id={user_id}")
+        if consultation_user_id != user_id:
+            logger.warning(f"アクセス権限なし: consultation_user_id={consultation_user_id} != user_id={user_id}")
             return jsonify({'error': 'アクセス権限がありません'}), 403
 
         # Calendlyウィジェット生成

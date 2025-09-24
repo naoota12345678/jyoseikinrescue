@@ -88,7 +88,9 @@
       "Bash(git reset:*)",
       "Bash(start http://localhost:8080/expert-consultation)",
       "Bash(start https://jyoseikinrescue-yuebabzoza-an.a.run.app/expert-consultation)",
-      "Bash(gcloud projects describe:*)"
+      "Bash(gcloud projects describe:*)",
+      "Bash(findstr:*)",
+      "Bash(start https://jyoseikinrescue-453016168690.asia-northeast1.run.app/expert-consultation)"
     ],
     "deny": [],
     "ask": [],
