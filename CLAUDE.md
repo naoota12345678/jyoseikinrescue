@@ -2,34 +2,59 @@
 
 ## 🚨 デプロイ時必読ルール（毎回確認必須）🚨
 
+### 🎯 正しいCloud Run URL（絶対変更不可）
+**正しいURL**: `https://jyoseikinrescue-453016168690.asia-northeast1.run.app`
+**間違ったURL**: `https://jyoseikinrescue-yuebabzoza-an.a.run.app` ← これになったら失敗
+
+### 🔍 URL確認コマンド（デプロイ前後必須実行）
+```bash
+# デプロイ前に現在のURLを確認
+gcloud run services describe jyoseikinrescue --region=asia-northeast1 --format="value(status.url)"
+
+# 結果が https://jyoseikinrescue-453016168690.asia-northeast1.run.app でない場合は停止
+```
+
 ### ❌ 絶対禁止コマンド
 ```bash
 # これは絶対に実行禁止（URL変更の原因）
 gcloud builds submit --tag asia-northeast1-docker.pkg.dev/jyoseikinrescue/jyoseikinrescue/jyoseikinrescue .
 ```
 
-### ✅ 正しいデプロイ手順（厳守・2段階方式）
+### ✅ 正しい7段階デプロイ手順（URL絶対間違えない版）
 ```bash
-# 🚨 STEP 0: バックグラウンドプロセスチェック（必須）
+# 🚨 STEP 1: デプロイ前URL確認（必須）
+gcloud run services describe jyoseikinrescue --region=asia-northeast1 --format="value(status.url)"
+# 結果: https://jyoseikinrescue-453016168690.asia-northeast1.run.app であることを確認
+
+# STEP 2: バックグラウンドプロセスチェック（必須）
 ps aux | grep "gcloud builds" || echo "No background builds"
 
-# STEP 1: 具体的な名前でビルド（jyoseikinrescue以外の名前必須）
+# STEP 3: 具体的な名前でビルド（jyoseikinrescue以外の名前必須）
 gcloud builds submit --tag asia-northeast1-docker.pkg.dev/jyoseikinrescue/jyoseikinrescue/SPECIFIC_NAME .
 
-# STEP 2: ビルド結果確認
+# STEP 4: ビルド結果確認
 gcloud builds list --limit=1 --format="value(images)"
 
-# STEP 3: サービス名jyoseikinrescue固定でデプロイ
-gcloud run services update jyoseikinrescue --region=asia-northeast1 --image=EXACT_IMAGE_FROM_STEP2
+# STEP 5: サービス名jyoseikinrescue固定でデプロイ
+gcloud run services update jyoseikinrescue --region=asia-northeast1 --image=EXACT_IMAGE_FROM_STEP4
 
-# 🚨 STEP 4: 具体的リビジョン指定（--to-latest絶対禁止）
-gcloud run services update-traffic jyoseikinrescue --region=asia-northeast1 --to-revisions=SPECIFIC_REVISION_NAME=100
+# 🚨 STEP 6: デプロイ後URL確認（必須）
+gcloud run services describe jyoseikinrescue --region=asia-northeast1 --format="value(status.url)"
+# 結果: https://jyoseikinrescue-453016168690.asia-northeast1.run.app であることを確認
 
-# STEP 5: デプロイ後検証（必須）
-gcloud run services describe jyoseikinrescue --region=asia-northeast1 --format="value(status.latestCreatedRevisionName)"
+# 🚨 STEP 7: 最新リビジョンに100%トラフィック振り分け + 最終URL確認（必須）
+gcloud run services update-traffic jyoseikinrescue --region=asia-northeast1 --to-latest
+gcloud run services describe jyoseikinrescue --region=asia-northeast1 --format="value(status.url)"
+# 結果: https://jyoseikinrescue-453016168690.asia-northeast1.run.app であることを確認
 ```
 
+### 🛡️ URL保護の仕組み
+- **既存サービス更新のみ**: `gcloud run services update` でサービス名固定
+- **新規サービス作成禁止**: `gcloud run deploy` は絶対使用禁止
+- **3回のURL確認**: デプロイ前・途中・最終で確実チェック
+
 **🔥 重要**: `jyoseikinrescue`をイメージ名に使用すると、Cloud RunのURLが変更されシステム全体が停止します
+**🚨 緊急**: URLが変わった場合は即座に報告し、デプロイを停止する
 
 ---
 

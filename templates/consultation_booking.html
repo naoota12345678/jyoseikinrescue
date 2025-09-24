@@ -409,15 +409,128 @@
         </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJVMsq9UJtcVKDMvNZzfqDw-o9Km5tpU4",
+            authDomain: "jyoseikinrescue.firebaseapp.com",
+            projectId: "jyoseikinrescue",
+            storageBucket: "jyoseikinrescue.appspot.com",
+            messagingSenderId: "453016168690",
+            appId: "1:453016168690:web:4b5c8e7f46f8e9c5f4d1e1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        let currentUser = null;
+        let authToken = null;
+
+        // 認証状態の監視
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                console.log('認証済みユーザー:', user.uid);
+                currentUser = user;
+                try {
+                    authToken = await user.getIdToken(true);
+                    window.authToken = authToken; // グローバルに設定
+                    console.log('認証トークン取得完了');
+                    // 認証完了後に相談情報を取得
+                    await loadConsultationInfo();
+                } catch (error) {
+                    console.error('トークン取得エラー:', error);
+                    handleAuthError();
+                }
+            } else {
+                console.log('認証されていません');
+                handleAuthError();
+            }
+        });
+
+        window.authToken = null;
+        window.consultationId = '{{ consultation_id }}';
+
+        // loadConsultationInfo関数をグローバルに設定
+        window.loadConsultationInfo = async function() {
+            try {
+                const response = await fetch(`/api/expert-consultation/booking/${window.consultationId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${window.authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const consultationInfo = await response.json();
+                    window.consultationInfo = consultationInfo;
+                    updateConsultationDisplay();
+                    loadAvailableDates();
+                } else {
+                    showError('相談情報の取得に失敗しました。');
+                }
+            } catch (error) {
+                console.error('相談情報取得エラー:', error);
+                showError('通信エラーが発生しました。');
+            }
+        };
+    </script>
+
     <script>
         let selectedDate = null;
         let selectedTime = null;
         let availableDates = [];
+        let consultationInfo = null;
 
         // ページ読み込み時の処理
         document.addEventListener('DOMContentLoaded', function() {
-            loadAvailableDates();
+            // 認証が完了するまで待つ
+            checkAuthAndLoad();
         });
+
+        function checkAuthAndLoad() {
+            if (window.authToken) {
+                loadConsultationInfo();
+            } else {
+                // 3秒後に再試行
+                setTimeout(checkAuthAndLoad, 3000);
+            }
+        }
+
+        async function loadConsultationInfo() {
+            try {
+                const response = await fetch(`/api/expert-consultation/booking/${window.consultationId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${window.authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    consultationInfo = await response.json();
+                    updateConsultationDisplay();
+                    loadAvailableDates();
+                } else {
+                    showError('相談情報の取得に失敗しました。');
+                }
+            } catch (error) {
+                console.error('相談情報取得エラー:', error);
+                showError('通信エラーが発生しました。');
+            }
+        }
+
+        function updateConsultationDisplay() {
+            if (consultationInfo) {
+                document.querySelector('.info-grid .info-item:nth-child(1) span:last-child').textContent = consultationInfo.user_name;
+            }
+        }
+
+        function handleAuthError() {
+            showError('認証エラーが発生しました。ダッシュボードに戻ります。');
+            setTimeout(() => {
+                window.location.href = '/dashboard';
+            }, 3000);
+        }
 
         async function loadAvailableDates() {
             try {

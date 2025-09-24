@@ -2506,38 +2506,12 @@ def create_expert_consultation():
 def expert_consultation_booking(consultation_id):
     """専門家相談の日時選択ページ（Google Calendar版）"""
     if not EXPERT_CONSULTATION_ENABLED:
-        return render_template('error.html',
-                             error_message='専門家相談システムが利用できません'), 500
+        return jsonify({'error': '専門家相談システムが利用できません'}), 500
 
-    try:
-        current_user = get_current_user()
-        user_id = current_user.get('user_id') or current_user['id']
+    # 認証はクライアント側のFirebaseで行う（consultation_successと同じ方式）
+    return render_template('consultation_booking.html',
+                         consultation_id=consultation_id)
 
-        # 相談情報を取得
-        consultation = expert_consultation_service.get_consultation(consultation_id)
-        if not consultation:
-            return render_template('error.html',
-                                 error_message='相談情報が見つかりません'), 404
-
-        # 本人確認
-        if consultation['user_id'] != user_id:
-            return render_template('error.html',
-                                 error_message='アクセス権限がありません'), 403
-
-        # 決済完了チェック
-        if consultation['status'] != 'paid':
-            return render_template('error.html',
-                                 error_message='決済が完了していません'), 400
-
-        return render_template('consultation_booking.html',
-                             consultation_id=consultation_id,
-                             user_name=consultation['user_name'],
-                             user_email=consultation['user_email'])
-
-    except Exception as e:
-        logger.error(f"相談予約ページエラー: {e}")
-        return render_template('error.html',
-                             error_message='システムエラーが発生しました'), 500
 
 @app.route('/expert-consultation/success/<consultation_id>')
 def expert_consultation_success(consultation_id):
@@ -2549,6 +2523,39 @@ def expert_consultation_success(consultation_id):
     # consultation_idを渡してクライアント側で処理
     return render_template('consultation_success.html',
                          consultation_id=consultation_id)
+
+@app.route('/api/expert-consultation/booking/<consultation_id>')
+@require_auth
+def api_expert_consultation_booking(consultation_id):
+    """専門家相談予約API"""
+    try:
+        current_user = get_current_user()
+        user_id = current_user.get('user_id')
+
+        # 相談情報を取得
+        consultation = expert_consultation_service.get_consultation(consultation_id)
+        if not consultation:
+            return jsonify({'error': '相談情報が見つかりません'}), 404
+
+        # 本人確認
+        if consultation['user_id'] != user_id:
+            return jsonify({'error': 'アクセス権限がありません'}), 403
+
+        # 決済完了チェック
+        if consultation['status'] != 'paid':
+            return jsonify({'error': '決済が完了していません'}), 400
+
+        return jsonify({
+            'success': True,
+            'consultation_id': consultation_id,
+            'user_name': consultation['user_name'],
+            'user_email': consultation['user_email'],
+            'status': consultation['status']
+        })
+
+    except Exception as e:
+        logger.error(f"相談予約API エラー: {e}")
+        return jsonify({'error': 'システムエラーが発生しました'}), 500
 
 @app.route('/api/expert-consultation/success/<consultation_id>')
 @require_auth
