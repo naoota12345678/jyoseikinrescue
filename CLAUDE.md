@@ -1,5 +1,32 @@
 # Claude開発メモ
 
+## 🚨 デプロイ時必読ルール（毎回確認必須）🚨
+
+### ❌ 絶対禁止コマンド
+```bash
+# これは絶対に実行禁止（URL変更の原因）
+gcloud builds submit --tag asia-northeast1-docker.pkg.dev/jyoseikinrescue/jyoseikinrescue/jyoseikinrescue .
+```
+
+### ✅ 正しいデプロイ手順（厳守）
+```bash
+# 1. 具体的な名前でビルド（jyoseikinrescue以外の名前必須）
+gcloud builds submit --tag asia-northeast1-docker.pkg.dev/jyoseikinrescue/jyoseikinrescue/SPECIFIC_NAME .
+
+# 2. ビルド結果確認
+gcloud builds list --limit=1 --format="value(images)"
+
+# 3. サービス名jyoseikinrescue固定でデプロイ
+gcloud run services update jyoseikinrescue --region=asia-northeast1 --image=EXACT_IMAGE_FROM_STEP2
+
+# 4. トラフィック最新リビジョンへ
+gcloud run services update-traffic jyoseikinrescue --region=asia-northeast1 --to-latest
+```
+
+**🔥 重要**: `jyoseikinrescue`をイメージ名に使用すると、Cloud RunのURLが変更されシステム全体が停止します
+
+---
+
 ## 重要な注意事項 ⚠️
 
 ### 絶対にやってはいけないこと
