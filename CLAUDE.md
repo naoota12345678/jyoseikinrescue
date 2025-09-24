@@ -8,19 +8,25 @@
 gcloud builds submit --tag asia-northeast1-docker.pkg.dev/jyoseikinrescue/jyoseikinrescue/jyoseikinrescue .
 ```
 
-### ✅ 正しいデプロイ手順（厳守）
+### ✅ 正しいデプロイ手順（厳守・2段階方式）
 ```bash
-# 1. 具体的な名前でビルド（jyoseikinrescue以外の名前必須）
+# 🚨 STEP 0: バックグラウンドプロセスチェック（必須）
+ps aux | grep "gcloud builds" || echo "No background builds"
+
+# STEP 1: 具体的な名前でビルド（jyoseikinrescue以外の名前必須）
 gcloud builds submit --tag asia-northeast1-docker.pkg.dev/jyoseikinrescue/jyoseikinrescue/SPECIFIC_NAME .
 
-# 2. ビルド結果確認
+# STEP 2: ビルド結果確認
 gcloud builds list --limit=1 --format="value(images)"
 
-# 3. サービス名jyoseikinrescue固定でデプロイ
+# STEP 3: サービス名jyoseikinrescue固定でデプロイ
 gcloud run services update jyoseikinrescue --region=asia-northeast1 --image=EXACT_IMAGE_FROM_STEP2
 
-# 4. トラフィック最新リビジョンへ
-gcloud run services update-traffic jyoseikinrescue --region=asia-northeast1 --to-latest
+# 🚨 STEP 4: 具体的リビジョン指定（--to-latest絶対禁止）
+gcloud run services update-traffic jyoseikinrescue --region=asia-northeast1 --to-revisions=SPECIFIC_REVISION_NAME=100
+
+# STEP 5: デプロイ後検証（必須）
+gcloud run services describe jyoseikinrescue --region=asia-northeast1 --format="value(status.latestCreatedRevisionName)"
 ```
 
 **🔥 重要**: `jyoseikinrescue`をイメージ名に使用すると、Cloud RunのURLが変更されシステム全体が停止します

@@ -2475,8 +2475,10 @@ def create_expert_consultation():
         # Stripe決済セッション作成
         stripe_service = get_stripe_service()
 
-        success_url = request.url_root.rstrip('/') + f'/expert-consultation/success/{consultation_id}'
-        cancel_url = request.url_root.rstrip('/') + '/expert-consultation'
+        # 正しいURL固定（request.url_rootは間違ったURLを返す可能性があるため）
+        base_url = 'https://jyoseikinrescue-453016168690.asia-northeast1.run.app'
+        success_url = f'{base_url}/expert-consultation/success/{consultation_id}'
+        cancel_url = f'{base_url}/expert-consultation'
 
         checkout_session = stripe_service.create_expert_consultation_checkout(
             consultation_id=consultation_id,
