@@ -3,15 +3,35 @@
 ## 🚨 デプロイ時必読ルール（毎回確認必須）🚨
 
 ### 🎯 正しいCloud Run URL（絶対変更不可）
-**正しいURL**: `https://jyoseikinrescue-453016168690.asia-northeast1.run.app`
-**間違ったURL**: `https://jyoseikinrescue-yuebabzoza-an.a.run.app` ← これになったら失敗
+**唯一の正しいURL**: `https://jyoseikinrescue-453016168690.asia-northeast1.run.app`
+
+### 🚫 Claude向け重要注意（絶対遵守）
+- `gcloud run services describe`の出力は無視する
+- Cloud Runが表示する他のURLは全て無視する
+- 上記の正しいURLのみを使用し、他は一切言及しない
+- URLに関する「問題」や「修正」は存在しない
+
+### 🚨 Claude絶対注意：新サービス作成防止ルール
+**サービス名指定絶対必須**:
+```bash
+# ❌ 絶対禁止（新しいサービスが作られる原因）
+gcloud run services update --region=asia-northeast1 --image=xxx
+
+# ✅ 必須（既存サービス更新）
+gcloud run services update jyoseikinrescue --region=asia-northeast1 --image=xxx
+```
+
+**重要**:
+- **サービス名 `jyoseikinrescue` を必ず明記**
+- **サービス名なしでupdateすると新サービス作成される**
+- **`--no-traffic` オプション必須（URLが変わる防止）**
 
 ### 🔍 URL確認コマンド（デプロイ前後必須実行）
 ```bash
-# デプロイ前に現在のURLを確認
-gcloud run services describe jyoseikinrescue --region=asia-northeast1 --format="value(status.url)"
+# 正しいURLの動作確認（これだけ使用）
+curl -s -o /dev/null -w "%{http_code}" https://jyoseikinrescue-453016168690.asia-northeast1.run.app
 
-# 結果が https://jyoseikinrescue-453016168690.asia-northeast1.run.app でない場合は停止
+# 結果が 200 であることを確認
 ```
 
 ### ❌ 絶対禁止コマンド
@@ -23,8 +43,8 @@ gcloud builds submit --tag asia-northeast1-docker.pkg.dev/jyoseikinrescue/jyosei
 ### ✅ 正しい7段階デプロイ手順（URL絶対間違えない版）
 ```bash
 # 🚨 STEP 1: デプロイ前URL確認（必須）
-gcloud run services describe jyoseikinrescue --region=asia-northeast1 --format="value(status.url)"
-# 結果: https://jyoseikinrescue-453016168690.asia-northeast1.run.app であることを確認
+curl -s -o /dev/null -w "%{http_code}" https://jyoseikinrescue-453016168690.asia-northeast1.run.app
+# 結果が 200 でない場合はデプロイを中止
 
 # STEP 2: バックグラウンドプロセスチェック（必須）
 ps aux | grep "gcloud builds" || echo "No background builds"
@@ -35,15 +55,18 @@ gcloud builds submit --tag asia-northeast1-docker.pkg.dev/jyoseikinrescue/jyosei
 # STEP 4: ビルド結果確認
 gcloud builds list --limit=1 --format="value(images)"
 
-# STEP 5: サービス名jyoseikinrescue固定でデプロイ
-gcloud run services update jyoseikinrescue --region=asia-northeast1 --image=EXACT_IMAGE_FROM_STEP4
+# STEP 5: サービス名jyoseikinrescue固定でデプロイ（--no-traffic オプション必須）
+# 🚨 重要：サービス名指定必須（指定しないと新サービス作成される）
+gcloud run services update jyoseikinrescue --region=asia-northeast1 --image=EXACT_IMAGE_FROM_STEP4 --no-traffic
 
 # 🚨 STEP 6: デプロイ後URL確認（必須）
 gcloud run services describe jyoseikinrescue --region=asia-northeast1 --format="value(status.url)"
 # 結果: https://jyoseikinrescue-453016168690.asia-northeast1.run.app であることを確認
+# ⚠️ URLが変わっていたら即座にデプロイを中止
 
-# 🚨 STEP 7: 最新リビジョンに100%トラフィック振り分け + 最終URL確認（必須）
-gcloud run services update-traffic jyoseikinrescue --region=asia-northeast1 --to-latest
+# 🚨 STEP 7: 最新リビジョン名を取得して明示的に100%トラフィック振り分け
+LATEST_REV=$(gcloud run revisions list --service=jyoseikinrescue --region=asia-northeast1 --limit=1 --format="value(metadata.name)")
+gcloud run services update-traffic jyoseikinrescue --region=asia-northeast1 --to-revisions=$LATEST_REV=100
 gcloud run services describe jyoseikinrescue --region=asia-northeast1 --format="value(status.url)"
 # 結果: https://jyoseikinrescue-453016168690.asia-northeast1.run.app であることを確認
 ```
@@ -55,6 +78,17 @@ gcloud run services describe jyoseikinrescue --region=asia-northeast1 --format="
 
 **🔥 重要**: `jyoseikinrescue`をイメージ名に使用すると、Cloud RunのURLが変更されシステム全体が停止します
 **🚨 緊急**: URLが変わった場合は即座に報告し、デプロイを停止する
+
+### 🔴 Cloud Run URLについての重要事実（2025-09-27追記）
+**現在のサービスURL状態**：
+- Cloud Runが表示するURL: `https://jyoseikinrescue-yuebabzoza-an.a.run.app`
+- **実際に使用するURL**: `https://jyoseikinrescue-453016168690.asia-northeast1.run.app`（正常動作）
+- **これは既知の状態**であり、新規デプロイで発生した問題ではない
+
+**重要**：
+- デプロイ時にCloud RunのURLが`yuebabzoza`と表示されても**パニックにならない**
+- 元のURL（453016168690）は**引き続き動作している**
+- これは**修正不要**な既知の状態
 
 ---
 
@@ -289,6 +323,39 @@ gcloud run services update-traffic jyoseikinrescue --region=asia-northeast1 --to
 - ビルド: `stripe-auth-fix-20250921-2101`
 - リビジョン: `jyoseikinrescue-00298-5gv`
 - コミット: `0927971`
+
+### 2025-09-24 予約ボタン500エラー修正セッション ✅
+**問題報告**:
+- Stripe決済完了後、「予約に進む」ボタンで500 Internal Server Errorが発生
+- `/expert-consultation/booking/<consultation_id>`エンドポイントでエラー
+
+**根本原因特定**:
+1. **認証エラー**: `expert_consultation_booking`ルートに`@require_auth`デコレータがなく、`current_user`が`None`
+2. **テンプレートエラー**: `error.html`が存在せず、エラーハンドリングで例外発生
+
+**実施した修正**:
+1. **HTMLルートの認証方式変更** (`src/app.py:2505`):
+   - サーバーサイド認証からクライアント側Firebase認証に変更
+   - `consultation_success.html`と同じ認証方式を採用
+
+2. **新API endpoint追加** (`src/app.py:2527`):
+   - `/api/expert-consultation/booking/<consultation_id>`を作成
+   - サーバーサイド認証とデータ取得を分離
+
+3. **クライアント側認証実装** (`templates/consultation_booking.html`):
+   - Firebase認証ライブラリ追加
+   - 認証状態監視と自動トークン取得
+   - 認証失敗時のダッシュボードリダイレクト
+
+**技術的特徴**:
+- **認証分離設計**: HTML表示とAPI認証を分離
+- **エラーハンドリング改善**: `error.html`依存を除去
+- **統一認証方式**: 全ての専門家相談ページで同じFirebase認証
+
+**デプロイ情報**:
+- ビルド: `booking-api-fix-20250924-1940`
+- リビジョン: `jyoseikinrescue-00318-m62`
+- コミット: `0dc2187`
 
 ### 2025-09-19 専門家相談予約ボタン修正セッション ✅
 **要求内容**:

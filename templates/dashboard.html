@@ -1183,7 +1183,7 @@
             <div class="nav-container">
                 <button onclick="showApplicationGuidance()" class="nav-item-primary">📌 ご利用にあたって</button>
                 <button onclick="showApplicationForms()" class="nav-item">📋 申請書類</button>
-                <button onclick="showExpertConsultation()" class="nav-item">👨‍💼 専門家相談</button>
+                <button onclick="showComingSoon()" class="nav-item" style="opacity: 0.7; cursor: not-allowed;">👨‍💼 専門家相談（近日公開）</button>
                 <button onclick="showEmploymentRules()" class="nav-item">📝 就業規則</button>
                 <button onclick="showDocumentTemplates()" class="nav-item">📄 添付書類雛形</button>
             </div>
@@ -2739,7 +2739,36 @@
             }
         }
 
-        // 新規追加：専門家相談ページ表示
+        // 近日公開中メッセージ表示
+        function showComingSoon() {
+            const chatMessages = document.getElementById('integratedChatMessages');
+            if (chatMessages) {
+                chatMessages.innerHTML = `
+                    <div style="background: white; padding: 3rem; border-radius: 12px; text-align: center;">
+                        <h2 style="color: #667eea; margin-bottom: 1rem;">
+                            <span style="font-size: 3rem;">🚧</span><br>
+                            専門家相談機能は近日公開予定
+                        </h2>
+                        <p style="color: #666; font-size: 1.1rem; line-height: 1.8;">
+                            現在、専門家相談機能は最終調整中です。<br>
+                            もうしばらくお待ちください。
+                        </p>
+                        <div style="margin-top: 2rem; padding: 1rem; background: #f0f4ff; border-radius: 8px;">
+                            <p style="color: #4a5568; margin: 0;">
+                                <strong>予定されている機能：</strong><br>
+                                • 社労士との30分オンライン相談<br>
+                                • Google Meetでの画面共有サポート<br>
+                                • 助成金申請の専門的アドバイス
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+            hideAllContentAreas();
+            document.getElementById('integratedChatContainer').style.display = 'block';
+        }
+
+        // 新規追加：専門家相談ページ表示（現在は無効化）
         function showExpertConsultation() {
             // Firebase認証確認してからトークンを取得してリダイレクト
             firebase.auth().onAuthStateChanged(user => {

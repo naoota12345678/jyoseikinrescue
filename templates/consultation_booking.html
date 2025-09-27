@@ -410,64 +410,181 @@
     </div>
 
     <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
-        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
-
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script>
+        // Firebase設定
         const firebaseConfig = {
-            apiKey: "AIzaSyDJVMsq9UJtcVKDMvNZzfqDw-o9Km5tpU4",
+            apiKey: "AIzaSyDgPJ2K3aEY1L6EyCUSlKNJYQkqNPkbfOY",
             authDomain: "jyoseikinrescue.firebaseapp.com",
             projectId: "jyoseikinrescue",
             storageBucket: "jyoseikinrescue.appspot.com",
             messagingSenderId: "453016168690",
-            appId: "1:453016168690:web:4b5c8e7f46f8e9c5f4d1e1"
+            appId: "1:453016168690:web:6b1cf3c5e6ac2e8c73fe80"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+        firebase.initializeApp(firebaseConfig);
 
-        let currentUser = null;
-        let authToken = null;
+        // consultation_idを取得
+        const consultationId = '{{ consultation_id }}';
+        let currentConsultationData = null;
 
-        // 認証状態の監視
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                console.log('認証済みユーザー:', user.uid);
-                currentUser = user;
-                try {
-                    authToken = await user.getIdToken(true);
-                    window.authToken = authToken; // グローバルに設定
-                    console.log('認証トークン取得完了');
-                    // 認証完了後に相談情報を取得
-                    await loadConsultationInfo();
-                } catch (error) {
-                    console.error('トークン取得エラー:', error);
+        // ページ読み込み時に認証確認とデータ読み込み
+        document.addEventListener('DOMContentLoaded', async function() {
+            let authWaitTimer = null;
+            let authProcessed = false;
+
+            // Firebase初期化確認
+            if (!firebase || !firebase.auth) {
+                console.error('Firebase not properly loaded');
+                handleAuthError();
+                return;
+            }
+
+            console.log('Firebase loaded successfully');
+
+            // 10秒後に認証チェック（Stripe戻り時の遅延対応）
+            authWaitTimer = setTimeout(() => {
+                if (!authProcessed && !firebase.auth().currentUser) {
+                    console.log('Authentication timeout - no user found after 10 seconds');
                     handleAuthError();
                 }
-            } else {
-                console.log('認証されていません');
-                handleAuthError();
-            }
-        });
+            }, 10000);
 
-        window.authToken = null;
-        window.consultationId = '{{ consultation_id }}';
+            // 認証状態の復旧を試行（Stripeから戻った場合の対応強化）
+            const storedToken = localStorage.getItem('auth_token');
+            const storedUserId = localStorage.getItem('user_id');
+
+            if (storedToken) {
+                console.log('Found stored token, attempting to restore authentication...');
+
+                // トークンが有効かチェック
+                try {
+                    const response = await fetch('/api/user/profile', {
+                        headers: { 'Authorization': 'Bearer ' + storedToken }
+                    });
+                    if (response.ok) {
+                        console.log('Token is still valid, proceeding with stored authentication');
+                        // Firebase認証の復元を待たずに直接API呼び出し
+                        window.authToken = storedToken;
+
+                        // 2秒待ってからFirebase認証状態を再確認
+                        setTimeout(async () => {
+                            if (!firebase.auth().currentUser) {
+                                console.log('Firebase auth not restored yet, using stored token directly');
+                                await loadConsultationInfo();
+                            }
+                        }, 2000);
+                    } else if (response.status === 401) {
+                        console.log('Stored token expired, waiting for Firebase re-auth...');
+                        localStorage.removeItem('auth_token');
+                    }
+                } catch (error) {
+                    console.log('Token validation error:', error);
+                }
+            }
+
+            firebase.auth().onAuthStateChanged(async function(user) {
+                console.log('Auth state changed:', user ? 'authenticated' : 'not authenticated');
+
+                if (user) {
+                    // 認証成功：タイマーをクリアして処理
+                    if (authWaitTimer) {
+                        clearTimeout(authWaitTimer);
+                        authWaitTimer = null;
+                        console.log('Auth timer cleared - user authenticated');
+                    }
+
+                    if (authProcessed) {
+                        console.log('Auth already processed, skipping');
+                        return;
+                    }
+                    authProcessed = true;
+
+                    console.log('Processing authenticated user:', user.uid);
+
+                    try {
+                        // Stripeから戻った直後なので、トークンを確実に更新
+                        console.log('Getting fresh token after Stripe redirect...');
+                        const token = await user.getIdToken(true);
+                        localStorage.setItem('auth_token', token);
+                        console.log('Token refreshed and stored successfully');
+
+                        // データ読み込み
+                        await loadConsultationInfo();
+                    } catch (error) {
+                        console.error('Error in auth processing:', error);
+                        handleAuthError();
+                    }
+                } else {
+                    // 認証されていない場合
+                    if (!authProcessed && authWaitTimer) {
+                        console.log('No user found, but still waiting...');
+                        return; // タイマーがまだ動いているので待機続行
+                    }
+
+                    if (!authProcessed) {
+                        console.log('No user authenticated and timeout reached');
+                        handleAuthError();
+                    }
+                }
+            });
+        });
 
         // loadConsultationInfo関数をグローバルに設定
         window.loadConsultationInfo = async function() {
             try {
-                const response = await fetch(`/api/expert-consultation/booking/${window.consultationId}`, {
+                // 認証トークンを取得（優先順位：Firebase現在のユーザー > localStorage > window.authToken）
+                let token = null;
+
+                // Firebase認証ユーザーがいる場合、新しいトークンを取得
+                if (firebase.auth().currentUser) {
+                    console.log('Getting token from Firebase user...');
+                    token = await firebase.auth().currentUser.getIdToken(true);
+                    localStorage.setItem('auth_token', token);
+                    window.authToken = token;
+                }
+                // localStorageにトークンがある場合
+                else if (localStorage.getItem('auth_token')) {
+                    console.log('Using token from localStorage...');
+                    token = localStorage.getItem('auth_token');
+                    window.authToken = token;
+                }
+                // window.authTokenがある場合（復旧処理で設定済み）
+                else if (window.authToken) {
+                    console.log('Using token from window.authToken...');
+                    token = window.authToken;
+                }
+
+                if (!token) {
+                    console.error('No authentication token available');
+                    handleAuthError();
+                    return;
+                }
+
+                console.log('Fetching consultation info with token...');
+                const response = await fetch(`/api/expert-consultation/booking/${consultationId}`, {
                     headers: {
-                        'Authorization': `Bearer ${window.authToken}`
+                        'Authorization': `Bearer ${token}`
                     }
                 });
 
                 if (response.ok) {
                     const consultationInfo = await response.json();
-                    window.consultationInfo = consultationInfo;
+                    currentConsultationData = consultationInfo;
+                    console.log('Consultation info loaded successfully:', consultationInfo);
                     updateConsultationDisplay();
                     loadAvailableDates();
+                } else if (response.status === 401) {
+                    console.error('Authentication failed, token may be invalid');
+                    // トークンが無効の場合、クリアして再認証を促す
+                    localStorage.removeItem('auth_token');
+                    window.authToken = null;
+                    handleAuthError();
                 } else {
+                    console.error('Failed to load consultation info:', response.status);
+                    const errorText = await response.text();
+                    console.error('Error details:', errorText);
                     showError('相談情報の取得に失敗しました。');
                 }
             } catch (error) {
@@ -483,45 +600,9 @@
         let availableDates = [];
         let consultationInfo = null;
 
-        // ページ読み込み時の処理
-        document.addEventListener('DOMContentLoaded', function() {
-            // 認証が完了するまで待つ
-            checkAuthAndLoad();
-        });
-
-        function checkAuthAndLoad() {
-            if (window.authToken) {
-                loadConsultationInfo();
-            } else {
-                // 3秒後に再試行
-                setTimeout(checkAuthAndLoad, 3000);
-            }
-        }
-
-        async function loadConsultationInfo() {
-            try {
-                const response = await fetch(`/api/expert-consultation/booking/${window.consultationId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${window.authToken}`
-                    }
-                });
-
-                if (response.ok) {
-                    consultationInfo = await response.json();
-                    updateConsultationDisplay();
-                    loadAvailableDates();
-                } else {
-                    showError('相談情報の取得に失敗しました。');
-                }
-            } catch (error) {
-                console.error('相談情報取得エラー:', error);
-                showError('通信エラーが発生しました。');
-            }
-        }
-
         function updateConsultationDisplay() {
-            if (consultationInfo) {
-                document.querySelector('.info-grid .info-item:nth-child(1) span:last-child').textContent = consultationInfo.user_name;
+            if (currentConsultationData) {
+                document.querySelector('.info-grid .info-item:nth-child(1) span:last-child').textContent = currentConsultationData.user_name;
             }
         }
 
