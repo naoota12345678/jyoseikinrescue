@@ -1183,7 +1183,9 @@
             <div class="nav-container">
                 <button onclick="showApplicationGuidance()" class="nav-item-primary">📌 ご利用にあたって</button>
                 <button onclick="showApplicationForms()" class="nav-item">📋 申請書類</button>
-                <button onclick="showComingSoon()" class="nav-item" style="opacity: 0.7; cursor: not-allowed;">👨‍💼 専門家相談（近日公開）</button>
+                <!-- 専門家相談ボタン（問題があれば showComingSoon() に戻す） -->
+                <button onclick="showExpertConsultation()" class="nav-item">👨‍💼 専門家相談</button>
+                <!-- <button onclick="showComingSoon()" class="nav-item" style="opacity: 0.7; cursor: not-allowed;">👨‍💼 専門家相談（近日公開）</button> -->
                 <button onclick="showEmploymentRules()" class="nav-item">📝 就業規則</button>
                 <button onclick="showDocumentTemplates()" class="nav-item">📄 添付書類雛形</button>
             </div>
@@ -1515,6 +1517,9 @@
         }
 
         const auth = firebase.auth();
+
+        // Firebase認証の永続性をLOCALに設定（ブラウザを閉じても認証を維持）
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
         // ページ読み込み時にagent_typeをチェック
         const urlParams = new URLSearchParams(window.location.search);
@@ -2739,7 +2744,30 @@
             }
         }
 
-        // 近日公開中メッセージ表示
+        // 専門家相談機能を表示（問題があれば showComingSoon() を使用）
+        function showExpertConsultation() {
+            // Firebase認証チェック
+            firebase.auth().onAuthStateChanged(function(user) {
+                if (user) {
+                    // トークンを取得してlocalStorageに保存
+                    user.getIdToken(true).then(token => {
+                        localStorage.setItem('auth_token', token);
+                        console.log('Token saved to localStorage');
+                        // 専門家相談ページ（/expert-consultation）に遷移
+                        window.location.href = '/expert-consultation';
+                    }).catch(error => {
+                        console.error('Failed to get token:', error);
+                        alert('認証エラーが発生しました。再度ログインしてください。');
+                        window.location.href = '/';
+                    });
+                } else {
+                    alert('専門家相談を利用するにはログインが必要です。');
+                    window.location.href = '/';
+                }
+            });
+        }
+
+        // 近日公開中メッセージ表示（元に戻す時用に残しておく）
         function showComingSoon() {
             const chatMessages = document.getElementById('integratedChatMessages');
             if (chatMessages) {
