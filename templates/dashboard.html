@@ -1534,6 +1534,34 @@
             if (user) {
                 currentUser = user;
                 await loadUserData();
+
+                // 専門家相談決済後の認証完了リダイレクト処理
+                if (window.pendingExpertConsultationRedirect) {
+                    const consultationId = window.pendingExpertConsultationRedirect;
+                    console.log('Authentication completed, redirecting to expert consultation success:', consultationId);
+
+                    // リダイレクトフラグをクリア
+                    delete window.pendingExpertConsultationRedirect;
+
+                    // トークンを取得してlocalStorageに保存
+                    try {
+                        const token = await user.getIdToken(true);
+                        localStorage.setItem('auth_token', token);
+                        console.log('Token saved before expert consultation redirect');
+                    } catch (error) {
+                        console.error('Failed to get token before redirect:', error);
+                    }
+
+                    // ローダーを削除
+                    const loader = document.getElementById('expert-consultation-loader');
+                    if (loader) {
+                        loader.remove();
+                    }
+
+                    // 専門家相談成功ページにリダイレクト
+                    window.location.href = `/expert-consultation/success/${consultationId}`;
+                    return;
+                }
                 
                 // 会話履歴を読み込み
                 await loadConversationsFromAPI();
@@ -1550,7 +1578,7 @@
                 }
                 
                 // Stripe決済後の処理
-                if (urlParams.get('payment') === 'success') {
+                if (urlParams.get('payment') === 'success' || urlParams.get('payment') === 'expert') {
                     // URLパラメータをすべてログ出力
                     console.log('=== Payment Success Debug ===');
                     console.log('Full URL:', window.location.href);
@@ -1576,12 +1604,36 @@
                     
                     let planType = urlParams.get('plan');
                     const packType = urlParams.get('pack');
-                    
+                    const consultationId = urlParams.get('consultation_id');
+
                     // pack パラメータがある場合はpack_XX形式に変換
                     if (packType) {
                         planType = `pack_${packType}`;
                     }
-                    
+
+                    // 専門家相談の場合
+                    if (consultationId) {
+                        console.log('Processing expert consultation payment success:', consultationId);
+
+                        // URLパラメータを削除
+                        window.history.replaceState({}, document.title, window.location.pathname);
+
+                        // ローディング表示
+                        showExpertConsultationLoader(consultationId);
+
+                        // 認証が既に完了している場合は即座にリダイレクト
+                        if (currentUser && localStorage.getItem('auth_token')) {
+                            console.log('Authentication already completed, redirecting immediately');
+                            window.location.href = `/expert-consultation/success/${consultationId}`;
+                        } else {
+                            console.log('Authentication not yet completed, will redirect after auth state change');
+                            // onAuthStateChanged で認証完了後にリダイレクト処理を実行
+                            window.pendingExpertConsultationRedirect = consultationId;
+                        }
+
+                        return; // 他の処理はスキップ
+                    }
+
                     if (planType) {
                         console.log('Processing payment success for plan:', planType);
                         
@@ -2267,7 +2319,93 @@
                 notification.remove();
             }, 5000);
         }
-        
+
+        // 専門家相談決済時のローディング表示
+        function showExpertConsultationLoader(consultationId) {
+            // 既存のローダーがあれば削除
+            const existingLoader = document.getElementById('expert-consultation-loader');
+            if (existingLoader) {
+                existingLoader.remove();
+            }
+
+            const loader = document.createElement('div');
+            loader.id = 'expert-consultation-loader';
+            loader.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+                color: white;
+            `;
+
+            // スタイルを追加
+            const style = document.createElement('style');
+            style.textContent = `
+                .expert-loader-content {
+                    text-align: center;
+                }
+                .expert-loader-spinner {
+                    width: 60px;
+                    height: 60px;
+                    border: 3px solid #f3f3f3;
+                    border-top: 3px solid #28a745;
+                    border-radius: 50%;
+                    animation: expert-loader-spin 1s linear infinite;
+                    margin: 0 auto 20px auto;
+                }
+                .expert-loader-title {
+                    margin-bottom: 10px;
+                    font-size: 1.2rem;
+                }
+                .expert-loader-status {
+                    font-size: 0.9rem;
+                    opacity: 0.8;
+                }
+                .expert-loader-id {
+                    font-size: 0.8rem;
+                    opacity: 0.6;
+                    margin-top: 20px;
+                }
+                @keyframes expert-loader-spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+
+            loader.innerHTML = `
+                <div class="expert-loader-content">
+                    <div class="expert-loader-spinner"></div>
+                    <h3 class="expert-loader-title">決済完了処理中...</h3>
+                    <p class="expert-loader-status">認証状態を確認しています</p>
+                    <p class="expert-loader-id">相談ID: ${consultationId}</p>
+                </div>
+            `;
+
+            document.body.appendChild(loader);
+
+            // 15秒後にタイムアウト処理
+            setTimeout(() => {
+                const currentLoader = document.getElementById('expert-consultation-loader');
+                if (currentLoader) {
+                    console.log('Expert consultation authentication timeout');
+                    if (confirm('認証の復元に時間がかかっています。ページを再読み込みしますか？')) {
+                        window.location.reload();
+                    } else {
+                        currentLoader.remove();
+                        showNotification('認証がタイムアウトしました。再度お試しください。', 'error');
+                    }
+                }
+            }, 15000);
+        }
+
         // メモ管理画面へのリンクを表示
         function showMemoManagementLink() {
             const agentSelection = document.querySelector('.agent-selection');

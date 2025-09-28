@@ -428,16 +428,30 @@
         // Firebase認証の永続性をLOCALに設定（Stripe決済後も認証を維持）
         firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-        // consultation_idを取得
-        const consultationId = '{{ consultation_id }}';
+        // consultation_idを取得（余計な文字列を除去）
+        const consultationId = '{{ consultation_id }}'.split(':')[0];
         let currentConsultationData = null;
         let authProcessed = false;
         let authWaitTimer = null;
         let authRetryCount = 0;
         const MAX_AUTH_RETRIES = 3;
 
-        // ページ読み込み時に認証確認とデータ読み込み（consultation_success.htmlと完全同一パターン）
-        document.addEventListener('DOMContentLoaded', function() {
+        // ページ可視性変更時の自動トークン更新（Stripe決済から戻った時対応）
+        document.addEventListener('visibilitychange', async function() {
+            if (!document.hidden && firebase.auth().currentUser) {
+                console.log('Page became visible, refreshing auth token...');
+                try {
+                    const token = await firebase.auth().currentUser.getIdToken(true);
+                    localStorage.setItem('auth_token', token);
+                    console.log('Token refreshed on page visibility change');
+                } catch (error) {
+                    console.error('Failed to refresh token on visibility change:', error);
+                }
+            }
+        });
+
+        // Stripe決済後の認証問題対策：localStorage トークンを優先する
+        document.addEventListener('DOMContentLoaded', async function() {
             // Firebase初期化確認
             if (!firebase || !firebase.auth) {
                 console.error('Firebase not properly loaded');
@@ -445,104 +459,153 @@
                 return;
             }
 
-            console.log('Firebase loaded successfully');
+            console.log('Page loaded, checking existing authentication...');
 
-            // consultation_success.htmlと完全同一の認証パターン
-            firebase.auth().onAuthStateChanged(function(user) {
-                console.log('Auth state changed:', user ? 'authenticated' : 'not authenticated');
+            const existingToken = localStorage.getItem('auth_token');
+            if (existingToken) {
+                console.log('Found existing token, checking expiration...');
 
-                if (user && !authProcessed) {
-                    authProcessed = true;
+                // トークンの期限をチェック（JWTデコード）
+                try {
+                    const tokenParts = existingToken.split('.');
+                    if (tokenParts.length === 3) {
+                        const payload = JSON.parse(atob(tokenParts[1]));
+                        const currentTime = Math.floor(Date.now() / 1000);
+                        const timeUntilExpiry = payload.exp - currentTime;
 
-                    // 必ずタイマーをクリア
-                    if (authWaitTimer) {
-                        clearTimeout(authWaitTimer);
-                        authWaitTimer = null;
-                        console.log('Auth timer cleared successfully');
-                    }
+                        console.log(`Token expires in ${timeUntilExpiry} seconds`);
 
-                    console.log('Processing authenticated user:', user.uid);
-
-                    try {
-                        // Stripeから戻った直後なので、トークンを確実に更新
-                        console.log('Getting fresh token after Stripe redirect...');
-                        user.getIdToken(true).then(token => {
-                            localStorage.setItem('auth_token', token);
-                            console.log('Token refreshed and stored successfully');
-
-                            // データ読み込み
-                            loadConsultationInfo();
-                        }).catch(error => {
-                            console.error('Error refreshing token:', error);
-                            alert('認証の更新に失敗しました。ページをリロードしてください。');
-                        });
-                    } catch (error) {
-                        console.error('Error refreshing token:', error);
-                        alert('認証の更新に失敗しました。ページをリロードしてください。');
-                    }
-                } else {
-                    // 認証されていない場合：認証復元を試行
-                    if (!authWaitTimer && !authProcessed) {
-                        console.log('No user detected, attempting Firebase auth restoration...');
-
-                        // 認証復元を試行（リトライ機能付き）
-                        authWaitTimer = setTimeout(async () => {
-                            if (!firebase.auth().currentUser && !authProcessed) {
-                                authRetryCount++;
-                                console.log(`Auth restoration attempt ${authRetryCount}/${MAX_AUTH_RETRIES}`);
-
-                                if (authRetryCount < MAX_AUTH_RETRIES) {
-                                    // 再試行
-                                    console.log('Retrying auth restoration...');
-                                    authWaitTimer = null;
-
-                                    // localStorageから既存のトークンを確認
-                                    const existingToken = localStorage.getItem('auth_token');
-                                    if (existingToken) {
-                                        console.log('Found existing token in localStorage, attempting to use it');
-                                        // トークンが存在する場合は、ページをリロード（Firebaseが認証を復元する可能性）
-                                        window.location.reload();
-                                    }
-                                } else {
-                                    // 最大リトライ回数に達した
-                                    console.log('Max auth retries reached');
-                                    showAuthRetryDialog();
-                                }
+                        // 10分以内に期限切れの場合は事前に更新
+                        if (timeUntilExpiry < 600) {
+                            console.log('Token expires soon, refreshing proactively...');
+                            if (firebase.auth().currentUser) {
+                                const newToken = await firebase.auth().currentUser.getIdToken(true);
+                                localStorage.setItem('auth_token', newToken);
+                                console.log('Token refreshed proactively');
+                                authProcessed = true;
+                                loadConsultationInfo();
+                                return;
                             }
-                        }, 5000); // 5秒ごとにリトライ
+                        }
                     }
+                } catch (tokenError) {
+                    console.log('Token parsing failed, validating via API...');
                 }
-            });
 
-            // 初回認証チェック（即座に）- consultation_success.htmlと同じく空処理
-            setTimeout(() => {
-                const currentUser = firebase.auth().currentUser;
-                if (currentUser && !authProcessed) {
-                    console.log('Initial user check found authenticated user');
-                    // 既に認証されている場合は即座に処理（空処理 - onAuthStateChangedに任せる）
+                // トークンの有効性を直接チェック
+                try {
+                    const response = await fetch(`/api/expert-consultation/booking/${consultationId}`, {
+                        headers: {
+                            'Authorization': 'Bearer ' + existingToken,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        console.log('Existing token is valid, proceeding with data load');
+                        authProcessed = true;
+                        loadConsultationInfo();
+                        return; // 成功したので Firebase 認証を待つ必要なし
+                    } else if (response.status === 401) {
+                        console.log('Existing token expired, removing and attempting Firebase auth restoration');
+                        localStorage.removeItem('auth_token');
+                        attemptFirebaseAuthRestoration();
+                    }
+                } catch (error) {
+                    console.log('Token validation failed:', error);
+                    localStorage.removeItem('auth_token');
+                    attemptFirebaseAuthRestoration();
                 }
-            }, 1000);
+            } else {
+                console.log('No existing token found, attempting Firebase authentication...');
+                attemptFirebaseAuthRestoration();
+            }
         });
 
-        // loadConsultationInfo関数をグローバルに設定（consultation_success.htmlと同一パターン）
+        function attemptFirebaseAuthRestoration() {
+            console.log('Attempting Firebase authentication restoration...');
+
+            const currentUser = firebase.auth().currentUser;
+            if (currentUser) {
+                console.log('Firebase user already authenticated, getting fresh token');
+                currentUser.getIdToken(true).then(token => {
+                    localStorage.setItem('auth_token', token);
+                    authProcessed = true;
+                    loadConsultationInfo();
+                }).catch(error => {
+                    console.error('Failed to get fresh token:', error);
+                    startAuthTimeout();
+                });
+            } else {
+                console.log('No Firebase user, waiting for authentication restoration...');
+                startAuthTimeout();
+            }
+        }
+
+        function startAuthTimeout() {
+            console.log('Starting authentication timeout (30 seconds)');
+            if (authWaitTimer) clearTimeout(authWaitTimer);
+            authWaitTimer = setTimeout(() => {
+                if (!authProcessed) {
+                    console.log('Authentication timeout reached - trying page reload');
+                    if (confirm('認証の復元に時間がかかっています。ページを再読み込みしますか？')) {
+                        window.location.reload();
+                    } else {
+                        window.location.href = '/dashboard';
+                    }
+                }
+            }, 30000);
+        }
+
+        firebase.auth().onAuthStateChanged(async function(user) {
+            if (user && !authProcessed) {
+                authProcessed = true;
+                if (authWaitTimer) {
+                    clearTimeout(authWaitTimer);
+                    authWaitTimer = null;
+                }
+
+                try {
+                    console.log('Firebase Auth: Logged in as', user.uid);
+                    const token = await user.getIdToken(true);
+                    localStorage.setItem('auth_token', token);
+                    console.log('Token updated from Firebase auth');
+
+                    // トークンの定期更新タイマーを設定（50分毎）
+                    setInterval(async () => {
+                        if (firebase.auth().currentUser) {
+                            try {
+                                const refreshedToken = await firebase.auth().currentUser.getIdToken(true);
+                                localStorage.setItem('auth_token', refreshedToken);
+                                console.log('Token automatically refreshed');
+                            } catch (error) {
+                                console.error('Automatic token refresh failed:', error);
+                            }
+                        }
+                    }, 50 * 60 * 1000); // 50分
+
+                    loadConsultationInfo();
+                } catch (error) {
+                    console.error('Error refreshing token:', error);
+                    alert('認証の更新に失敗しました。ページをリロードしてください。');
+                }
+            }
+        });
+
+        // loadConsultationInfo関数
         window.loadConsultationInfo = async function() {
             try {
-                // まずFirebaseから新しいトークンを取得
-                const user = firebase.auth().currentUser;
-                if (!user) {
-                    console.error('No authenticated user');
-                    alert('認証が切れています。ログインし直してください。');
+                const token = localStorage.getItem('auth_token');
+                if (!token) {
+                    console.error('No auth token available');
+                    alert('認証トークンがありません。ダッシュボードに移動します。');
                     window.location.href = '/dashboard';
                     return;
                 }
 
-                console.log('Getting fresh token from Firebase...');
-                const token = await user.getIdToken(true); // 強制的に新しいトークンを取得
-                localStorage.setItem('auth_token', token);
-                console.log('Fresh token obtained and stored. Token length:', token.length);
-                console.log('Token preview:', token.substring(0, 50) + '...');
+                console.log('Loading consultation info with token');
+                console.log('Token length:', token.length);
 
-                console.log('Making API call to:', `/api/expert-consultation/booking/${consultationId}`);
                 const response = await fetch(`/api/expert-consultation/booking/${consultationId}`, {
                     headers: {
                         'Authorization': 'Bearer ' + token,
@@ -551,13 +614,11 @@
                 });
 
                 console.log('API response status:', response.status);
-                console.log('API response headers:', response.headers);
 
                 if (!response.ok) {
                     if (response.status === 401) {
                         console.error('Authentication failed - Status 401');
-                        const errorBody = await response.text();
-                        console.error('Error response body:', errorBody);
+                        localStorage.removeItem('auth_token'); // 無効なトークンを削除
                         alert('認証が切れています。ログインし直してください。');
                         window.location.href = '/dashboard';
                         return;
@@ -567,7 +628,7 @@
 
                 const consultationInfo = await response.json();
                 currentConsultationData = consultationInfo;
-                console.log('Consultation info loaded successfully', consultationInfo);
+                console.log('Consultation info loaded successfully');
                 updateConsultationDisplay();
                 loadAvailableDates();
             } catch (error) {
@@ -598,7 +659,19 @@
 
         async function loadAvailableDates() {
             try {
-                const response = await fetch('/api/google-calendar/available-dates');
+                const token = localStorage.getItem('auth_token');
+                if (!token) {
+                    console.error('No auth token available for calendar API');
+                    showError('認証が必要です。ページを再読み込みしてください。');
+                    return;
+                }
+
+                const response = await fetch('/api/google-calendar/available-dates', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    }
+                });
                 const result = await response.json();
 
                 if (result.success) {
@@ -716,7 +789,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        consultation_id: '{{ consultation_id }}',
+                        consultation_id: consultationId,  // 既にsplit(':')[0]処理済みの変数を使用
                         date: selectedDate,
                         time: selectedTime
                     })
@@ -726,7 +799,7 @@
 
                 if (result.success) {
                     // 成功ページにリダイレクト
-                    window.location.href = `/expert-consultation/confirmed/{{ consultation_id }}`;
+                    window.location.href = `/expert-consultation/confirmed/${consultationId}`;
                 } else {
                     showError(result.error || '予約の確定に失敗しました。');
                 }

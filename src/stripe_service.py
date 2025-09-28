@@ -362,13 +362,15 @@ class StripeService:
 
             # 専門家相談の決済完了処理
             if payment_type == 'expert_consultation' and consultation_id:
+                temp_reservation_id = metadata.get('temp_reservation_id')
                 return {
                     'status': 'success',
                     'action': 'expert_consultation_paid',
                     'consultation_id': consultation_id,
                     'user_id': user_id,
                     'session_id': session.get('id'),
-                    'payment_intent_id': session.get('payment_intent')
+                    'payment_intent_id': session.get('payment_intent'),
+                    'temp_reservation_id': temp_reservation_id if temp_reservation_id else None
                 }
 
             # 通常のサブスクリプション・パック決済
@@ -484,7 +486,7 @@ class StripeService:
             logger.error(f"Consultation payment error: {str(e)}")
             raise
 
-    def create_expert_consultation_checkout(self, consultation_id, user_id, user_name, user_email, success_url, cancel_url):
+    def create_expert_consultation_checkout(self, consultation_id, user_id, user_name, user_email, success_url, cancel_url, temp_reservation_id=None):
         """専門家相談用のStripe決済セッションを作成"""
         try:
             # 専門家相談の料金
@@ -513,7 +515,8 @@ class StripeService:
                     'user_name': user_name,
                     'user_email': user_email,
                     'payment_type': 'expert_consultation',
-                    'service_type': 'expert_consultation_30min'
+                    'service_type': 'expert_consultation_30min',
+                    'temp_reservation_id': temp_reservation_id or ''
                 }
             )
 

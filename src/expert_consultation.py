@@ -205,5 +205,141 @@ class ExpertConsultationService:
             logger.error(f"相談予約可能性チェックエラー: {e}")
             return False, "システムエラーが発生しました"
 
+    def create_temp_reservation(self, user_id, datetime_str, timezone="Asia/Tokyo"):
+        """仮予約を作成（15分間キープ）"""
+        try:
+            import uuid
+            from datetime import datetime, timezone as tz, timedelta
+
+            db = firebase_service.get_db()
+
+            # 仮予約IDを生成
+            temp_reservation_id = f"temp_{str(uuid.uuid4())[:8]}"
+
+            # 15分後の期限を計算
+            now = datetime.now(tz.utc)
+            expires_at = now + timedelta(minutes=15)
+
+            # 仮予約データ
+            temp_reservation_data = {
+                'temp_reservation_id': temp_reservation_id,
+                'user_id': user_id,
+                'datetime': datetime_str,
+                'timezone': timezone,
+                'created_at': now.timestamp(),
+                'expires_at': expires_at.timestamp(),
+                'status': 'pending',
+                'consultation_id': None,  # 決済時に設定
+                'stripe_session_id': None  # 決済時に設定
+            }
+
+            # Firestoreに保存
+            db.collection('temp_reservations').document(temp_reservation_id).set(temp_reservation_data)
+
+            logger.info(f"仮予約作成: {temp_reservation_id} for user {user_id} at {datetime_str}")
+
+            return {
+                'success': True,
+                'temp_reservation_id': temp_reservation_id,
+                'expires_at': expires_at.isoformat(),
+                'expires_timestamp': expires_at.timestamp()
+            }
+
+        except Exception as e:
+            logger.error(f"仮予約作成エラー: {e}")
+            return {'success': False, 'error': str(e)}
+
+    def get_temp_reservation(self, temp_reservation_id):
+        """仮予約情報を取得"""
+        try:
+            db = firebase_service.get_db()
+            temp_reservation_ref = db.collection('temp_reservations').document(temp_reservation_id)
+            temp_reservation_doc = temp_reservation_ref.get()
+
+            if temp_reservation_doc.exists:
+                return temp_reservation_doc.to_dict()
+            return None
+
+        except Exception as e:
+            logger.error(f"仮予約取得エラー: {e}")
+            return None
+
+    def is_temp_reservation_valid(self, temp_reservation_id):
+        """仮予約が有効か確認（期限切れチェック）"""
+        try:
+            temp_reservation = self.get_temp_reservation(temp_reservation_id)
+            if not temp_reservation:
+                return False
+
+            import time
+            current_time = time.time()
+            expires_at = temp_reservation.get('expires_at', 0)
+
+            return current_time < expires_at and temp_reservation.get('status') == 'pending'
+
+        except Exception as e:
+            logger.error(f"仮予約有効性チェックエラー: {e}")
+            return False
+
+    def convert_temp_to_consultation(self, temp_reservation_id, consultation_id):
+        """仮予約を正式な相談に変換"""
+        try:
+            db = firebase_service.get_db()
+
+            # 仮予約情報を取得
+            temp_reservation = self.get_temp_reservation(temp_reservation_id)
+            if not temp_reservation:
+                logger.error(f"仮予約が見つかりません: {temp_reservation_id}")
+                return False
+
+            # expert_consultationsに仮予約情報を紐付け
+            consultation_ref = db.collection('expert_consultations').document(consultation_id)
+            consultation_ref.update({
+                'temp_reservation_id': temp_reservation_id,
+                'scheduled_datetime_iso': temp_reservation['datetime'],
+                'scheduled_at': time.time()
+            })
+
+            # 仮予約のステータスを更新
+            temp_reservation_ref = db.collection('temp_reservations').document(temp_reservation_id)
+            temp_reservation_ref.update({
+                'consultation_id': consultation_id,
+                'status': 'converted'
+            })
+
+            logger.info(f"仮予約を相談に変換: {temp_reservation_id} -> {consultation_id}")
+            return True
+
+        except Exception as e:
+            logger.error(f"仮予約変換エラー: {e}")
+            return False
+
+    def cleanup_expired_temp_reservations(self):
+        """期限切れ仮予約を削除"""
+        try:
+            import time
+            db = firebase_service.get_db()
+            current_time = time.time()
+
+            # 期限切れの仮予約を検索
+            expired_reservations = db.collection('temp_reservations') \
+                .where('expires_at', '<', current_time) \
+                .where('status', '==', 'pending') \
+                .get()
+
+            deleted_count = 0
+            for doc in expired_reservations:
+                doc.reference.delete()
+                deleted_count += 1
+
+            if deleted_count > 0:
+                logger.info(f"期限切れ仮予約を削除: {deleted_count}件")
+
+            return deleted_count
+
+        except Exception as e:
+            logger.error(f"期限切れ仮予約削除エラー: {e}")
+            return 0
+
 # グローバルインスタンス
 expert_consultation_service = ExpertConsultationService()

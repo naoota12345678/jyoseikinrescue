@@ -1063,11 +1063,35 @@ def stripe_webhook():
                 # 専門家相談決済完了処理
                 consultation_id = result.get('consultation_id')
                 payment_intent_id = result.get('payment_intent_id')
+                temp_reservation_id = result.get('temp_reservation_id')
 
                 if EXPERT_CONSULTATION_ENABLED and consultation_id:
+                    # 決済情報を更新
                     expert_consultation_service.update_consultation_payment(
                         consultation_id, payment_intent_id
                     )
+
+                    # 仮予約がある場合はGoogle Calendar予約を作成
+                    if temp_reservation_id and GOOGLE_CALENDAR_ENABLED:
+                        try:
+                            # 仮予約情報を取得
+                            temp_reservation = expert_consultation_service.get_temp_reservation(temp_reservation_id)
+                            if temp_reservation and expert_consultation_service.is_temp_reservation_valid(temp_reservation_id):
+                                datetime_str = temp_reservation.get('datetime')
+                                user_id = temp_reservation.get('user_id')
+
+                                # Google Calendar予約を作成（ここは後で実装）
+                                # google_calendar_service.create_consultation_event(consultation_id, datetime_str, user_id)
+
+                                # 仮予約ステータスを確定に変更
+                                expert_consultation_service.convert_temp_to_consultation(temp_reservation_id, consultation_id)
+
+                                logger.info(f"仮予約からGoogle Calendar予約に変換: {temp_reservation_id} -> {consultation_id}")
+                            else:
+                                logger.warning(f"仮予約が無効または期限切れ: {temp_reservation_id}")
+                        except Exception as e:
+                            logger.error(f"仮予約変換エラー: {e}")
+
                     logger.info(f"Expert consultation payment completed: {consultation_id}")
         
         return jsonify({'received': True})
@@ -2477,7 +2501,7 @@ def create_expert_consultation():
 
         # 正しいURL固定（request.url_rootは間違ったURLを返す可能性があるため）
         base_url = 'https://jyoseikinrescue-453016168690.asia-northeast1.run.app'
-        success_url = f'{base_url}/expert-consultation/success/{consultation_id}'
+        success_url = f'{base_url}/dashboard?payment=expert&consultation_id={consultation_id}'
         cancel_url = f'{base_url}/expert-consultation'
 
         checkout_session = stripe_service.create_expert_consultation_checkout(
@@ -2505,6 +2529,9 @@ def create_expert_consultation():
 @app.route('/expert-consultation/booking/<consultation_id>')
 def expert_consultation_booking(consultation_id):
     """専門家相談の日時選択ページ（Google Calendar版）"""
+    # consultation_idから余計な文字列（ポート番号など）を除去
+    consultation_id = consultation_id.split(':')[0]
+
     if not EXPERT_CONSULTATION_ENABLED:
         return jsonify({'error': '専門家相談システムが利用できません'}), 500
 
@@ -2516,6 +2543,9 @@ def expert_consultation_booking(consultation_id):
 @app.route('/expert-consultation/success/<consultation_id>')
 def expert_consultation_success(consultation_id):
     """専門家相談決済完了ページ"""
+    # consultation_idから余計な文字列（ポート番号など）を除去
+    consultation_id = consultation_id.split(':')[0]
+
     # 認証はクライアント側のFirebaseで行う（ダッシュボードと同じ方式）
     if not EXPERT_CONSULTATION_ENABLED:
         return jsonify({'error': '専門家相談システムが利用できません'}), 500
@@ -2529,6 +2559,10 @@ def expert_consultation_success(consultation_id):
 def api_expert_consultation_booking(consultation_id):
     """専門家相談予約API"""
     try:
+        # consultation_idから余計な文字列（ポート番号など）を除去
+        consultation_id = consultation_id.split(':')[0]
+        logger.info(f"API request for consultation booking: {consultation_id}")
+
         current_user = get_current_user()
         user_id = current_user.get('user_id')
 
@@ -2561,6 +2595,8 @@ def api_expert_consultation_booking(consultation_id):
 @require_auth
 def expert_consultation_success_api(consultation_id):
     """専門家相談決済完了ページのデータを取得するAPI"""
+    # consultation_idから余計な文字列（ポート番号など）を除去
+    consultation_id = consultation_id.split(':')[0]
     logger.info(f"=== API呼び出し開始: consultation_id={consultation_id} ===")
 
     if not EXPERT_CONSULTATION_ENABLED:
@@ -2649,6 +2685,146 @@ def expert_consultation_status(consultation_id):
         logger.error(f"相談ステータス確認エラー: {e}")
         return render_template('error.html',
                              error_message='システムエラーが発生しました'), 500
+
+# =====================================
+# 仮予約API
+# =====================================
+
+@app.route('/api/expert-consultation/temp-reservation', methods=['POST'])
+@require_auth
+def create_temp_reservation():
+    """専門家相談の仮予約を作成"""
+    if not EXPERT_CONSULTATION_ENABLED:
+        return jsonify({'error': '専門家相談システムが利用できません'}), 500
+
+    try:
+        current_user = get_current_user()
+        user_id = current_user.get('user_id') or current_user['id']
+
+        data = request.get_json()
+        datetime_str = data.get('datetime')
+        timezone = data.get('timezone', 'Asia/Tokyo')
+
+        if not datetime_str:
+            return jsonify({'error': '日時が指定されていません'}), 400
+
+        # 仮予約作成
+        result = expert_consultation_service.create_temp_reservation(user_id, datetime_str, timezone)
+
+        if result['success']:
+            logger.info(f"仮予約作成成功: {result['temp_reservation_id']} for user {user_id}")
+            return jsonify(result)
+        else:
+            logger.error(f"仮予約作成失敗: {result.get('error')}")
+            return jsonify({'error': result.get('error', '仮予約の作成に失敗しました')}), 500
+
+    except Exception as e:
+        logger.error(f"仮予約作成API error: {e}")
+        return jsonify({'error': '仮予約の作成中にエラーが発生しました'}), 500
+
+@app.route('/api/expert-consultation/create-payment', methods=['POST'])
+@require_auth
+def create_payment_with_temp_reservation():
+    """仮予約に基づいて決済セッションを作成"""
+    if not EXPERT_CONSULTATION_ENABLED:
+        return jsonify({'error': '専門家相談システムが利用できません'}), 500
+
+    try:
+        current_user = get_current_user()
+        user_id = current_user.get('user_id') or current_user['id']
+        user_email = current_user.get('user_email') or current_user.get('email')
+        user_name = current_user.get('user_name') or current_user.get('name', 'お客様')
+
+        data = request.get_json()
+        temp_reservation_id = data.get('temp_reservation_id')
+
+        if not temp_reservation_id:
+            return jsonify({'error': '仮予約IDが指定されていません'}), 400
+
+        # 仮予約の有効性確認
+        if not expert_consultation_service.is_temp_reservation_valid(temp_reservation_id):
+            return jsonify({'error': '仮予約が無効または期限切れです'}), 400
+
+        # 相談リクエストを作成
+        consultation_id = expert_consultation_service.create_consultation_request(
+            user_id, user_email, user_name, f"仮予約: {temp_reservation_id}"
+        )
+
+        if not consultation_id:
+            return jsonify({'error': '相談リクエストの作成に失敗しました'}), 500
+
+        # 仮予約と相談を紐付け
+        expert_consultation_service.convert_temp_to_consultation(temp_reservation_id, consultation_id)
+
+        # URLの構築
+        base_url = request.url_root.rstrip('/')
+        success_url = f'{base_url}/expert-consultation/success/{consultation_id}'
+        cancel_url = f'{base_url}/expert-consultation'
+
+        # Stripe決済セッション作成
+        stripe_service = get_stripe_service()
+        checkout_session = stripe_service.create_expert_consultation_checkout(
+            consultation_id=consultation_id,
+            user_id=user_id,
+            user_name=user_name,
+            user_email=user_email,
+            success_url=success_url,
+            cancel_url=cancel_url,
+            temp_reservation_id=temp_reservation_id
+        )
+
+        if not checkout_session:
+            return jsonify({'error': 'Stripe決済セッションの作成に失敗しました'}), 500
+
+        logger.info(f"決済セッション作成成功: consultation_id={consultation_id}, temp_reservation={temp_reservation_id}")
+
+        return jsonify({
+            'success': True,
+            'checkout_url': checkout_session['url'],
+            'session_id': checkout_session['id'],
+            'consultation_id': consultation_id
+        })
+
+    except Exception as e:
+        logger.error(f"決済セッション作成API error: {e}")
+        return jsonify({'error': '決済セッションの作成中にエラーが発生しました'}), 500
+
+@app.route('/api/expert-consultation/reservation-status/<temp_reservation_id>')
+@require_auth
+def get_temp_reservation_status(temp_reservation_id):
+    """仮予約の状態を確認"""
+    if not EXPERT_CONSULTATION_ENABLED:
+        return jsonify({'error': '専門家相談システムが利用できません'}), 500
+
+    try:
+        current_user = get_current_user()
+        user_id = current_user.get('user_id') or current_user['id']
+
+        # 仮予約情報を取得
+        temp_reservation = expert_consultation_service.get_temp_reservation(temp_reservation_id)
+
+        if not temp_reservation:
+            return jsonify({'error': '仮予約が見つかりません'}), 404
+
+        # 本人確認
+        if temp_reservation.get('user_id') != user_id:
+            return jsonify({'error': 'アクセス権限がありません'}), 403
+
+        # 有効性チェック
+        is_valid = expert_consultation_service.is_temp_reservation_valid(temp_reservation_id)
+
+        return jsonify({
+            'success': True,
+            'status': temp_reservation.get('status'),
+            'expires_at': temp_reservation.get('expires_at'),
+            'is_valid': is_valid,
+            'consultation_id': temp_reservation.get('consultation_id'),
+            'datetime': temp_reservation.get('datetime')
+        })
+
+    except Exception as e:
+        logger.error(f"仮予約状態確認API error: {e}")
+        return jsonify({'error': '仮予約状態の確認中にエラーが発生しました'}), 500
 
 # =====================================
 # Google Calendar API エンドポイント
