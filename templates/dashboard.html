@@ -3566,30 +3566,45 @@
             `;
         }
 
+        // 統合メッセージ送信中フラグ
+        let isIntegratedSending = false;
+
         // 統合メッセージ送信（重要：利用回数チェック付き）
         async function sendIntegratedMessage() {
+            // 既に送信中の場合は処理をスキップ（二重送信防止）
+            if (isIntegratedSending) {
+                console.log('Already sending a message, skipping...');
+                return;
+            }
+
             const chatInput = document.getElementById('integratedChatInput');
             const message = chatInput.value.trim();
-            
+
             if (!message || !integratedCurrentAgent) return;
+
+            // 送信ボタンを即座に無効化（二重送信防止）
+            const sendBtn = document.getElementById('integratedSendBtn');
+            sendBtn.disabled = true;
+
+            // 送信中フラグを立てる
+            isIntegratedSending = true;
 
             // 使用回数チェック（dashboard.htmlの既存ロジックを利用）
             const remainingText = document.getElementById('remainingQuestions').textContent;
             const remaining = parseInt(remainingText) || 0;
-            
+
             if (remaining <= 0) {
                 const planType = document.getElementById('planType').textContent === 'ベーシック' ? 'basic' : 'free';
                 showUpgradePrompt(planType);
+                // フラグをリセット
+                isIntegratedSending = false;
+                sendBtn.disabled = false;
                 return;
             }
-            
+
             // ユーザーメッセージを表示
             addIntegratedMessageToChat('user', message);
             chatInput.value = '';
-            
-            // 送信ボタンを無効化
-            const sendBtn = document.getElementById('integratedSendBtn');
-            sendBtn.disabled = true;
             
             // ローディングメッセージを表示
             showThinkingMessage();
@@ -3653,14 +3668,16 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                
+
                 // ローディングメッセージを削除
                 hideThinkingMessage();
-                
+
                 addIntegratedMessageToChat('assistant', '通信エラーが発生しました。');
             }
-            
+
+            // 送信ボタンを再度有効化し、フラグをリセット
             sendBtn.disabled = false;
+            isIntegratedSending = false;
         }
 
         // 統合チャットにメッセージを追加（重複チェック付き）
