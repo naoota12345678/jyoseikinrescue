@@ -1061,11 +1061,20 @@
             }
             
             try {
+                // Firebase認証トークンを取得（認証済みユーザー向け完全版診断のため）
+                const headers = {
+                    'Content-Type': 'application/json',
+                };
+
+                const currentUser = firebase.auth().currentUser;
+                if (currentUser) {
+                    const token = await currentUser.getIdToken();
+                    headers['Authorization'] = 'Bearer ' + token;
+                }
+
                 const response = await fetch('/api/grant-check', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: headers,
                     body: JSON.stringify({
                         company_info: companyInfo
                     })

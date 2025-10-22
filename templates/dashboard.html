@@ -1686,6 +1686,8 @@
                 }
                 // 診断結果の変換チェック
                 setTimeout(checkPendingDiagnosis, 1000);
+                // 新規診断結果の表示チェック（無料診断からの登録）
+                setTimeout(checkAndDisplayFullDiagnosis, 1000);
             } else {
                 // 未認証の場合はログインページにリダイレクト
                 // パス名が '/' でない場合のみリダイレクト
@@ -2296,7 +2298,55 @@
                 }
             }
         }
-        
+
+        // 無料診断からの登録後、完全版診断結果を表示
+        function checkAndDisplayFullDiagnosis() {
+            const fullResult = localStorage.getItem('diagnosisFullResult');
+
+            if (fullResult) {
+                try {
+                    const grants = JSON.parse(fullResult);
+
+                    // 診断結果を画面に表示
+                    const chatMessages = document.getElementById('integratedChatMessages');
+                    chatMessages.innerHTML = `
+                        <div class="message assistant welcome">
+                            <div class="assistant-avatar">🎉</div>
+                            <div class="message-content">
+                                <h2 style="margin-top: 0;">📋 あなたの助成金診断結果（詳細版）</h2>
+                                <p style="color: #666; margin-bottom: 20px;">会員登録ありがとうございます！無料診断の詳細結果をご覧いただけます。</p>
+                                ${grants.map(grant => `
+                                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #667eea;">
+                                        <h3 style="margin-top: 0;">${grant.name}</h3>
+                                        <div style="white-space: pre-wrap;">${grant.full_description || grant.description}</div>
+                                    </div>
+                                `).join('')}
+
+                                <div style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 12px; text-align: center;">
+                                    <h3 style="margin: 0 0 10px 0;">🤔 さらに詳しく相談したい方へ</h3>
+                                    <p style="margin: 0 0 15px 0; opacity: 0.95;">AI助成金判定エージェントが、あなたの状況に合わせて最適なコースや申請手順を対話形式でアドバイスします</p>
+                                    <button onclick="selectIntegratedAgent('hanntei')" style="background: white; color: #667eea; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; font-size: 1.1em; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                                        助成金判定エージェントで個別相談（5回無料）
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    // 入力エリアを非表示（診断結果表示中）
+                    document.getElementById('integratedChatInputArea').style.display = 'none';
+
+                    // localStorageから削除（一度だけ表示）
+                    localStorage.removeItem('diagnosisFullResult');
+
+                    showNotification('詳細な診断結果を表示しました！', 'success');
+
+                } catch (error) {
+                    console.error('診断結果表示エラー:', error);
+                }
+            }
+        }
+
         // 通知を表示する関数
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');

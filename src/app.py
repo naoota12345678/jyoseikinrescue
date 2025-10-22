@@ -247,18 +247,42 @@ def grant_check():
     try:
         data = request.json
         company_info = data.get('company_info', {})
-        
+
         if not company_info:
             return jsonify({'error': '会社情報を入力してください'}), 400
-        
+
+        # 認証チェック（Authorizationヘッダーの有無）
+        auth_header = request.headers.get('Authorization')
+        is_authenticated = auth_header is not None and auth_header.startswith('Bearer ')
+
         # 利用可能な助成金をチェック
         available_grants = get_claude_service().check_available_grants(company_info)
-        
+
+        # 認証済みなら完全版、未認証なら短縮版を返す
+        if is_authenticated:
+            # 完全版（full_description使用）
+            response_grants = [{
+                'name': grant.get('name'),
+                'description': grant.get('full_description', grant.get('description')),
+                'status': grant.get('status'),
+                'agent_recommendation': grant.get('agent_recommendation')
+            } for grant in available_grants]
+        else:
+            # 短縮版（short_description使用）
+            response_grants = [{
+                'name': grant.get('name'),
+                'description': grant.get('short_description', grant.get('description')),
+                'status': grant.get('status'),
+                'agent_recommendation': grant.get('agent_recommendation')
+            } for grant in available_grants]
+
         return jsonify({
-            'grants': available_grants,
-            'status': 'success'
+            'grants': response_grants,
+            'full_grants': available_grants if not is_authenticated else None,  # 未認証時のみ完全版も送信（localStorage保存用）
+            'status': 'success',
+            'is_authenticated': is_authenticated
         })
-        
+
     except Exception as e:
         logger.error(f"Error in grant check endpoint: {str(e)}")
         return jsonify({'error': 'サーバーエラーが発生しました'}), 500

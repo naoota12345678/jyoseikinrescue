@@ -445,16 +445,40 @@
                 });
                 
                 const data = await response.json();
-                
+
                 if (data.status === 'success') {
                     const chatMessages = document.getElementById('chatMessages');
                     const resultMessage = document.createElement('div');
                     resultMessage.className = 'message ai-message';
-                    resultMessage.innerHTML = '<strong>🔍 助成金適用可能性チェック結果:</strong><br><br>' + 
-                                            data.grants.map(grant => 
+
+                    // 短縮版の診断結果を表示
+                    resultMessage.innerHTML = '<strong>🔍 助成金適用可能性チェック結果:</strong><br><br>' +
+                                            data.grants.map(grant =>
                                                 `<strong>${grant.name}:</strong><br>${grant.description}`
                                             ).join('<br><br>');
+
                     chatMessages.appendChild(resultMessage);
+
+                    // 未認証ユーザーには会員登録を促す
+                    if (!data.is_authenticated && data.full_grants) {
+                        // 完全版をlocalStorageに保存
+                        localStorage.setItem('diagnosisFullResult', JSON.stringify(data.full_grants));
+
+                        // 会員登録誘導ボタンを表示
+                        const ctaMessage = document.createElement('div');
+                        ctaMessage.className = 'message ai-message';
+                        ctaMessage.innerHTML = `
+                            <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 12px; margin-top: 10px;">
+                                <h3 style="margin: 0 0 10px 0; font-size: 1.2em;">📋 さらに詳しい診断結果を見る</h3>
+                                <p style="margin: 0 0 15px 0; opacity: 0.95;">会員登録（無料）で、詳細な助成金情報とAI専門エージェント5回無料相談</p>
+                                <button onclick="window.location.href='/auth'" style="background: white; color: #667eea; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; font-size: 1.1em; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                                    会員登録して詳細を見る（無料）
+                                </button>
+                            </div>
+                        `;
+                        chatMessages.appendChild(ctaMessage);
+                    }
+
                     chatMessages.scrollTop = chatMessages.scrollHeight;
                 } else {
                     alert('エラー: ' + (data.error || '不明なエラーが発生しました'));

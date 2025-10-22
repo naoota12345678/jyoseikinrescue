@@ -960,22 +960,28 @@ class ClaudeService:
         # 従業員数チェック
         employee_count = company_info.get('employee_count', 0)
         industry = company_info.get('industry', '')
-        
+
         # 中小企業要件チェック（簡易版）
         is_sme = employee_count <= 300  # 簡易判定
-        
+
         if is_sme:
             # 事業場規模による助成額区分
             size_info = "30人未満" if employee_count < 30 else "30人以上"
-            
-            description = f"""✅ 適用可能性: 高い
+
+            # 短縮版（未登録ユーザー向け）
+            short_description = f"""✅ 業務改善助成金: 申請可能
+💰 最大600万円
+📌 従業員{employee_count}人（事業場規模{size_info}）で高い助成率"""
+
+            # 完全版（登録ユーザー向け）
+            full_description = f"""✅ 適用可能性: 高い
 ・中小企業要件を満たしています（従業員{employee_count}人 = 事業場規模{size_info}）
 
 【令和7年度 助成額】
 📊 最大600万円まで支給可能（賃金引上げ額・人数により決定）
 ・30円コース: 30～130万円
 ・45円コース: 45～180万円
-・60円コース: 60～300万円  
+・60円コース: 60～300万円
 ・90円コース: 90～600万円 ← 最高額はこちら
 
 🚗 設備投資対象の拡大
@@ -987,47 +993,63 @@ class ClaudeService:
 🎯 助成率: 設備投資費用の3/4～4/5
 
 → 業務改善助成金専門エージェントで詳細相談・見積もり算出"""
-            
+
             return {
                 "name": "業務改善助成金",
-                "description": description,
+                "short_description": short_description,
+                "full_description": full_description,
+                "description": full_description,  # 後方互換性のため
                 "status": "適用可能",
                 "agent_recommendation": "gyoumukaizen"
             }
         else:
+            not_applicable = "❌ 適用可能性: 低い\n・中小企業要件（従業員数）を超えている可能性があります"
             return {
                 "name": "業務改善助成金",
-                "description": "❌ 適用可能性: 低い\n・中小企業要件（従業員数）を超えている可能性があります",
+                "short_description": not_applicable,
+                "full_description": not_applicable,
+                "description": not_applicable,
                 "status": "要件不適合"
             }
     
     def _check_career_up_possibility(self, company_info: Dict) -> Dict:
         """キャリアアップ助成金の可能性チェック"""
         employee_count = company_info.get('employee_count', 0)
-        
+
         # 従業員がいる企業なら可能性あり
         if employee_count > 0:
-            description = """🔍 可能性あり（要件によっては適用可能）
+            # 短縮版（未登録ユーザー向け）
+            short_description = """🔍 キャリアアップ助成金: 可能性あり
+💡 非正規→正社員、賃金改善、社保適用拡大など
+📋 複数のコースあり"""
+
+            # 完全版（登録ユーザー向け）
+            full_description = """🔍 可能性あり（要件によっては適用可能）
 以下に該当する場合、各コースが利用できる可能性があります：
 
 【主要コース】
 ✓ 正社員化コース: 非正規雇用者を正社員に転換する場合
-✓ 賃金規定等改定コース: 賃金制度を見直し・改善する場合  
+✓ 賃金規定等改定コース: 賃金制度を見直し・改善する場合
 ✓ 賞与・退職金制度導入コース: 福利厚生制度を新設する場合
 ✓ 社会保険適用時処遇改善コース: 社保適用拡大への対応が必要な場合
 
 💡 詳細な要件や支給額については、キャリアアップ助成金専門エージェントにご相談ください"""
-            
+
             return {
                 "name": "キャリアアップ助成金",
-                "description": description,
+                "short_description": short_description,
+                "full_description": full_description,
+                "description": full_description,  # 後方互換性のため
                 "status": "可能性あり",
                 "agent_recommendation": "career-up"
             }
         else:
+            info_insufficient = "ℹ️ 従業員情報が不明のため判定できません"
             return {
                 "name": "キャリアアップ助成金",
-                "description": "ℹ️ 従業員情報が不明のため判定できません",
+                "short_description": info_insufficient,
+                "full_description": info_insufficient,
+                "description": info_insufficient,
                 "status": "情報不足"
             }
     
